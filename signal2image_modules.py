@@ -1,7 +1,8 @@
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
+
 from scipy.signal import spectrogram
+from torch import nn
 
 
 def replace_last_layer(base_model, combined_model_name, num_classes):
@@ -14,8 +15,9 @@ def replace_last_layer(base_model, combined_model_name, num_classes):
     return base_model
 
 class SignalAsImage(nn.Module):
-    def __init__(self, num_classes, base_model, combined_model_name, signals_all_max, signals_all_min):
+    def __init__(self, num_classes, base_model, combined_model_name, signals_all_max, signals_all_min, device):
         super(SignalAsImage, self).__init__()
+        self.device = device
         self.signals_all_max = signals_all_max
         self.signals_all_min = signals_all_min
         self.base_model = replace_last_layer(base_model, combined_model_name, num_classes)
@@ -24,7 +26,7 @@ class SignalAsImage(nn.Module):
         x = x - self.signals_all_min
         x = 178 * x / (self.signals_all_max - self.signals_all_min)
         x = x.floor().long()
-        out = torch.zeros(x.shape[0], 1, 178, 178).cuda()
+        out = torch.zeros(x.shape[0], 1, 178, 178, device=self.device)
         for index, _ in enumerate(x):
             out[index, 0, 177 - x[index, 0, :], range(178)] = 255
         out = torch.cat((out, out, out), 1)
@@ -33,12 +35,13 @@ class SignalAsImage(nn.Module):
 
 
 class Spectrogram(nn.Module):
-    def __init__(self, num_classes, base_model, combined_model_name):
+    def __init__(self, num_classes, base_model, combined_model_name, device):
         super(Spectrogram, self).__init__()
+        self.device = device
         self.base_model = replace_last_layer(base_model, combined_model_name, num_classes)
 
     def forward(self, x):
-        out = torch.zeros(x.shape[0], 1, 178, 178).cuda()
+        out = torch.zeros(x.shape[0], 1, 178, 178, device=self.device)
         for index, signal in enumerate(x):
             _, _, Sxx = spectrogram(signal.cpu(), fs=178, noverlap=4, nperseg=8, nfft=64, mode='magnitude')
             out[index, 0, :, :] = F.interpolate(torch.tensor(Sxx[0, :, :]).unsqueeze(0).unsqueeze(0), 178, mode='bilinear')

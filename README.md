@@ -3,13 +3,7 @@ This repository contains the code that generates the results of the paper **Sign
 
 ArXiv link: <https://arxiv.org/abs/1904.13216>
 
-Be warned that the whole experiment takes around a week on a NVIDIA Titan X.
-
-# Requirements
-* pytorch
-* torchvision
-* matplotlib
-* pandas
+See Makefile for usage.
 
 # Citation:
 If you use this repository cite the following:

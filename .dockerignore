@@ -4,3 +4,4 @@ data.csv
 paper/*
 !paper/ms.bib
 !paper/ms.tex
+.git/
