@@ -1,12 +1,13 @@
+PROJECT=signal2image
+
 local:
-	./main.py $(ARGS)
+	./main.py ${ARGS}
 	latexmk -pdf -quiet -cd paper/ms.tex
 
 clean:
-	latexmk -C -cd paper/ms.tex
-	rm -rf paper/images/ models/
-	rm paper/ms.bbl paper/results_table.tex
+	find paper/* ! -name ms.tex ! -name ms.bib -type d,f -exec rm -rf {} +
+	rm -rf tmp/ __pycache__/
 
 docker:
-	docker build -t dockercode .
-	docker run --rm ${GPU} dockercode python3 main.py ${ARGS}
+	docker build -t ${PROJECT} .
+	docker run --rm ${GPU} ${PROJECT} python3 main.py ${ARGS}

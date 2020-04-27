@@ -1,6 +1,5 @@
 __pycache__/
-models/
-data.csv
+tmp/
 paper/*
 !paper/ms.bib
 !paper/ms.tex
