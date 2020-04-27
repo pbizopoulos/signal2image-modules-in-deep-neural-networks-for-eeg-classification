@@ -3,7 +3,7 @@ import collections
 import numpy as np
 import os
 import pandas as pd
-import sys
+import argparse
 import time
 import torch
 
@@ -22,23 +22,30 @@ from utilities import save_signal, save_signal_as_image, save_spectrogram, save_
 if __name__ == '__main__':
     torch.backends.cudnn.deterministic = True
     torch.manual_seed(0)
-    if not os.path.exists('selected_models'):
-        os.mkdir('selected_models')
+    path_models = './models'
+    if not os.path.exists(path_models):
+        os.mkdir(path_models)
     num_classes = 5
     batch_size = 20
     signals_all_max = 2047
     signals_all_min = -1885
-    if len(sys.argv) > 1:
-        DEBUG = True
-        num_epochs = 1
-        device = 'cpu'
-    else:
-        DEBUG = False
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--full', default=False, action='store_true')
+    parser.add_argument('--gpu', default=False, action='store_true')
+    args = parser.parse_args()
+    if args.full:
+        num_samples = 11500
         num_epochs = 100
+    else:
+        num_samples = 10
+        num_epochs = 1
+    if args.gpu:
         device = 'cuda'
-    training_dataset = UCI_epilepsy('training', DEBUG)
-    validation_dataset = UCI_epilepsy('validation', DEBUG)
-    test_dataset = UCI_epilepsy('test', DEBUG)
+    else:
+        device = 'cpu'
+    training_dataset = UCI_epilepsy('training', num_samples)
+    validation_dataset = UCI_epilepsy('validation', num_samples)
+    test_dataset = UCI_epilepsy('test', num_samples)
     training_dataloader = DataLoader(dataset=training_dataset, batch_size=batch_size, shuffle=True)
     validation_dataloader = DataLoader(dataset=validation_dataset, batch_size=batch_size, shuffle=False)
     test_dataloader = DataLoader(dataset=test_dataset, batch_size=batch_size)
@@ -105,12 +112,12 @@ if __name__ == '__main__':
             results[combined_model_name]['validation_accuracy'].append(validation_accuracy)
             if validation_accuracy > best_validation_accuracy:
                 best_validation_accuracy = validation_accuracy
-                torch.save(model, f'selected_models/{combined_model_name}.pt')
+                torch.save(model, f'{path_models}/{combined_model_name}.pt')
                 print('saving as best model')
         train_time = time.time() - train_time
         results[combined_model_name]['train_time'] = train_time
     for combined_model_name in combined_models_names:
-        model = torch.load(f'selected_models/{combined_model_name}.pt')
+        model = torch.load(f'{path_models}/{combined_model_name}.pt')
         model.eval()
         test_loss_sum = 0
         corrects = 0
@@ -153,4 +160,4 @@ if __name__ == '__main__':
         save_signal(signals_all, signal_index, label_name)
         save_signal_as_image(signals_all, signal_index, label_name)
         save_spectrogram(signals_all, signal_index, label_name)
-        save_cnn(signals_all, signal_index, label_name)
+        save_cnn(signals_all, signal_index, label_name, path_models)

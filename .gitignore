@@ -1,5 +1,5 @@
 __pycache__/
-selected_models/
+models/
 data.csv
 paper/*
 !paper/ms.bib

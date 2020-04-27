@@ -7,13 +7,12 @@ from torch.utils.data.dataset import Dataset
 
 
 class UCI_epilepsy(Dataset):
-    def __init__(self, training_validation_test, DEBUG):
+    def __init__(self, training_validation_test, num_samples):
         filename = "./data.csv"
         if not os.path.isfile(filename):
             urllib.request.urlretrieve("https://archive.ics.uci.edu/ml/machine-learning-databases/00388/data.csv", filename)
         dataset = pd.read_csv(filename)
-        if DEBUG:
-            dataset = dataset[:10]
+        dataset = dataset[:num_samples]
         signals_all = dataset.drop(columns=['Unnamed: 0', 'y'])
         labels_all = dataset['y']
         last_training_index = int(signals_all.shape[0]*0.76)
