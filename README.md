@@ -4,19 +4,20 @@ This repository contains the code that generates the results of the paper **Sign
 ArXiv link: <https://arxiv.org/abs/1904.13216>
 
 # Instructions
-- `make'
+Choose one of the following:
+- `make`
 	- Requires local installation of requirements.txt and texlive-full.
 	- Takes ~2 minutes and populates the figures and table.
-- `make ARGS="--full --gpu"'
+- `make ARGS="--full --gpu"`
 	- Requires local installation of requirements.txt and texlive-full.
 	- Takes a week on an NVIDIA Titan X.
-- `make docker'
+- `make docker`
 	- Requires local installation of docker.
 	- Takes ~2 minutes.
-- `make docker GPU="--gpus all" ARGS="--full --gpu"'
+- `make docker GPU="--gpus all" ARGS="--full --gpu"`
 	- Requires local installation of nvidia-container-toolkit.
 	- Takes a week on an NVIDIA Titan X.
-- `make clean'
+- `make clean`
 	- Cleans local build.
 
 # Citation:
