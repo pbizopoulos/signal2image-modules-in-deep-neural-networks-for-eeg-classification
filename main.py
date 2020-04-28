@@ -22,7 +22,7 @@ from utilities import save_signal, save_signal_as_image, save_spectrogram, save_
 if __name__ == '__main__':
     torch.backends.cudnn.deterministic = True
     torch.manual_seed(0)
-    path_tmp = './tmp'
+    path_tmp = 'tmp'
     if not os.path.exists(path_tmp):
         os.mkdir(path_tmp)
     path_models = f'{path_tmp}/models'
@@ -31,6 +31,9 @@ if __name__ == '__main__':
     path_images = './paper/images'
     if not os.path.exists(path_images):
         os.mkdir(path_images)
+    path_tables = './paper/tables'
+    if not os.path.exists(path_tables):
+        os.mkdir(path_tables)
     num_classes = 5
     batch_size = 20
     signals_all_max = 2047
@@ -150,7 +153,7 @@ if __name__ == '__main__':
     results_test_accuracy_for_paper = results_test_accuracy_for_paper.reshape(5, 15)
     df = pd.DataFrame(results_test_accuracy_for_paper, index=['1D', '2D, signal as image', '2D, spectrogram', '2D, one layer CNN', '2D, two layer CNN'])
     df.columns = base_models_names
-    with open('paper/results_table.tex', 'w') as f:
+    with open(f'{path_tables}/results.tex', 'w') as f:
         df.to_latex(buf=f, bold_rows=True, escape=False, column_format='l|c|c|cccc|ccccc|cccc')
 
     dataset = pd.read_csv(f'{path_tmp}/data.csv')
