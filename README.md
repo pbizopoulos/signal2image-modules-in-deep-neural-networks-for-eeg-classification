@@ -6,7 +6,7 @@ ArXiv link: <https://arxiv.org/abs/1904.13216>
 # Instructions
 The syntax of the `make` command is as follows:
 
-`make [docker] [ARGS="[--full] [--gpu]"] [GPU="--gpus all"]` 
+`make [docker] [ARGS="[--full] [--gpu]"] [GPU="--gpus all"]`
 
 where `[...]` denotes an optional argument.
 
