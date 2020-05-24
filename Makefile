@@ -4,7 +4,7 @@ WORKDIR=/usr/src/app
 local:
 	make clean-paper
 	make venv
-	. venv/bin/activate; ./main.py ${ARGS}
+	. venv/bin/activate; ./main.py $(ARGS)
 	latexmk -gg -pdf -quiet -cd paper/ms.tex
 
 venv: requirements.txt
@@ -12,9 +12,9 @@ venv: requirements.txt
 	. venv/bin/activate; pip install -Ur requirements.txt
 
 docker:
-	docker build -t ${PROJECT} .
-	docker run --rm --user $(shell id -u):$(shell id -g) -v ${PWD}:${WORKDIR} ${GPU} ${PROJECT} python3 main.py ${ARGS}
-	docker run --rm --user $(shell id -u):$(shell id -g) -v ${PWD}/paper/:/doc/ thomasweise/docker-texlive-full latexmk -gg -pdf -quiet -cd /doc/ms.tex
+	docker build -t $(PROJECT) .
+	docker run --rm --user $(shell id -u):$(shell id -g) -v $(PWD):$(WORKDIR) $(GPU) $(PROJECT) python3 main.py $(ARGS)
+	docker run --rm --user $(shell id -u):$(shell id -g) -v $(PWD)/paper/:/doc/ thomasweise/docker-texlive-full latexmk -gg -pdf -quiet -cd /doc/ms.tex
 
 clean-paper:
 	find paper/* ! -name ms.tex ! -name ms.bib -type d,f -exec rm -rf {} +
