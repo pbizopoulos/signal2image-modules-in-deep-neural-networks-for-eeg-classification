@@ -3,3 +3,4 @@ tmp/
 paper/*
 !paper/ms.bib
 !paper/ms.tex
+venv/
