@@ -5,11 +5,14 @@ local:
 	make clean-paper
 	make venv
 	. venv/bin/activate; ./main.py $(ARGS)
+	make paper
+
+paper: paper/ms.tex
 	latexmk -gg -pdf -quiet -cd paper/ms.tex
 
 venv: requirements.txt
 	python -m venv venv
-	. venv/bin/activate; pip install -Ur requirements.txt
+	. venv/bin/activate; pip install -U pip setuptools; pip install -Ur requirements.txt
 
 docker:
 	docker build -t $(PROJECT) .
@@ -23,3 +26,5 @@ clean:
 	make clean-paper
 	rm -rf tmp/ __pycache__/
 	rm -rf venv/
+
+.PHONY: paper
