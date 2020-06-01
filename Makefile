@@ -12,7 +12,7 @@ paper: paper/ms.tex
 
 venv: requirements.txt
 	python -m venv venv
-	. venv/bin/activate; pip install -U pip setuptools; pip install -Ur requirements.txt
+	. venv/bin/activate; pip install -U pip; pip install -Ur requirements.txt
 
 docker:
 	docker build -t $(PROJECT) .
