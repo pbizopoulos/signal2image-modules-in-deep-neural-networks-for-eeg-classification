@@ -38,7 +38,7 @@ docker:
 		-e TORCH_HOME=$(WORKDIR)/tmp \
 		-v $(PWD):$(WORKDIR) \
 		$(GPU) $(PROJECT) \
-		python3 main.py $(ARGS)
+		./main.py $(ARGS)
 	docker run --rm \
 		--user $(shell id -u):$(shell id -g) \
 		-v $(PWD)/paper/:/doc/ \

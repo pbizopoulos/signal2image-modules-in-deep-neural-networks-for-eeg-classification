@@ -1,5 +1,4 @@
 pandas
 matplotlib
 scipy
-torch
 torchvision
