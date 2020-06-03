@@ -16,7 +16,7 @@ clean-code:
 
 venv: requirements.txt
 	python -m venv venv
-	. venv/bin/activate; pip install -U pip; pip install -Ur requirements.txt
+	. venv/bin/activate; pip install -U pip wheel; pip install -Ur requirements.txt
 
 paper:
 	latexmk -gg -pdf -quiet -cd paper/ms.tex
