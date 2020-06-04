@@ -28,12 +28,9 @@ if __name__ == '__main__':
     path_models = f'{path_tmp}/models'
     if not os.path.exists(path_models):
         os.mkdir(path_models)
-    path_images = './paper/images'
-    if not os.path.exists(path_images):
-        os.mkdir(path_images)
-    path_tables = './paper/tables'
-    if not os.path.exists(path_tables):
-        os.mkdir(path_tables)
+    path_results = 'results'
+    if not os.path.exists(path_results):
+        os.mkdir(path_results)
     num_classes = 5
     batch_size = 20
     signals_all_max = 2047
@@ -153,7 +150,7 @@ if __name__ == '__main__':
     results_test_accuracy_for_paper = results_test_accuracy_for_paper.reshape(5, 15)
     df = pd.DataFrame(results_test_accuracy_for_paper, index=['1D', '2D, signal as image', '2D, spectrogram', '2D, one layer CNN', '2D, two layer CNN'])
     df.columns = base_models_names
-    with open(f'{path_tables}/results.tex', 'w') as f:
+    with open(f'{path_results}/results.tex', 'w') as f:
         df.to_latex(buf=f, bold_rows=True, escape=False, column_format='l|c|c|cccc|ccccc|cccc')
 
     dataset = pd.read_csv(f'{path_tmp}/data.csv')
@@ -164,7 +161,7 @@ if __name__ == '__main__':
     labels_names = ['eyes_open', 'eyes_closed', 'healthy_area', 'tumor_area', 'epilepsy']
     for index, label_name in enumerate(labels_names):
         signal_index = (labels_all == index).nonzero()[-1]
-        save_signal(signals_all, signal_index, label_name)
-        save_signal_as_image(signals_all, signal_index, label_name)
-        save_spectrogram(signals_all, signal_index, label_name)
-        save_cnn(signals_all, signal_index, label_name, path_models)
+        save_signal(signals_all, signal_index, label_name, path_results)
+        save_signal_as_image(signals_all, signal_index, label_name, path_results)
+        save_spectrogram(signals_all, signal_index, label_name, path_results)
+        save_cnn(signals_all, signal_index, label_name, path_models, path_results)

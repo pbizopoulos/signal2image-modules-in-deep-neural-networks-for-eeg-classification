@@ -1,6 +1,13 @@
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.pdf
+
 __pycache__/
 tmp/
-paper/*
-!paper/ms.bib
-!paper/ms.tex
 venv/
+results/

@@ -1,28 +1,31 @@
-paper/ms.pdf:
+all:
 	make clean
 	make results
-	make paper
+	make ms.pdf
 
 clean:
-	rm -rf tmp/ __pycache__/ venv/
+	rm -rf __pycache__/ tmp/ venv/
 	make clean-results
 
 clean-results:
-	find paper/* ! -name ms.tex ! -name ms.bib -type d,f -exec rm -rf {} +
+	latexmk -C ms.tex
+	rm -rf results/ ms.bbl
 
-results:
+results: main.py
 	make venv
 	. venv/bin/activate; ./main.py $(ARGS)
+	touch results
 
 venv: requirements.txt
 	python -m venv venv
 	. venv/bin/activate; pip install -U pip wheel; pip install -Ur requirements.txt
+	touch venv
 
-paper:
-	latexmk -gg -pdf -quiet -cd paper/ms.tex
+ms.pdf: ms.tex ms.bib
+	latexmk -gg -pdf -quiet ms.tex
 
-view: paper/ms.pdf
-	xdg-open paper/ms.pdf
+view:
+	xdg-open ms.pdf
 
 PROJECT=$(notdir $(shell pwd))
 WORKDIR=/usr/src/app
@@ -35,13 +38,11 @@ docker:
 		-w $(WORKDIR) \
 		-e HOME=$(WORKDIR)/tmp \
 		-e TORCH_HOME=$(WORKDIR)/tmp \
-		-v $(PWD):$(WORKDIR) \
+		-v $(PWD)/:$(WORKDIR) \
 		$(GPU) $(PROJECT) \
 		./main.py $(ARGS)
 	docker run --rm \
 		--user $(shell id -u):$(shell id -g) \
-		-v $(PWD)/paper/:/doc/ \
+		-v $(PWD)/:/doc/ \
 		thomasweise/docker-texlive-full \
 		latexmk -gg -pdf -quiet -cd /doc/ms.tex
-
-.PHONY: paper

@@ -11,7 +11,6 @@
 \usepackage{tikz}
 \renewcommand\theadfont{\bfseries}
 \IEEEoverridecommandlockouts
-\graphicspath{{./images/}}
 
 \pdfinfoomitdate=1
 \pdfsuppressptexinfo=-1
@@ -81,12 +80,12 @@ For the purposes of this paper we use a variation of the database\footnote{\url{
 \begin{figure}[!t]
 	\centering
 	\begin{tikzpicture}[]
-		\node[] at (-4.5, 0){\includegraphics[scale=0.2,angle=90]{images/signal_epilepsy.png}};
+		\node[] at (-4.5, 0){\includegraphics[scale=0.2,angle=90]{results/signal_epilepsy.png}};
 		\node[align=left] at (-4.2, 0) {$x_i$};
 		\draw[dashed,->] (-4, 0) -- (-3.8, 0);
 		\node[draw, minimum height=2.55cm] at (-3.5, 0) {$m$};
 		\draw[dashed,->] (-3.2, 0) -- (-3, 0);
-		\node[] at (-1.7, 0){\includegraphics[scale=0.41,angle=90]{images/cnn_epilepsy.png}};
+		\node[] at (-1.7, 0){\includegraphics[scale=0.41,angle=90]{results/cnn_epilepsy.png}};
 		\draw[dashed,->] (-0.4, 0) -- (-0.2, 0);
 		\node[draw, minimum height=2.55cm] at (0.1, 0) {$b_{d}$};
 		\draw[dashed,->] (0.4, 0) -- (0.6, 0);
@@ -154,93 +153,93 @@ An example of the respective outputs of some of the $m$ (the one/two layers CNN 
 	\rotatebox[origin=c]{90}{Original Signal}
 	\begin{subfigure}{0.19\linewidth}
 		\centering
-		\includegraphics[scale=0.2]{images/signal_eyes_open.png}
+		\includegraphics[scale=0.2]{results/signal_eyes_open.png}
 	\end{subfigure}
 	\begin{subfigure}{0.19\linewidth}
 		\centering
-		\includegraphics[scale=0.2]{images/signal_eyes_closed.png}
+		\includegraphics[scale=0.2]{results/signal_eyes_closed.png}
 	\end{subfigure}
 	\begin{subfigure}{0.19\linewidth}
 		\centering
-		\includegraphics[scale=0.2]{images/signal_healthy_area.png}
+		\includegraphics[scale=0.2]{results/signal_healthy_area.png}
 	\end{subfigure}
 	\begin{subfigure}{0.19\linewidth}
 		\centering
-		\includegraphics[scale=0.2]{images/signal_tumor_area.png}
+		\includegraphics[scale=0.2]{results/signal_tumor_area.png}
 	\end{subfigure}
 	\begin{subfigure}{0.19\linewidth}
 		\centering
-		\includegraphics[scale=0.2]{images/signal_epilepsy.png}
+		\includegraphics[scale=0.2]{results/signal_epilepsy.png}
 	\end{subfigure}
 
 	\rotatebox[origin=c]{90}{`Signal as Image'}
 	\begin{subfigure}{0.19\linewidth}
 		\centering
-		\includegraphics[scale=0.5]{images/signal_as_image_eyes_open.png}
+		\includegraphics[scale=0.5]{results/signal_as_image_eyes_open.png}
 	\end{subfigure}
 	\begin{subfigure}{0.19\linewidth}
 		\centering
-		\includegraphics[scale=0.5]{images/signal_as_image_eyes_closed.png}
+		\includegraphics[scale=0.5]{results/signal_as_image_eyes_closed.png}
 	\end{subfigure}
 	\begin{subfigure}{0.19\linewidth}
 		\centering
-		\includegraphics[scale=0.5]{images/signal_as_image_healthy_area.png}
+		\includegraphics[scale=0.5]{results/signal_as_image_healthy_area.png}
 	\end{subfigure}
 	\begin{subfigure}{0.19\linewidth}
 		\centering
-		\includegraphics[scale=0.5]{images/signal_as_image_tumor_area.png}
+		\includegraphics[scale=0.5]{results/signal_as_image_tumor_area.png}
 	\end{subfigure}
 	\begin{subfigure}{0.19\linewidth}
 		\centering
-		\includegraphics[scale=0.5]{images/signal_as_image_epilepsy.png}
+		\includegraphics[scale=0.5]{results/signal_as_image_epilepsy.png}
 	\end{subfigure}
 
 	\rotatebox[origin=c]{90}{Spectrogram}
 	\begin{subfigure}{0.19\linewidth}
 		\centering
-		\includegraphics[scale=0.5]{images/spectrogram_eyes_open.png}
+		\includegraphics[scale=0.5]{results/spectrogram_eyes_open.png}
 	\end{subfigure}
 	\begin{subfigure}{0.19\linewidth}
 		\centering
-		\includegraphics[scale=0.5]{images/spectrogram_eyes_closed.png}
+		\includegraphics[scale=0.5]{results/spectrogram_eyes_closed.png}
 	\end{subfigure}
 	\begin{subfigure}{0.19\linewidth}
 		\centering
-		\includegraphics[scale=0.5]{images/spectrogram_healthy_area.png}
+		\includegraphics[scale=0.5]{results/spectrogram_healthy_area.png}
 	\end{subfigure}
 	\begin{subfigure}{0.19\linewidth}
 		\centering
-		\includegraphics[scale=0.5]{images/spectrogram_tumor_area.png}
+		\includegraphics[scale=0.5]{results/spectrogram_tumor_area.png}
 	\end{subfigure}
 	\begin{subfigure}{0.19\linewidth}
 		\centering
-		\includegraphics[scale=0.5]{images/spectrogram_epilepsy.png}
+		\includegraphics[scale=0.5]{results/spectrogram_epilepsy.png}
 	\end{subfigure}
 
 	\rotatebox[origin=c]{90}{\hspace{5mm} one layer CNN}
 	\begin{subfigure}{0.19\linewidth}
 		\centering
-		\includegraphics[scale=0.5]{images/cnn_eyes_open.png}
+		\includegraphics[scale=0.5]{results/cnn_eyes_open.png}
 		\caption{Open}
 	\end{subfigure}
 	\begin{subfigure}{0.19\linewidth}
 		\centering
-		\includegraphics[scale=0.5]{images/cnn_eyes_closed.png}
+		\includegraphics[scale=0.5]{results/cnn_eyes_closed.png}
 		\caption{Closed}
 	\end{subfigure}
 	\begin{subfigure}{0.19\linewidth}
 		\centering
-		\includegraphics[scale=0.5]{images/cnn_healthy_area.png}
+		\includegraphics[scale=0.5]{results/cnn_healthy_area.png}
 		\caption{Healthy}
 	\end{subfigure}
 	\begin{subfigure}{0.19\linewidth}
 		\centering
-		\includegraphics[scale=0.5]{images/cnn_tumor_area.png}
+		\includegraphics[scale=0.5]{results/cnn_tumor_area.png}
 		\caption{Tumor}
 	\end{subfigure}
 	\begin{subfigure}{0.19\linewidth}
 		\centering
-		\includegraphics[scale=0.5]{images/cnn_epilepsy.png}
+		\includegraphics[scale=0.5]{results/cnn_epilepsy.png}
 		\caption{Epilepsy}
 	\end{subfigure}
 	\caption{Visualizations of the original signals and the outputs of the S2Is for each class.
@@ -275,9 +274,9 @@ We used PyTorch~\cite{paszke2017automatic} for implementing the neural network a
 	Bold indicates the best accuracy for each base model.}
 	\label{table:results}
 	\begin{minipage}{\textwidth}
-		\setlength\tabcolsep{1pt}
+		\setlength\tabcolsep{0.6pt}
 		\centering
-		\input{tables/results.tex}
+		\input{results/results.tex}
 	\end{minipage}
 \end{table*}
 
