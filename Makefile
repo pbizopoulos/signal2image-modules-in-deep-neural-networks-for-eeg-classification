@@ -45,4 +45,7 @@ docker:
 		thomasweise/docker-texlive-full \
 		latexmk -gg -pdf -quiet -cd /doc/ms.tex
 
+view:
+	xdg-open paper/ms.pdf
+
 .PHONY: paper
