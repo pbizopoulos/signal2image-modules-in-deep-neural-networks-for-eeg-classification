@@ -1,18 +1,18 @@
-PROJECT=$(notdir $(shell pwd))
-WORKDIR=/usr/src/app
-GPU != if [[ "$(ARGS)" == *"--gpu"* ]]; then echo "--gpus=all"; fi
-
-all:
+paper/ms.pdf:
 	make clean
-	make code
+	make results
 	make paper
 
-code:
+clean:
+	rm -rf tmp/ __pycache__/ venv/
+	make clean-results
+
+clean-results:
+	find paper/* ! -name ms.tex ! -name ms.bib -type d,f -exec rm -rf {} +
+
+results:
 	make venv
 	. venv/bin/activate; ./main.py $(ARGS)
-
-clean-code:
-	rm -rf tmp/ __pycache__/ venv/
 
 venv: requirements.txt
 	python -m venv venv
@@ -21,13 +21,12 @@ venv: requirements.txt
 paper:
 	latexmk -gg -pdf -quiet -cd paper/ms.tex
 
-clean-paper:
-	find paper/* ! -name ms.tex ! -name ms.bib -type d,f -exec rm -rf {} +
+view: paper/ms.pdf
+	xdg-open paper/ms.pdf
 
-clean:
-	make clean-code
-	make clean-paper
-
+PROJECT=$(notdir $(shell pwd))
+WORKDIR=/usr/src/app
+GPU != if [[ "$(ARGS)" == *"--gpu"* ]]; then echo "--gpus=all"; fi
 docker:
 	make clean
 	docker build -t $(PROJECT) .
@@ -44,8 +43,5 @@ docker:
 		-v $(PWD)/paper/:/doc/ \
 		thomasweise/docker-texlive-full \
 		latexmk -gg -pdf -quiet -cd /doc/ms.tex
-
-view:
-	xdg-open paper/ms.pdf
 
 .PHONY: paper
