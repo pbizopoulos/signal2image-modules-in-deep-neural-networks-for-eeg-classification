@@ -6,6 +6,7 @@
 *.log
 *.out
 *.pdf
+.texlive2020/
 
 __pycache__/
 cache/

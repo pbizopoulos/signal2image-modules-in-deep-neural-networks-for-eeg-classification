@@ -30,13 +30,13 @@ view:
 docker-ms.pdf:
 	docker run --rm \
 		--user $(shell id -u):$(shell id -g) \
-		-v $(PWD)/:/doc/ \
-		thomasweise/docker-texlive-full \
-		latexmk -gg -pdf -quiet -cd /doc/ms.tex
+		-v $(PWD)/:/home/latex \
+		aergus/latex \
+		latexmk -gg -pdf -quiet -cd /home/latex/ms.tex
 
+GPU != if [[ "$(ARGS)" == *"--gpu"* ]]; then echo "--gpus=all"; fi
 PROJECT=$(notdir $(shell pwd))
 WORKDIR=/usr/src/app
-GPU != if [[ "$(ARGS)" == *"--gpu"* ]]; then echo "--gpus=all"; fi
 docker:
 	docker build -t $(PROJECT) .
 	docker run --rm \
