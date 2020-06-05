@@ -14,12 +14,12 @@ clean-results:
 results: $(shell find . -maxdepth 1 -name '*.py')
 	make venv
 	. venv/bin/activate; ./main.py $(ARGS)
-	touch results
+	touch -c results
 
 venv: requirements.txt
 	python -m venv venv
 	. venv/bin/activate; pip install -U pip wheel; pip install -Ur requirements.txt
-	touch venv
+	touch -c venv
 
 ms.pdf: ms.tex ms.bib
 	latexmk -gg -pdf -quiet ms.tex
