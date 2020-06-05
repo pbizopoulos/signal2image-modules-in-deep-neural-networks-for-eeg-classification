@@ -25,9 +25,6 @@ if __name__ == '__main__':
     path_tmp = 'tmp'
     if not os.path.exists(path_tmp):
         os.mkdir(path_tmp)
-    path_models = f'{path_tmp}/models'
-    if not os.path.exists(path_models):
-        os.mkdir(path_models)
     path_results = 'results'
     if not os.path.exists(path_results):
         os.mkdir(path_results)
@@ -118,12 +115,12 @@ if __name__ == '__main__':
             results[combined_model_name]['validation_accuracy'].append(validation_accuracy)
             if validation_accuracy > best_validation_accuracy:
                 best_validation_accuracy = validation_accuracy
-                torch.save(model, f'{path_models}/{combined_model_name}.pt')
+                torch.save(model, f'{path_results}/{combined_model_name}.pt')
                 print('saving as best model')
         train_time = time.time() - train_time
         results[combined_model_name]['train_time'] = train_time
     for combined_model_name in combined_models_names:
-        model = torch.load(f'{path_models}/{combined_model_name}.pt')
+        model = torch.load(f'{path_results}/{combined_model_name}.pt')
         model.eval()
         test_loss_sum = 0
         corrects = 0
@@ -164,4 +161,4 @@ if __name__ == '__main__':
         save_signal(signals_all, signal_index, label_name, path_results)
         save_signal_as_image(signals_all, signal_index, label_name, path_results)
         save_spectrogram(signals_all, signal_index, label_name, path_results)
-        save_cnn(signals_all, signal_index, label_name, path_models, path_results)
+        save_cnn(signals_all, signal_index, label_name, path_results)
