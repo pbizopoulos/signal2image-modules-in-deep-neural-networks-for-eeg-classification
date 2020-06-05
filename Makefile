@@ -4,7 +4,7 @@ all:
 	make ms.pdf
 
 clean:
-	rm -rf __pycache__/ tmp/ venv/
+	rm -rf __pycache__/ cache/ venv/
 	make clean-results
 
 clean-results:
@@ -36,9 +36,9 @@ docker:
 	docker run --rm \
 		--user $(shell id -u):$(shell id -g) \
 		-w $(WORKDIR) \
-		-e HOME=$(WORKDIR)/tmp \
-		-e TORCH_HOME=$(WORKDIR)/tmp \
-		-v $(PWD)/:$(WORKDIR) \
+		-e HOME=$(WORKDIR)/cache \
+		-e TORCH_HOME=$(WORKDIR)/cache \
+		-v $(PWD):$(WORKDIR) \
 		$(GPU) $(PROJECT) \
 		./main.py $(ARGS)
 	docker run --rm \

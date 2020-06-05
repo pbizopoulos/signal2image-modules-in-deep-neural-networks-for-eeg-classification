@@ -22,9 +22,9 @@ from utilities import save_signal, save_signal_as_image, save_spectrogram, save_
 if __name__ == '__main__':
     torch.backends.cudnn.deterministic = True
     torch.manual_seed(0)
-    path_tmp = 'tmp'
-    if not os.path.exists(path_tmp):
-        os.mkdir(path_tmp)
+    path_cache = 'cache'
+    if not os.path.exists(path_cache):
+        os.mkdir(path_cache)
     path_results = 'results'
     if not os.path.exists(path_results):
         os.mkdir(path_results)
@@ -46,9 +46,9 @@ if __name__ == '__main__':
         device = 'cuda'
     else:
         device = 'cpu'
-    training_dataset = UCI_epilepsy('training', num_samples, path_tmp)
-    validation_dataset = UCI_epilepsy('validation', num_samples, path_tmp)
-    test_dataset = UCI_epilepsy('test', num_samples, path_tmp)
+    training_dataset = UCI_epilepsy('training', num_samples, path_cache)
+    validation_dataset = UCI_epilepsy('validation', num_samples, path_cache)
+    test_dataset = UCI_epilepsy('test', num_samples, path_cache)
     training_dataloader = DataLoader(dataset=training_dataset, batch_size=batch_size, shuffle=True)
     validation_dataloader = DataLoader(dataset=validation_dataset, batch_size=batch_size, shuffle=False)
     test_dataloader = DataLoader(dataset=test_dataset, batch_size=batch_size)
@@ -150,7 +150,7 @@ if __name__ == '__main__':
     with open(f'{path_results}/results.tex', 'w') as f:
         df.to_latex(buf=f, bold_rows=True, escape=False, column_format='l|c|c|cccc|ccccc|cccc')
 
-    dataset = pd.read_csv(f'{path_tmp}/data.csv')
+    dataset = pd.read_csv(f'{path_cache}/data.csv')
     signals_all = dataset.drop(columns=['Unnamed: 0', 'y'])
     labels_all = dataset['y']
     signals_all = torch.tensor(signals_all.values, dtype=torch.float)
