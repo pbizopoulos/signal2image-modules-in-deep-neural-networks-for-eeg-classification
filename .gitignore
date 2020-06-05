@@ -11,3 +11,4 @@ __pycache__/
 cache/
 results/
 venv/
+upload_to_arxiv.tar
