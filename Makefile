@@ -21,7 +21,7 @@ venv: requirements.txt
 	. venv/bin/activate; pip install -U pip wheel; pip install -Ur requirements.txt
 	touch -c venv
 
-ms.pdf: ms.tex ms.bib
+ms.pdf: results
 	latexmk -gg -pdf -quiet ms.tex
 
 view:
