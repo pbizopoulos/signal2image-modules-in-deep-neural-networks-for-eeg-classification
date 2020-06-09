@@ -20,32 +20,34 @@ from utilities import save_signal, save_signal_as_image, save_spectrogram, save_
 
 
 if __name__ == '__main__':
-    torch.backends.cudnn.deterministic = True
     torch.manual_seed(0)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    np.random.seed(0)
     path_cache = 'cache'
     if not os.path.exists(path_cache):
         os.mkdir(path_cache)
     path_results = 'results'
     if not os.path.exists(path_results):
         os.mkdir(path_results)
-    num_classes = 5
-    batch_size = 20
-    signals_all_max = 2047
-    signals_all_min = -1885
     parser = argparse.ArgumentParser()
-    parser.add_argument('--full', default=False, action='store_true')
     parser.add_argument('--gpu', default=False, action='store_true')
+    parser.add_argument('--full', default=False, action='store_true')
     args = parser.parse_args()
+    if args.gpu:
+        device = 'cuda'
+    else:
+        device = 'cpu'
     if args.full:
         num_samples = 11500
         num_epochs = 100
     else:
         num_samples = 10
         num_epochs = 1
-    if args.gpu:
-        device = 'cuda'
-    else:
-        device = 'cpu'
+    num_classes = 5
+    batch_size = 20
+    signals_all_max = 2047
+    signals_all_min = -1885
     training_dataset = UCI_epilepsy('training', num_samples, path_cache)
     validation_dataset = UCI_epilepsy('validation', num_samples, path_cache)
     test_dataset = UCI_epilepsy('test', num_samples, path_cache)
