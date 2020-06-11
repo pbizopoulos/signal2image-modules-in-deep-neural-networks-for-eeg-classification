@@ -21,7 +21,7 @@ venv: requirements.txt
 	. venv/bin/activate; pip install -U pip wheel; pip install -Ur requirements.txt
 	touch -c venv
 
-ms.pdf: results
+ms.pdf: results ms.tex ms.bib
 	latexmk -gg -pdf -quiet ms.tex
 
 view:
@@ -57,4 +57,15 @@ arxiv:
 	rm $(ARXIV_ID)
 
 arxiv-tar:
-	tar -cvf upload_to_arxiv.tar ms.tex ms.bib ms.bbl results/
+	tar -cvf upload_to_arxiv.tar ms.tex ms.bib ms.bbl results/*.{pdf,tex}
+
+upload-results:
+	hub release create -m 'Results release' results-release
+	for f in $(shell ls results/*); do hub release edit -m 'Results release' -a $$f results-release; done
+
+download-results:
+	mkdir -p results ; cd results ; hub release download results-release ; cd ..
+
+delete-results:
+	hub release delete results-release
+	git push origin :results-release
