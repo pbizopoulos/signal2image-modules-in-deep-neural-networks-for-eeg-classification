@@ -3,10 +3,8 @@ This repository contains the code that generates the results of the paper **Sign
 
 ArXiv link: <https://arxiv.org/abs/1904.13216>
 
-# Instructions
-<https://pbizopoulos.github.io/reconciler-a-workflow-for-certifying-computational-research-reproducibility/instructions.txt>
+[Instructions](https://pbizopoulos.github.io/reconciler-a-workflow-for-certifying-computational-research-reproducibility/instructions.txt)
 
-# Citation
 If you use this repository cite the following:
 ```
 @inproceedings{bizopoulos2019signal2image,
