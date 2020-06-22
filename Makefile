@@ -19,7 +19,7 @@ clean:
 	rm -rf __pycache__/ cache/ venv/ upload_to_arxiv.tar results/ ms.bbl
 	latexmk -C ms.tex
 
-docker-pdf:
+docker-ms.pdf:
 	docker run --rm \
 		--user $(shell id -u):$(shell id -g) \
 		-v $(PWD)/:/home/latex \
