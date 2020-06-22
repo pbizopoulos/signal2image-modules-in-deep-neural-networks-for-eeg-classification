@@ -1,8 +1,7 @@
 ms.pdf: results ms.tex ms.bib
 	latexmk -gg -pdf -quiet ms.tex
 
-results: $(shell find . -maxdepth 1 -name '*.py')
-	make venv
+results: venv $(shell find . -maxdepth 1 -name '*.py')
 	. venv/bin/activate; ./main.py $(ARGS)
 	touch -c results
 
@@ -12,7 +11,7 @@ venv: requirements.txt
 	touch -c venv
 
 clean:
-	rm -rf __pycache__/ cache/ venv/ upload_to_arxiv.tar results/ ms.bbl
+	rm -rf __pycache__/ cache/ venv/ arxiv.tar results/ ms.bbl
 	latexmk -C ms.tex
 
 docker-ms.pdf:
@@ -55,8 +54,8 @@ arxiv:
 	make docker-ms.pdf
 	rm $(ARXIV_ID)
 
-arxiv-tar:
-	tar -cvf upload_to_arxiv.tar ms.tex ms.bib ms.bbl results/*.{pdf,tex}
+arxiv.tar:
+	tar -cvf arxiv.tar ms.tex ms.bib ms.bbl results/*.{pdf,tex}
 
 TAG=results
 upload-results:

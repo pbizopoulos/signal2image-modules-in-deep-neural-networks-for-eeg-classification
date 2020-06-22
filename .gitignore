@@ -9,7 +9,7 @@
 .texlive2020/
 
 __pycache__/
+arxiv.tar
 cache/
 results/
 venv/
-upload_to_arxiv.tar
