@@ -1,33 +1,25 @@
 all:
-	make clean
 	make results
 	make ms.pdf
-
-clean:
-	rm -rf __pycache__/ cache/ venv/ upload_to_arxiv.tar
-	make clean-results
-
-clean-results:
-	latexmk -C ms.tex
-	rm -rf results/ ms.bbl
 
 results: $(shell find . -maxdepth 1 -name '*.py')
 	make venv
 	. venv/bin/activate; ./main.py $(ARGS)
 	touch -c results
 
+ms.pdf: results ms.tex ms.bib
+	latexmk -gg -pdf -quiet ms.tex
+
 venv: requirements.txt
 	python -m venv venv
 	. venv/bin/activate; pip install -U pip wheel; pip install -Ur requirements.txt
 	touch -c venv
 
-ms.pdf: results ms.tex ms.bib
-	latexmk -gg -pdf -quiet ms.tex
+clean:
+	rm -rf __pycache__/ cache/ venv/ upload_to_arxiv.tar results/ ms.bbl
+	latexmk -C ms.tex
 
-view:
-	xdg-open ms.pdf
-
-docker-ms.pdf:
+docker-pdf:
 	docker run --rm \
 		--user $(shell id -u):$(shell id -g) \
 		-v $(PWD)/:/home/latex \
@@ -59,13 +51,14 @@ arxiv:
 arxiv-tar:
 	tar -cvf upload_to_arxiv.tar ms.tex ms.bib ms.bbl results/*.{pdf,tex}
 
+TAG=results
 upload-results:
-	hub release create -m 'Results release' results-release
-	for f in $(shell ls results/*); do hub release edit -m 'Results release' -a $$f results-release; done
+	hub release create -m 'Results release' $(TAG)
+	for f in $(shell ls results/*); do hub release edit -m 'Results' -a $$f $(TAG); done
 
 download-results:
-	mkdir -p results ; cd results ; hub release download results-release ; cd ..
+	mkdir -p results ; cd results ; hub release download $(TAG) ; cd ..
 
 delete-results:
-	hub release delete results-release
-	git push origin :results-release
+	hub release delete $(TAG)
+	git push origin :$(TAG)
