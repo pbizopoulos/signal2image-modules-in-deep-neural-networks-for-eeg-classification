@@ -14,13 +14,6 @@ clean:
 	rm -rf __pycache__/ cache/ venv/ arxiv.tar results/ ms.bbl
 	latexmk -C ms.tex
 
-docker-ms.pdf:
-	docker run --rm \
-		--user $(shell id -u):$(shell id -g) \
-		-v $(PWD)/:/home/latex \
-		aergus/latex \
-		latexmk -gg -pdf -quiet -cd /home/latex/ms.tex
-
 PROJECT=$(notdir $(shell pwd))
 WORKDIR=/usr/src/app
 docker:
@@ -33,7 +26,7 @@ docker:
 		-v $(PWD):$(WORKDIR) \
 		$(PROJECT) \
 		./main.py $(ARGS)
-	make docker-ms.pdf
+	make docker-pdf
 
 docker-gpu:
 	docker build -t $(PROJECT) .
@@ -45,13 +38,20 @@ docker-gpu:
 		-v $(PWD):$(WORKDIR) \
 		--gpus all $(PROJECT) \
 		./main.py $(ARGS)
-	make docker-ms.pdf
+	make docker-pdf
+
+docker-pdf:
+	docker run --rm \
+		--user $(shell id -u):$(shell id -g) \
+		-v $(PWD)/:/home/latex \
+		aergus/latex \
+		latexmk -gg -pdf -quiet -cd /home/latex/ms.tex
 
 arxiv:
 	curl -LO https://arxiv.org/e-print/$(ARXIV_ID)
 	tar -xvf $(ARXIV_ID)
 	docker build -t $(PROJECT)-arxiv .
-	make docker-ms.pdf
+	make docker-pdf
 	rm $(ARXIV_ID)
 
 arxiv.tar:
