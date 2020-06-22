@@ -31,13 +31,9 @@ if __name__ == '__main__':
     if not os.path.exists(path_results):
         os.mkdir(path_results)
     parser = argparse.ArgumentParser()
-    parser.add_argument('--gpu', default=False, action='store_true')
     parser.add_argument('--full', default=False, action='store_true')
     args = parser.parse_args()
-    if args.gpu:
-        device = 'cuda'
-    else:
-        device = 'cpu'
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     if args.full:
         num_samples = 11500
         num_epochs = 100

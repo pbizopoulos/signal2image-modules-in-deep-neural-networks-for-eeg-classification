@@ -1,14 +1,10 @@
-all:
-	make results
-	make ms.pdf
+ms.pdf: results ms.tex ms.bib
+	latexmk -gg -pdf -quiet ms.tex
 
 results: $(shell find . -maxdepth 1 -name '*.py')
 	make venv
 	. venv/bin/activate; ./main.py $(ARGS)
 	touch -c results
-
-ms.pdf: results ms.tex ms.bib
-	latexmk -gg -pdf -quiet ms.tex
 
 venv: requirements.txt
 	python3 -m venv venv
@@ -26,7 +22,6 @@ docker-ms.pdf:
 		aergus/latex \
 		latexmk -gg -pdf -quiet -cd /home/latex/ms.tex
 
-GPU != if [[ "$(ARGS)" == *"--gpu"* ]]; then echo "--gpus=all"; fi
 PROJECT=$(notdir $(shell pwd))
 WORKDIR=/usr/src/app
 docker:
@@ -37,7 +32,19 @@ docker:
 		-e HOME=$(WORKDIR)/cache \
 		-e TORCH_HOME=$(WORKDIR)/cache \
 		-v $(PWD):$(WORKDIR) \
-		$(GPU) $(PROJECT) \
+		$(PROJECT) \
+		./main.py $(ARGS)
+	make docker-ms.pdf
+
+docker-gpu:
+	docker build -t $(PROJECT) .
+	docker run --rm \
+		--user $(shell id -u):$(shell id -g) \
+		-w $(WORKDIR) \
+		-e HOME=$(WORKDIR)/cache \
+		-e TORCH_HOME=$(WORKDIR)/cache \
+		-v $(PWD):$(WORKDIR) \
+		--gpus all $(PROJECT) \
 		./main.py $(ARGS)
 	make docker-ms.pdf
 
