@@ -13,7 +13,7 @@ def save_signal(signals_all, signal_index, label_name, path_results):
     plt.axis('off')
     plt.xlim([0, 177])
     plt.ylim([-1000, 1000])
-    plt.savefig(f'{path_results}/signal_{label_name}.png', bbox_tight='tight')
+    plt.savefig(f'{path_results}/signal-{label_name}.png', bbox_tight='tight')
     plt.close()
 
 def save_signal_as_image(signals_all, signal_index, label_name, path_results):
@@ -26,18 +26,18 @@ def save_signal_as_image(signals_all, signal_index, label_name, path_results):
     for index in range(178):
         data[177 - x[index], index] = 255
     plt.figure()
-    plt.imsave(f'{path_results}/signal_as_image_{label_name}.png', data, cmap='gray')
+    plt.imsave(f'{path_results}/signal-as-image-{label_name}.png', data, cmap='gray')
     plt.close()
 
 def save_spectrogram(signals_all, signal_index, label_name, path_results):
     _, _, Sxx = spectrogram(signals_all[signal_index].cpu(), fs=178, noverlap=4, nperseg=8, nfft=64, mode='magnitude')
     data = np.array(Image.fromarray(Sxx[0, :, :]).resize((178, 178), resample=1))
     plt.figure()
-    plt.imsave(f'{path_results}/spectrogram_{label_name}.png', data, cmap='gray')
+    plt.imsave(f'{path_results}/spectrogram-{label_name}.png', data, cmap='gray')
     plt.close()
 
 def save_cnn(signals_all, signal_index, label_name, path_results):
-    model = torch.load(f'{path_results}/alexnet_cnn_one_layer.pt')
+    model = torch.load(f'{path_results}/alexnet-cnn-one-layer.pt')
     device = next(model.parameters()).device
     signal = signals_all[signal_index].unsqueeze(0).to(device)
     outputs= []
@@ -48,5 +48,5 @@ def save_cnn(signals_all, signal_index, label_name, path_results):
     data = outputs[0][0, 0].cpu().detach().numpy()
     data = np.array(Image.fromarray(data).resize((178, 178), resample=1))
     plt.figure()
-    plt.imsave(f'{path_results}/cnn_{label_name}.png', data, cmap='gray')
+    plt.imsave(f'{path_results}/cnn-{label_name}.png', data, cmap='gray')
     plt.close()

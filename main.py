@@ -54,11 +54,11 @@ if __name__ == '__main__':
     base_models_names = ['lenet', 'alexnet', 'vgg11', 'vgg13', 'vgg16', 'vgg19', 'resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152', 'densenet121', 'densenet161', 'densenet169', 'densenet201']
     base_models_1D = [lenet, alexnet, vgg11, vgg13, vgg16, vgg19, resnet18, resnet34, resnet50, resnet101, resnet152, densenet121, densenet161, densenet169, densenet201]
     base_models_2D = [lenet_2D, models.alexnet, models.vgg11, models.vgg13, models.vgg16, models.vgg19, models.resnet18, models.resnet34, models.resnet50, models.resnet101, models.resnet152, models.densenet121, models.densenet161, models.densenet169, models.densenet201]
-    base_models_1D_names = [f'{model_name}_1D' for model_name in base_models_names]
-    combined_models_signal_as_image_names = [f'{model_name}_signal_as_image' for model_name in base_models_names]
-    combined_models_spectrogram_names = [f'{model_name}_spectrogram' for model_name in base_models_names]
-    combined_models_cnn_one_layer_names = [f'{model_name}_cnn_one_layer' for model_name in base_models_names]
-    combined_models_cnn_two_layers_names = [f'{model_name}_cnn_two_layers' for model_name in base_models_names]
+    base_models_1D_names = [f'{model_name}-1D' for model_name in base_models_names]
+    combined_models_signal_as_image_names = [f'{model_name}-signal-as-image' for model_name in base_models_names]
+    combined_models_spectrogram_names = [f'{model_name}-spectrogram' for model_name in base_models_names]
+    combined_models_cnn_one_layer_names = [f'{model_name}-cnn-one-layer' for model_name in base_models_names]
+    combined_models_cnn_two_layers_names = [f'{model_name}-cnn-two-layers' for model_name in base_models_names]
     base_models = base_models_1D + base_models_2D + base_models_2D + base_models_2D + base_models_2D
     combined_models_names = base_models_1D_names + combined_models_signal_as_image_names + combined_models_spectrogram_names + combined_models_cnn_one_layer_names + combined_models_cnn_two_layers_names
     results = collections.defaultdict(dict)
@@ -67,15 +67,15 @@ if __name__ == '__main__':
         results[combined_model_name]['validation_loss'] = []
         results[combined_model_name]['validation_accuracy'] = []
     for base_model, combined_model_name in zip(base_models, combined_models_names):
-        if combined_model_name.endswith('_1D'):
+        if combined_model_name.endswith('-1D'):
             model = base_model(num_classes)
-        elif combined_model_name.endswith('_signal_as_image'):
+        elif combined_model_name.endswith('-signal-as-image'):
             model = SignalAsImage(num_classes, base_model(), combined_model_name, signals_all_max, signals_all_min, device)
-        elif combined_model_name.endswith('_spectrogram'):
+        elif combined_model_name.endswith('-spectrogram'):
             model = Spectrogram(num_classes, base_model(), combined_model_name, device)
-        elif combined_model_name.endswith('_cnn_one_layer'):
+        elif combined_model_name.endswith('-cnn-one-layer'):
             model = CNN_one_layer(num_classes, base_model(), combined_model_name)
-        elif combined_model_name.endswith('_cnn_two_layers'):
+        elif combined_model_name.endswith('-cnn-two-layers'):
             model = CNN_two_layers(num_classes, base_model(), combined_model_name)
         model = model.to(device)
         optimizer = Adam(model.parameters())
@@ -153,7 +153,7 @@ if __name__ == '__main__':
     labels_all = dataset['y']
     signals_all = torch.tensor(signals_all.values, dtype=torch.float)
     labels_all = torch.tensor(labels_all.values) - 1
-    labels_names = ['eyes_open', 'eyes_closed', 'healthy_area', 'tumor_area', 'epilepsy']
+    labels_names = ['eyes-open', 'eyes-closed', 'healthy-area', 'tumor-area', 'epilepsy']
     for index, label_name in enumerate(labels_names):
         signal_index = (labels_all == index).nonzero()[-1]
         save_signal(signals_all, signal_index, label_name, path_results)
