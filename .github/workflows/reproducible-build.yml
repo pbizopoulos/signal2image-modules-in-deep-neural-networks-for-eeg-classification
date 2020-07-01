@@ -1,0 +1,12 @@
+name: reproducible-build
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Git repository
+        uses: actions/checkout@v2
+      - name: Certify paper reproducibility
+        uses: pbizopoulos/reproducible-build-action@master
+        with:
+          make_call: "make"
