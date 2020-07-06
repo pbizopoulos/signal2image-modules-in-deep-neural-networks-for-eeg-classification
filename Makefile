@@ -31,7 +31,6 @@ docker:
 		--user $(shell id -u):$(shell id -g) \
 		-w $(DOCKER_WORKDIR) \
 		-e HOME=$(DOCKER_WORKDIR)/$(CACHE_DIR) \
-		-e TORCH_HOME=$(DOCKER_WORKDIR)/$(CACHE_DIR) \
 		-v $(PWD):$(DOCKER_WORKDIR) \
 		$(NAME_CURRENT_DIR) \
 		python3 $(ROOT_CODE) $(ARGS) --cache-dir $(CACHE_DIR) --results-dir $(RESULTS_DIR)
@@ -43,7 +42,6 @@ docker-gpu:
 		--user $(shell id -u):$(shell id -g) \
 		-w $(DOCKER_WORKDIR) \
 		-e HOME=$(DOCKER_WORKDIR)/$(CACHE_DIR) \
-		-e TORCH_HOME=$(DOCKER_WORKDIR)/$(CACHE_DIR) \
 		-v $(PWD):$(DOCKER_WORKDIR) \
 		--gpus all $(NAME_CURRENT_DIR) \
 		python3 $(ROOT_CODE) $(ARGS) --cache-dir $(CACHE_DIR) --results-dir $(RESULTS_DIR)
