@@ -3,6 +3,7 @@
 CACHE_DIR = cache
 DOCKER_WORKDIR = /usr/src/app
 NAME_CURRENT_DIR = $(notdir $(shell pwd))
+PYTHON = python3
 RELEASE_NAME = v1
 RESULTS_DIR = results
 ROOT_CODE = main.py
@@ -14,12 +15,12 @@ $(ROOT_TEX_NO_EXT).pdf: $(ROOT_TEX_NO_EXT).tex $(ROOT_TEX_NO_EXT).bib $(RESULTS_
 
 $(RESULTS_DIR): venv $(SRC_CODE)
 	rm -rf $@/
-	. $</bin/activate; python3 $(ROOT_CODE) $(ARGS) --cache-dir $(CACHE_DIR) --results-dir $(RESULTS_DIR)
+	. $</bin/activate; $(PYTHON) $(ROOT_CODE) $(ARGS) --cache-dir $(CACHE_DIR) --results-dir $(RESULTS_DIR)
 
 venv: requirements.txt
 	rm -rf $@/
-	python3 -m $@ $@/
-	. $@/bin/activate; pip install -U pip wheel; pip install -Ur $<
+	$(PYTHON) -m $@ $@/
+	. $@/bin/activate; $(PYTHON) -m pip install -U pip wheel; $(PYTHON) -m pip install -Ur $<
 
 clean:
 	rm -rf __pycache__/ $(CACHE_DIR)/ $(RESULTS_DIR)/ venv/ arxiv.tar $(ROOT_TEX_NO_EXT).bbl
@@ -33,7 +34,7 @@ docker:
 		-e HOME=$(DOCKER_WORKDIR)/$(CACHE_DIR) \
 		-v $(PWD):$(DOCKER_WORKDIR) \
 		$(NAME_CURRENT_DIR) \
-		python3 $(ROOT_CODE) $(ARGS) --cache-dir $(CACHE_DIR) --results-dir $(RESULTS_DIR)
+		$(PYTHON) $(ROOT_CODE) $(ARGS) --cache-dir $(CACHE_DIR) --results-dir $(RESULTS_DIR)
 	make docker-pdf
 
 docker-gpu:
@@ -44,7 +45,7 @@ docker-gpu:
 		-e HOME=$(DOCKER_WORKDIR)/$(CACHE_DIR) \
 		-v $(PWD):$(DOCKER_WORKDIR) \
 		--gpus all $(NAME_CURRENT_DIR) \
-		python3 $(ROOT_CODE) $(ARGS) --cache-dir $(CACHE_DIR) --results-dir $(RESULTS_DIR)
+		$(PYTHON) $(ROOT_CODE) $(ARGS) --cache-dir $(CACHE_DIR) --results-dir $(RESULTS_DIR)
 	make docker-pdf
 
 docker-pdf:

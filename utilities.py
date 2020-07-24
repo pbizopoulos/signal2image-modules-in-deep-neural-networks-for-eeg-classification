@@ -13,7 +13,7 @@ def save_signal(signals_all, signal_index, label_name, results_dir):
     plt.axis('off')
     plt.xlim([0, 177])
     plt.ylim([-1000, 1000])
-    plt.savefig(f'{results_dir}/signal-{label_name}.png', bbox_tight='tight')
+    plt.savefig(f'{results_dir}/signal-{label_name}.png')
     plt.close()
 
 def save_signal_as_image(signals_all, signal_index, label_name, results_dir):
