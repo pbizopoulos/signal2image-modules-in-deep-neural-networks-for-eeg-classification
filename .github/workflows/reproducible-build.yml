@@ -8,8 +8,6 @@ on:
       - master
   schedule:
     - cron: '0 0 * * *'
-env:
-  ARGS: --full
 jobs:
   build:
     runs-on: ubuntu-latest
