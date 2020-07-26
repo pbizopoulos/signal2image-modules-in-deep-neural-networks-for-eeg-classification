@@ -8,13 +8,36 @@ on:
       - master
   schedule:
     - cron: '0 0 * * *'
+env:
+  ARGS: --full
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
       - name: Set up Git repository
         uses: actions/checkout@v2
-      - name: Certify paper reproducibility
-        uses: pbizopoulos/reproducible-build-action@master
+      - name: Build/Run Docker code
+        run: make docker ARGS=${{ env.ARGS }}
+      - name: Upload pdf for comparison
+        uses: actions/upload-artifact@v2
         with:
-          make_call: "make"
+          name: output-${{ matrix.os }}
+          path: ./ms.pdf
+  compare:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download pdfs from build
+        uses: actions/download-artifact@v2
+      - name: Compare pdf binaries
+        run: diff --from-file output-ubuntu-latest/ms.pdf output-windows-latest/ms.pdf output-windows-latest/ms.pdf
+      - name: Create file with sha256sum name
+        run: echo ::set-env name=sha256sumfilename::$(sha256sum output-ubuntu-latest/ms.pdf | cut -d ' ' -f1)
+      - name: Upload file with sha256sum name
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.sha256sumfilename }}
+          path: .
