@@ -8,12 +8,34 @@ on:
       - master
   schedule:
     - cron: '0 0 * * *'
+env:
+  ARGS: --full
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  build-local:
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-20.04]
+    steps:
+      - name: Set up Git repository
+        uses: actions/checkout@v2
+      - name: install prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y texlive-full python3-venv
+        shell: bash
+      - name: make code
+        run: make ARGS=${{ env.ARGS }}
+      - name: Upload pdf for comparison
+        uses: actions/upload-artifact@v2
+        with:
+          name: output-local-${{ matrix.os }}
+          path: ./ms.pdf
+  build-docker:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-20.04, ubuntu-18.04, ubuntu-16.04]
     steps:
       - name: Set up Git repository
         uses: actions/checkout@v2
@@ -22,18 +44,18 @@ jobs:
       - name: Upload pdf for comparison
         uses: actions/upload-artifact@v2
         with:
-          name: output-${{ matrix.os }}
+          name: output-docker-${{ matrix.os }}
           path: ./ms.pdf
   compare:
-    needs: build
-    runs-on: ubuntu-latest
+    needs: [build-local, build-docker]
+    runs-on: ubuntu-20.04
     steps:
       - name: Download pdfs from build
         uses: actions/download-artifact@v2
       - name: Compare pdf binaries
-        run: diff --from-file output-ubuntu-latest/ms.pdf output-windows-latest/ms.pdf output-windows-latest/ms.pdf
+        run: diff --from-file output-local-ubuntu-20.04/ms.pdf output-docker-ubuntu-20.04/ms.pdf output-docker-ubuntu-18.04/ms.pdf output-docker-ubuntu-16.04/ms.pdf
       - name: Create file with sha256sum name
-        run: echo ::set-env name=sha256sumfilename::$(sha256sum output-ubuntu-latest/ms.pdf | cut -d ' ' -f1)
+        run: echo ::set-env name=sha256sumfilename::$(sha256sum output-local-ubuntu-20.04/ms.pdf | cut -d ' ' -f1)
       - name: Upload file with sha256sum name
         uses: actions/upload-artifact@v2
         with:

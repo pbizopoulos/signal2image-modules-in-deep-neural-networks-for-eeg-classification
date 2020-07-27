@@ -1,5 +1,6 @@
 .POSIX:
 
+ARXIV_ID = 
 CACHE_DIR = cache
 DOCKER_WORKDIR = /usr/src/app
 NAME_CURRENT_DIR = $(notdir $(shell pwd))
@@ -11,7 +12,9 @@ ROOT_TEX_NO_EXT = ms
 SRC_CODE = $(shell find . -maxdepth 1 -name '*.py')
 
 $(ROOT_TEX_NO_EXT).pdf: $(ROOT_TEX_NO_EXT).tex $(ROOT_TEX_NO_EXT).bib $(RESULTS_DIR)
-	latexmk -gg -pdf -quiet $<
+	latexmk -usepretex="\pdfinfo{/Creator () /Producer ()}\pdfinfoomitdate=1\pdfsuppressptexinfo=-1\pdftrailerid{}" -gg -pdf $<
+	sha256sum $(ROOT_TEX_NO_EXT).pdf
+
 
 $(RESULTS_DIR): venv $(SRC_CODE)
 	rm -rf $@/
@@ -53,14 +56,15 @@ docker-pdf:
 		--user $(shell id -u):$(shell id -g) \
 		-v $(PWD)/:/home/latex \
 		aergus/latex \
-		latexmk -gg -pdf -quiet -cd /home/latex/$(ROOT_TEX_NO_EXT).tex
+		latexmk -usepretex="\pdfinfo{/Creator () /Producer ()}\pdfinfoomitdate=1\pdfsuppressptexinfo=-1\pdftrailerid{}" -gg -pdf -cd /home/latex/$(ROOT_TEX_NO_EXT).tex
+	sha256sum $(ROOT_TEX_NO_EXT).pdf
 
 arxiv:
 	curl -LO https://arxiv.org/e-print/$(ARXIV_ID)
 	tar -xvf $(ARXIV_ID)
-	docker build -t $(NAME_CURRENT_DIR)-arxiv .
 	make docker-pdf
 	rm $(ARXIV_ID)
+	sha256sum $(ROOT_TEX_NO_EXT).pdf
 
 arxiv.tar:
 	tar -cvf arxiv.tar $(ROOT_TEX_NO_EXT).{tex,bib,bbl} $(RESULTS_DIR)/*.{pdf,tex}
