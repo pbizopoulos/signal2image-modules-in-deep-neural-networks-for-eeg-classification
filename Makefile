@@ -64,7 +64,6 @@ arxiv:
 	tar -xvf $(ARXIV_ID)
 	make docker-pdf
 	rm $(ARXIV_ID)
-	sha256sum $(ROOT_TEX_NO_EXT).pdf
 
 arxiv.tar:
 	tar -cvf arxiv.tar $(ROOT_TEX_NO_EXT).{tex,bib,bbl} $(RESULTS_DIR)/*.{pdf,tex}
@@ -74,7 +73,7 @@ upload-results:
 	for f in $(shell ls $(RESULTS_DIR)/*); do hub release edit -m 'Results' -a $$f $(RELEASE_NAME); done
 
 download-results:
-	mkdir -p $(RESULTS_DIR) ; cd $(RESULTS_DIR) ; hub release download $(RELEASE_NAME) ; cd ..
+	mkdir -p $(RESULTS_DIR); cd $(RESULTS_DIR); hub release download $(RELEASE_NAME); cd ..
 
 delete-results:
 	hub release delete $(RELEASE_NAME)
