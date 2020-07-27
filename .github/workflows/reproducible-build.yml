@@ -8,8 +8,6 @@ on:
       - master
   schedule:
     - cron: '0 0 * * *'
-env:
-  ARGS: --full
 jobs:
   build-local:
     runs-on: ${{ matrix.os }}
