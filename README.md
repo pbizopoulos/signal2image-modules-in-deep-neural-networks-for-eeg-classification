@@ -5,4 +5,4 @@
 # Signal2Image Modules in Deep Neural Networks for EEG Classification
 This repository contains the code that generates the results of the paper **Signal2Image Modules in Deep Neural Networks for EEG Classification** presented at EMBC 2019.
 
-[Build instructions](https://pbizopoulos.github.io/reconciler-a-workflow-for-writing-reproducible-computational-research-papers/build_instructions.txt)
+[Build instructions](https://pbizopoulos.github.io/reconciler-a-template-for-reproducible-computational-research-papers/build_instructions.txt)
