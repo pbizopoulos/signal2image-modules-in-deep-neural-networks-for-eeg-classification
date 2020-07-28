@@ -58,7 +58,7 @@ docker-pdf:
 		--user $(shell id -u):$(shell id -g) \
 		-v $(PWD)/:/home/latex \
 		aergus/latex \
-		latexmk -usepretex="\pdfinfo{/Creator () /Producer ()}\pdfinfoomitdate=1\pdfsuppressptexinfo=-1\pdftrailerid{}" -gg -pdf -cd /home/latex/$(ROOT_TEX_NO_EXT).tex
+		latexmk -usepretex="\pdfinfo{/Author () /Title () /Subject () /Keywords () /Creator () /Producer () /CreationDate () /ModDate ()}\pdfsuppressptexinfo=-1\pdftrailerid{}" -gg -pdf -cd /home/latex/$(ROOT_TEX_NO_EXT).tex
 	sha256sum $(ROOT_TEX_NO_EXT).pdf
 
 arxiv:
