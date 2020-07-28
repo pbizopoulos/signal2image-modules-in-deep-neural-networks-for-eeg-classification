@@ -20,9 +20,9 @@ jobs:
       - name: install prerequisites
         run: |
           sudo apt-get update
-          sudo apt-get install -y texlive-full python3-venv
+          sudo apt-get install -y python3-venv
         shell: bash
-      - name: make code
+      - name: make
         run: make ARGS=${{ env.ARGS }}
       - name: Upload pdf for comparison
         uses: actions/upload-artifact@v2
