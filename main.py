@@ -25,6 +25,7 @@ if __name__ == '__main__':
     np.random.seed(0)
     parser = argparse.ArgumentParser()
     parser.add_argument('--full', default=False, action='store_true')
+    parser.add_argument('--use-cuda', default=False, action='store_true')
     parser.add_argument('--cache-dir', default='cache')
     parser.add_argument('--results-dir', default='results')
     args = parser.parse_args()
@@ -32,7 +33,7 @@ if __name__ == '__main__':
         os.mkdir(args.cache_dir)
     if not os.path.exists(args.results_dir):
         os.mkdir(args.results_dir)
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('cuda' if (torch.cuda.is_available() and args.use_cuda) else 'cpu')
     if args.full:
         num_samples = 11500
         num_epochs = 100
