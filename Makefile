@@ -12,12 +12,7 @@ ROOT_TEX_NO_EXT = ms
 SRC_CODE = $(shell find . -maxdepth 1 -name '*.py')
 
 $(ROOT_TEX_NO_EXT).pdf: $(ROOT_TEX_NO_EXT).tex $(ROOT_TEX_NO_EXT).bib $(RESULTS_DIR)
-	docker run --rm \
-		--user $(shell id -u):$(shell id -g) \
-		-v $(PWD)/:/home/latex \
-		aergus/latex \
-		latexmk -usepretex="\pdfinfo{/Creator () /Producer ()}\pdfinfoomitdate=1\pdfsuppressptexinfo=-1\pdftrailerid{}" -gg -pdf -cd /home/latex/$(ROOT_TEX_NO_EXT).tex
-	sha256sum $(ROOT_TEX_NO_EXT).pdf
+	make docker-pdf
 
 $(RESULTS_DIR): venv $(SRC_CODE)
 	rm -rf $@/
@@ -45,7 +40,7 @@ docker:
 		-v $(PWD):$(DOCKER_WORKDIR) \
 		$(NAME_CURRENT_DIR) \
 		$(PYTHON) $(ROOT_CODE) $(ARGS) --cache-dir $(CACHE_DIR) --results-dir $(RESULTS_DIR)
-	make $(ROOT_TEX_NO_EXT).pdf
+	make docker-pdf
 
 docker-gpu:
 	docker build -t $(NAME_CURRENT_DIR) .
@@ -56,12 +51,20 @@ docker-gpu:
 		-v $(PWD):$(DOCKER_WORKDIR) \
 		--gpus all $(NAME_CURRENT_DIR) \
 		$(PYTHON) $(ROOT_CODE) $(ARGS) --cache-dir $(CACHE_DIR) --results-dir $(RESULTS_DIR)
-	make $(ROOT_TEX_NO_EXT).pdf
+	make docker-pdf
+
+docker-pdf:
+	docker run --rm \
+		--user $(shell id -u):$(shell id -g) \
+		-v $(PWD)/:/home/latex \
+		aergus/latex \
+		latexmk -usepretex="\pdfinfo{/Creator () /Producer ()}\pdfinfoomitdate=1\pdfsuppressptexinfo=-1\pdftrailerid{}" -gg -pdf -cd /home/latex/$(ROOT_TEX_NO_EXT).tex
+	sha256sum $(ROOT_TEX_NO_EXT).pdf
 
 arxiv:
 	curl -LO https://arxiv.org/e-print/$(ARXIV_ID)
 	tar -xvf $(ARXIV_ID)
-	make $(ROOT_TEX_NO_EXT).pdf
+	make docker-pdf
 	rm $(ARXIV_ID)
 
 arxiv.tar:
