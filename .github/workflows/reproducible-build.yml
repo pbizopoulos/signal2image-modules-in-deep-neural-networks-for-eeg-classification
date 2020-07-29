@@ -6,6 +6,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-20.04]
+        index: [0, 1]
     steps:
       - name: Set up Git repository
         uses: actions/checkout@v2
@@ -19,13 +20,14 @@ jobs:
       - name: Upload pdf for comparison
         uses: actions/upload-artifact@v2
         with:
-          name: output-local-${{ matrix.os }}
+          name: local-${{ matrix.os }}-${{ matrix.index }}
           path: ./ms.pdf
   build-docker:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-20.04, ubuntu-18.04, ubuntu-16.04]
+        index: [0, 1]
     steps:
       - name: Set up Git repository
         uses: actions/checkout@v2
@@ -34,7 +36,7 @@ jobs:
       - name: Upload pdf for comparison
         uses: actions/upload-artifact@v2
         with:
-          name: output-docker-${{ matrix.os }}
+          name: docker-${{ matrix.os }}-${{ matrix.index }}
           path: ./ms.pdf
   compare:
     needs: [build-local, build-docker]
@@ -43,9 +45,18 @@ jobs:
       - name: Download pdfs from build
         uses: actions/download-artifact@v2
       - name: Compare pdf binaries
-        run: diff --from-file output-local-ubuntu-20.04/ms.pdf output-docker-ubuntu-20.04/ms.pdf output-docker-ubuntu-18.04/ms.pdf output-docker-ubuntu-16.04/ms.pdf
+        run: |
+          diff --from-file
+          local-ubuntu-20.04-0/ms.pdf
+          docker-ubuntu-20.04-0/ms.pdf
+          docker-ubuntu-18.04-0/ms.pdf
+          docker-ubuntu-16.04-0/ms.pdf
+          local-ubuntu-20.04-1/ms.pdf
+          docker-ubuntu-20.04-1/ms.pdf
+          docker-ubuntu-18.04-1/ms.pdf
+          docker-ubuntu-16.04-1/ms.pdf
       - name: Create file with sha256sum name
-        run: echo ::set-env name=sha256sumfilename::$(sha256sum output-local-ubuntu-20.04/ms.pdf | cut -d ' ' -f1)
+        run: echo ::set-env name=sha256sumfilename::$(sha256sum local-ubuntu-20.04-0/ms.pdf | cut -d ' ' -f1)
       - name: Upload file with sha256sum name
         uses: actions/upload-artifact@v2
         with:
