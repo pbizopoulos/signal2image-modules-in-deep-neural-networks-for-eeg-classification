@@ -38,8 +38,68 @@ jobs:
         with:
           name: docker-${{ matrix.os }}-${{ matrix.index }}
           path: ./ms.pdf
+  compare-local-ubuntu-20.04:
+    needs: [build-local]
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Download pdfs from build
+        uses: actions/download-artifact@v2
+      - name: Compare pdf binaries
+        run: diff local-ubuntu-20.04-0/ms.pdf local-ubuntu-20.04-1/ms.pdf
+      - name: Create file with sha256sum name
+        run: echo ::set-env name=localubuntu2004::$(sha256sum local-ubuntu-20.04-0/ms.pdf | cut -d ' ' -f1)
+      - name: Upload file with sha256sum name
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.localubuntu2004 }}
+          path: .
+  compare-docker-ubuntu-20.04:
+    needs: [build-docker]
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Download pdfs from build
+        uses: actions/download-artifact@v2
+      - name: Compare pdf binaries
+        run: diff docker-ubuntu-20.04-0/ms.pdf docker-ubuntu-20.04-1/ms.pdf
+      - name: Create file with sha256sum name
+        run: echo ::set-env name=dockerubuntu2004::$(sha256sum docker-ubuntu-20.04-0/ms.pdf | cut -d ' ' -f1)
+      - name: Upload file with sha256sum name
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.dockerubuntu2004 }}
+          path: .
+  compare-docker-ubuntu-18.04:
+    needs: [build-docker]
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Download pdfs from build
+        uses: actions/download-artifact@v2
+      - name: Compare pdf binaries
+        run: diff docker-ubuntu-18.04-0/ms.pdf docker-ubuntu-18.04-1/ms.pdf
+      - name: Create file with sha256sum name
+        run: echo ::set-env name=dockerubuntu1804::$(sha256sum docker-ubuntu-18.04-0/ms.pdf | cut -d ' ' -f1)
+      - name: Upload file with sha256sum name
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.dockerubuntu1804 }}
+          path: .
+  compare-docker-ubuntu-16.04:
+    needs: [build-docker]
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Download pdfs from build
+        uses: actions/download-artifact@v2
+      - name: Compare pdf binaries
+        run: diff docker-ubuntu-16.04-0/ms.pdf docker-ubuntu-16.04-1/ms.pdf
+      - name: Create file with sha256sum name
+        run: echo ::set-env name=dockerubuntu1604::$(sha256sum docker-ubuntu-16.04-0/ms.pdf | cut -d ' ' -f1)
+      - name: Upload file with sha256sum name
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.dockerubuntu1604 }}
+          path: .
   compare:
-    needs: [build-local, build-docker]
+    needs: [compare-local-ubuntu-20.04, compare-docker-ubuntu-20.04, compare-docker-ubuntu-18.04, compare-docker-ubuntu-16.04]
     runs-on: ubuntu-20.04
     steps:
       - name: Download pdfs from build
@@ -47,18 +107,14 @@ jobs:
       - name: Compare pdf binaries
         run: |
           diff --from-file
-          local-ubuntu-20.04-0/ms.pdf
-          docker-ubuntu-20.04-0/ms.pdf
-          docker-ubuntu-18.04-0/ms.pdf
-          docker-ubuntu-16.04-0/ms.pdf
-          local-ubuntu-20.04-1/ms.pdf
-          docker-ubuntu-20.04-1/ms.pdf
-          docker-ubuntu-18.04-1/ms.pdf
-          docker-ubuntu-16.04-1/ms.pdf
+          ${{ env.localubuntu2004 }}/ms.pdf
+          ${{ env.dockerubuntu2004 }}/ms.pdf
+          ${{ env.dockerubuntu1804 }}/ms.pdf
+          ${{ env.dockerubuntu1604 }}/ms.pdf
       - name: Create file with sha256sum name
-        run: echo ::set-env name=sha256sumfilename::$(sha256sum local-ubuntu-20.04-0/ms.pdf | cut -d ' ' -f1)
+        run: echo ::set-env name=finalsha::$(sha256sum {{ env.localubuntu2004 }}/ms.pdf | cut -d ' ' -f1)
       - name: Upload file with sha256sum name
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ env.sha256sumfilename }}
+          name: ${{ env.finalsha }}
           path: .
