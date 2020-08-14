@@ -4,4 +4,15 @@
 # Signal2Image Modules in Deep Neural Networks for EEG Classification
 This repository contains the code that generates the results of the paper **Signal2Image Modules in Deep Neural Networks for EEG Classification** presented at EMBC 2019.
 
-[Build instructions](https://pbizopoulos.github.io/reconciler-a-template-for-reproducible-computational-research-papers/build_instructions.txt)
+## Requirements:
+- docker
+- grep
+- make
+- nvidia-container-toolkit [required only for using cuda]
+- python3-venv
+
+## Instructions
+1. `git clone https://github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification`
+2. `cd signal2image-modules-in-deep-neural-networks-for-eeg-classification`
+3. `sudo systemctl start docker`
+4. `make venv-verify` or `make docker-verify`
