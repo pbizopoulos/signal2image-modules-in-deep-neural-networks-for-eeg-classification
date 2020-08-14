@@ -5,13 +5,13 @@
 This repository contains the code that generates the results of the paper **Signal2Image Modules in Deep Neural Networks for EEG Classification** presented at EMBC 2019.
 
 ## Requirements
+- UNIX tools (awk, cut, grep)
 - docker
-- grep
 - make
-- nvidia-container-toolkit [required only for using cuda]
+- nvidia-container-toolkit [required only when using CUDA]
 - python3-venv
 
-## Instructions
+## Instructions for verifying the reproducibility of this paper
 1. `git clone https://github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification`
 2. `cd signal2image-modules-in-deep-neural-networks-for-eeg-classification`
 3. `sudo systemctl start docker`

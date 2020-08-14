@@ -1,17 +1,17 @@
-# Reproducible builds for computational research papers Makefile help.
+# NAME
+# 	Reproducible builds for computational research papers Makefile help.
 # 
-# The syntax for calling make are:
-# make [docker[-gpu] | clean | verify | help] [ARGS=--full] [GPU='--gpus all']
-# where [...] denotes an optional argument.
+# SYNTAX
+# 	make [OPTION] [ARGS=--full] [GPU='--gpus all']
 # 
-# Extended help:
+# OPTIONS
 
 .POSIX:
 
 ARGS = 
 GPU = 
 
-ms.pdf: ms.tex ms.bib results # (or make) Generate pdf with results from venv.
+ms.pdf: ms.tex ms.bib results # (or empty) Generate pdf with results from venv.
 	make docker-pdf
 
 results: .venv/bin/activate $(shell find . -maxdepth 1 -name '*.py')
@@ -60,5 +60,5 @@ clean: # Remove cache, results, venv directories and tex auxiliary files.
 		latexmk -C -cd /home/latex/ms.tex
 
 help: # Show help.
-	@grep '^# ' Makefile
-	@grep -E '^[a-zA-Z._-]+:.*?# .*$$' Makefile | awk 'BEGIN {FS = ":.*?# "}; {printf "make %-15s - %s\n", $$1, $$2}'
+	@grep '^# ' Makefile | cut -b 3-
+	@grep -E '^[a-zA-Z._-]+:.*?# .*$$' Makefile | awk 'BEGIN {FS = ":.*?# "}; {printf "	%-13s - %s\n", $$1, $$2}'
