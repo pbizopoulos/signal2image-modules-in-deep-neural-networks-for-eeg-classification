@@ -4,7 +4,7 @@
 # Signal2Image Modules in Deep Neural Networks for EEG Classification
 This repository contains the code that generates the results of the paper **Signal2Image Modules in Deep Neural Networks for EEG Classification** presented at EMBC 2019.
 
-## Requirements:
+## Requirements
 - docker
 - grep
 - make
