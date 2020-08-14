@@ -1,82 +1,64 @@
+# Reproducible builds for computational research papers Makefile help.
+# 
+# The syntax for calling make are:
+# make [docker[-gpu] | clean | verify | help] [ARGS=--full] [GPU='--gpus all']
+# where [...] denotes an optional argument.
+# 
+# Extended help:
+
 .POSIX:
 
-ARXIV_ID = 
-CACHE_DIR = cache
-DOCKER_WORKDIR = /usr/src/app
-NAME_CURRENT_DIR = $(notdir $(shell pwd))
-PYTHON = python3
-RELEASE_NAME = v1
-RESULTS_DIR = results
-ROOT_CODE = main.py
-ROOT_TEX_NO_EXT = ms
-SRC_CODE = $(shell find . -maxdepth 1 -name '*.py')
+ARGS = 
+GPU = 
 
-$(ROOT_TEX_NO_EXT).pdf: $(ROOT_TEX_NO_EXT).tex $(ROOT_TEX_NO_EXT).bib $(RESULTS_DIR)
+ms.pdf: ms.tex ms.bib results # (or make) Generate pdf with results from venv.
 	make docker-pdf
 
-$(RESULTS_DIR): venv $(SRC_CODE)
-	rm -rf $@/
-	. $</bin/activate; $(PYTHON) $(ROOT_CODE) $(ARGS) --cache-dir $(CACHE_DIR) --results-dir $(RESULTS_DIR)
+results: .venv/bin/activate $(shell find . -maxdepth 1 -name '*.py')
+	rm -rf $@/*
+	. .venv/bin/activate; python3 main.py $(ARGS) --cache-dir cache --results-dir results
 
-venv: requirements.txt
-	rm -rf $@/
-	$(PYTHON) -m $@ $@/
-	. $@/bin/activate; $(PYTHON) -m pip install -U pip wheel; $(PYTHON) -m pip install -Ur $<
+.venv/bin/activate: requirements.txt
+	rm -rf .venv/*
+	python3 -m venv .venv/
+	. .venv/bin/activate; python3 -m pip install -U pip wheel; python3 -m pip install -Ur $<
 
-clean:
-	rm -rf __pycache__/ $(CACHE_DIR)/ $(RESULTS_DIR)/ venv/ arxiv.tar $(ROOT_TEX_NO_EXT).bbl
+venv-verify: # Verify venv paper reproducibility.
+	make clean && make && mv ms.pdf tmp.pdf
+	make clean && make
+	@diff ms.pdf tmp.pdf && echo 'ms.pdf is reproducible with venv' && sha256sum ms.pdf || (rm tmp.pdf && echo 'ms.pdf is not reproducible with venv')
+
+docker: # Generate pdf with results from docker.
+	docker build -t signal2image-modules-in-deep-neural-networks-for-eeg-classification .
 	docker run --rm \
 		--user $(shell id -u):$(shell id -g) \
-		-v $(PWD)/:/home/latex \
-		aergus/latex \
-		latexmk -C -cd /home/latex/$(ROOT_TEX_NO_EXT).tex
-
-docker:
-	docker build -t $(NAME_CURRENT_DIR) .
-	docker run --rm \
-		--user $(shell id -u):$(shell id -g) \
-		-w $(DOCKER_WORKDIR) \
-		-e HOME=$(DOCKER_WORKDIR)/$(CACHE_DIR) \
-		-v $(PWD):$(DOCKER_WORKDIR) \
-		$(NAME_CURRENT_DIR) \
-		$(PYTHON) $(ROOT_CODE) $(ARGS) --cache-dir $(CACHE_DIR) --results-dir $(RESULTS_DIR)
+		-w /usr/src/app \
+		-e HOME=/usr/src/app/cache \
+		-v $(PWD):/usr/src/app \
+		$(GPU) signal2image-modules-in-deep-neural-networks-for-eeg-classification \
+		python3 main.py $(ARGS) --cache-dir cache --results-dir results
 	make docker-pdf
 
-docker-gpu:
-	docker build -t $(NAME_CURRENT_DIR) .
-	docker run --rm \
-		--user $(shell id -u):$(shell id -g) \
-		-w $(DOCKER_WORKDIR) \
-		-e HOME=$(DOCKER_WORKDIR)/$(CACHE_DIR) \
-		-v $(PWD):$(DOCKER_WORKDIR) \
-		--gpus all $(NAME_CURRENT_DIR) \
-		$(PYTHON) $(ROOT_CODE) $(ARGS) --cache-dir $(CACHE_DIR) --results-dir $(RESULTS_DIR)
-	make docker-pdf
+docker-verify: # Verify docker paper reproducibility.
+	make clean && make docker && mv ms.pdf tmp.pdf
+	make clean && make docker
+	@diff ms.pdf tmp.pdf && echo 'ms.pdf is reproducible with docker' && sha256sum ms.pdf || (rm tmp.pdf && echo 'ms.pdf is not reproducible with docker')
 
 docker-pdf:
 	docker run --rm \
 		--user $(shell id -u):$(shell id -g) \
 		-v $(PWD)/:/home/latex \
 		aergus/latex \
-		latexmk -usepretex="\pdfinfo{/Author () /Title () /Subject () /Keywords () /Creator () /Producer () /CreationDate () /ModDate ()}\pdfsuppressptexinfo=-1\pdftrailerid{}" -gg -pdf -cd /home/latex/$(ROOT_TEX_NO_EXT).tex
-	sha256sum $(ROOT_TEX_NO_EXT).pdf
+		latexmk -usepretex="\pdfinfoomitdate=1\pdfsuppressptexinfo=-1\pdftrailerid{}" -gg -pdf -cd -quiet /home/latex/ms.tex
 
-arxiv:
-	curl -LO https://arxiv.org/e-print/$(ARXIV_ID)
-	tar -xvf $(ARXIV_ID)
-	make docker-pdf
-	rm $(ARXIV_ID)
+clean: # Remove cache, results, venv directories and tex auxiliary files.
+	rm -rf __pycache__/ cache/* results/* .venv/* ms.bbl
+	docker run --rm \
+		--user $(shell id -u):$(shell id -g) \
+		-v $(PWD)/:/home/latex \
+		aergus/latex \
+		latexmk -C -cd /home/latex/ms.tex
 
-arxiv.tar:
-	tar -cvf arxiv.tar $(ROOT_TEX_NO_EXT).{tex,bib,bbl} $(RESULTS_DIR)/*.{pdf,tex}
-
-upload-results:
-	hub release create -m 'Results release' $(RELEASE_NAME)
-	for f in $(shell ls $(RESULTS_DIR)/*); do hub release edit -m 'Results' -a $$f $(RELEASE_NAME); done
-
-download-results:
-	mkdir -p $(RESULTS_DIR); cd $(RESULTS_DIR); hub release download $(RELEASE_NAME); cd ..
-
-delete-results:
-	hub release delete $(RELEASE_NAME)
-	git push origin :$(RELEASE_NAME)
+help: # Show help.
+	@grep '^# ' Makefile
+	@grep -E '^[a-zA-Z._-]+:.*?# .*$$' Makefile | awk 'BEGIN {FS = ":.*?# "}; {printf "make %-15s - %s\n", $$1, $$2}'
