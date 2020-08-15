@@ -26,7 +26,8 @@ results: .venv/bin/activate $(shell find . -maxdepth 1 -name '*.py')
 venv-verify: # Verify venv paper reproducibility.
 	make clean && make && mv ms.pdf tmp.pdf
 	make clean && make
-	@diff ms.pdf tmp.pdf && echo 'ms.pdf is reproducible with venv' && sha256sum ms.pdf || (rm tmp.pdf && echo 'ms.pdf is not reproducible with venv')
+	@diff ms.pdf tmp.pdf && (echo 'ms.pdf is reproducible with venv' && sha256sum ms.pdf) || echo 'ms.pdf is not reproducible with venv'
+	@rm tmp.pdf
 
 docker: # Generate pdf with results from docker.
 	docker build -t signal2image-modules-in-deep-neural-networks-for-eeg-classification .
@@ -42,7 +43,8 @@ docker: # Generate pdf with results from docker.
 docker-verify: # Verify docker paper reproducibility.
 	make clean && make docker && mv ms.pdf tmp.pdf
 	make clean && make docker
-	@diff ms.pdf tmp.pdf && echo 'ms.pdf is reproducible with docker' && sha256sum ms.pdf || (rm tmp.pdf && echo 'ms.pdf is not reproducible with docker')
+	@diff ms.pdf tmp.pdf && (echo 'ms.pdf is reproducible with docker' && sha256sum ms.pdf) || echo 'ms.pdf is not reproducible with docker'
+	@rm tmp.pdf
 
 docker-pdf:
 	docker run --rm \
