@@ -19,20 +19,19 @@ from utilities import save_signal, save_signal_as_image, save_spectrogram, save_
 
 
 if __name__ == '__main__':
-    torch.manual_seed(0)
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
+    # Set random seeds.
     np.random.seed(0)
+    torch.backends.cudnn.benchmark = False
+    torch.backends.cudnn.deterministic = True
+    torch.manual_seed(0)
+
+    # Parse arguments.
     parser = argparse.ArgumentParser()
     parser.add_argument('--full', default=False, action='store_true')
     parser.add_argument('--use-cuda', default=False, action='store_true')
-    parser.add_argument('--cache-dir', default='cache')
-    parser.add_argument('--results-dir', default='results')
+    parser.add_argument('--cache-dir')
+    parser.add_argument('--results-dir')
     args = parser.parse_args()
-    if not os.path.exists(args.cache_dir):
-        os.mkdir(args.cache_dir)
-    if not os.path.exists(args.results_dir):
-        os.mkdir(args.results_dir)
     device = torch.device('cuda' if (torch.cuda.is_available() and args.use_cuda) else 'cpu')
     if args.full:
         num_samples = 11500
