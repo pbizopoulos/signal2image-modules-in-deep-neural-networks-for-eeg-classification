@@ -50,7 +50,7 @@ docker-pdf:
 	docker run --rm \
 		--user $(shell id -u):$(shell id -g) \
 		-v $(PWD)/:/home/latex \
-		aergus/latex \
+		ghcr.io/pbizopoulos/texlive-full \
 		latexmk -usepretex="\pdfinfoomitdate=1\pdfsuppressptexinfo=-1\pdftrailerid{}" -gg -pdf -cd -quiet /home/latex/ms.tex
 
 clean: # Remove cache, results, venv directories and tex auxiliary files.
@@ -58,7 +58,7 @@ clean: # Remove cache, results, venv directories and tex auxiliary files.
 	docker run --rm \
 		--user $(shell id -u):$(shell id -g) \
 		-v $(PWD)/:/home/latex \
-		aergus/latex \
+		ghcr.io/pbizopoulos/texlive-full \
 		latexmk -C -cd /home/latex/ms.tex
 
 help: # Show help.
