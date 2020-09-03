@@ -11,7 +11,7 @@
 ARGS = 
 GPU = 
 
-ms.pdf: ms.tex ms.bib results/.gitkeep # (or empty) Generate pdf with results from venv.
+ms.pdf: ms.tex ms.bib results/.gitkeep # (or empty OPTION) Generate pdf with results from venv.
 	make docker-pdf
 
 results/.gitkeep: .venv/bin/activate $(shell find . -maxdepth 1 -name '*.py')
