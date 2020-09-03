@@ -58,4 +58,4 @@ clean: # Remove cache, results, venv directories and tex auxiliary files.
 
 help: # Show help.
 	@grep '^# ' Makefile | cut -b 3-
-	@grep -E '^[a-zA-Z._-]+:.*?# .*$$' Makefile | awk 'BEGIN {FS = ":.*?# "}; {printf "	%-13s - %s\n", $$1, $$2}'
+	@grep -E '^[a-z.-]*:.*# .*$$' Makefile | awk 'BEGIN {FS = ":.*# "}; {printf "\t%-13s - %s\n", $$1, $$2}'
