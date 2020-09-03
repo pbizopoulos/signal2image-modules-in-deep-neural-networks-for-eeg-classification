@@ -11,23 +11,18 @@
 ARGS = 
 GPU = 
 
-ms.pdf: ms.tex ms.bib results # (or empty) Generate pdf with results from venv.
+ms.pdf: ms.tex ms.bib results/.gitkeep # (or empty) Generate pdf with results from venv.
 	make docker-pdf
 
-results: .venv/bin/activate $(shell find . -maxdepth 1 -name '*.py')
-	rm -rf $@/*
+results/.gitkeep: .venv/bin/activate $(shell find . -maxdepth 1 -name '*.py')
+	rm -rf results/*
 	. .venv/bin/activate; python3 main.py $(ARGS) --cache-dir cache --results-dir results
+	touch results/.gitkeep
 
 .venv/bin/activate: requirements.txt
 	rm -rf .venv/*
 	python3 -m venv .venv/
 	. .venv/bin/activate; python3 -m pip install -U pip wheel; python3 -m pip install -Ur $<
-
-venv-verify: # Verify venv paper reproducibility.
-	make clean && make && mv ms.pdf tmp.pdf
-	make clean && make
-	@diff ms.pdf tmp.pdf && (echo 'ms.pdf is reproducible with venv' && sha256sum ms.pdf) || echo 'ms.pdf is not reproducible with venv'
-	@rm tmp.pdf
 
 docker: # Generate pdf with results from docker.
 	docker build -t signal2image-modules-in-deep-neural-networks-for-eeg-classification .
@@ -40,7 +35,7 @@ docker: # Generate pdf with results from docker.
 		python3 main.py $(ARGS) --cache-dir cache --results-dir results
 	make docker-pdf
 
-docker-verify: # Verify docker paper reproducibility.
+verify: # Verify paper reproducibility.
 	make clean && make docker && mv ms.pdf tmp.pdf
 	make clean && make docker
 	@diff ms.pdf tmp.pdf && (echo 'ms.pdf is reproducible with docker' && sha256sum ms.pdf) || echo 'ms.pdf is not reproducible with docker'
