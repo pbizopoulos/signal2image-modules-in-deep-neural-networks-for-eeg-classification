@@ -2,19 +2,16 @@ name: reproducible-build
 on: [push, pull_request]
 jobs:
   verify:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-20.04, ubuntu-18.04]
+    runs-on: ubuntu-20.04
     steps:
       - name: Set up Git repository
         uses: actions/checkout@v2
       - name: make verify
-        run: make verify
+        run: make verify GPU= INTERACTIVE=
       - name: Upload pdf for comparison
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ matrix.os }}
+          name: output
           path: ./ms.pdf
   release:
     if: contains(github.event.commit_head.message, '{release}')
@@ -36,20 +33,17 @@ jobs:
   upload-release-assets:
     needs: [release]
     runs-on: ubuntu-20.04
-    strategy:
-      matrix:
-        os: [ubuntu-20.04, ubuntu-18.04]
     steps:
       - name: Download pdfs from build
         uses: actions/download-artifact@v2
       - name: Create sha256sum var
-        run: echo "::set-env name=sha256sumvar::$(sha256sum ${{ matrix.os }}/ms.pdf | cut -d ' ' -f 1)"
+        run: echo "::set-env name=sha256sumvar::$(sha256sum output/ms.pdf | cut -d ' ' -f 1)"
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.release.outputs.upload_url }} 
-          asset_path: ./${{ matrix.os }}/ms.pdf
-          asset_name: ${{ matrix.os }}-${{ env.sha256sumvar }}.pdf
+          asset_path: ./output/ms.pdf
+          asset_name: output-${{ env.sha256sumvar }}.pdf
           asset_content_type: application/pdf

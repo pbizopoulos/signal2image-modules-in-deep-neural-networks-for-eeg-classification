@@ -2,54 +2,44 @@
 # 	Reproducible builds for computational research papers Makefile help.
 # 
 # SYNTAX
-# 	make [OPTION] [ARGS=--full] [GPU='--gpus all']
+# 	make [OPTION] [ARGS=--full]
 # 
 # OPTIONS
 
 .POSIX:
 
 ARGS = 
-GPU = 
+GPU = --gpus all
+INTERACTIVE = -it
 
-ms.pdf: ms.tex ms.bib results/.gitkeep # (or empty OPTION) Generate pdf with results from venv.
-	make docker-pdf
-
-results/.gitkeep: .venv/bin/activate $(shell find . -maxdepth 1 -name '*.py')
-	rm -rf results/*
-	. .venv/bin/activate; python3 main.py $(ARGS) --cache-dir cache --results-dir results
-	touch results/.gitkeep
-
-.venv/bin/activate: requirements.txt
-	rm -rf .venv/*
-	python3 -m venv .venv/
-	. .venv/bin/activate; python3 -m pip install -U pip wheel; python3 -m pip install -Ur $<
-
-docker: # Generate pdf with results from docker.
-	docker build -t signal2image-modules-in-deep-neural-networks-for-eeg-classification .
-	docker run --rm \
-		--user $(shell id -u):$(shell id -g) \
-		-w /usr/src/app \
-		-e HOME=/usr/src/app/cache \
-		-v $(PWD):/usr/src/app \
-		$(GPU) signal2image-modules-in-deep-neural-networks-for-eeg-classification \
-		python3 main.py $(ARGS) --cache-dir cache --results-dir results
-	make docker-pdf
-
-verify: # Verify paper reproducibility.
-	make clean && make docker && mv ms.pdf tmp.pdf
-	make clean && make docker
-	@diff ms.pdf tmp.pdf && (echo 'ms.pdf is reproducible with docker' && sha256sum ms.pdf) || echo 'ms.pdf is not reproducible with docker'
-	@rm tmp.pdf
-
-docker-pdf:
+ms.pdf: ms.tex ms.bib results/.completed # Generate pdf.
 	docker run --rm \
 		--user $(shell id -u):$(shell id -g) \
 		-v $(PWD)/:/home/latex \
 		ghcr.io/pbizopoulos/texlive-full \
 		latexmk -usepretex="\pdfinfoomitdate=1\pdfsuppressptexinfo=-1\pdftrailerid{}" -gg -pdf -cd -quiet /home/latex/ms.tex
 
-clean: # Remove cache, results, venv directories and tex auxiliary files.
-	rm -rf __pycache__/ cache/* results/* .venv/* ms.bbl
+
+results/.completed: $(shell find . -maxdepth 1 -name '*.py')
+	rm -rf results/* results/.completed
+	docker build -t signal2image-modules-in-deep-neural-networks-for-eeg-classification .
+	docker run --rm $(INTERACTIVE) \
+		--user $(shell id -u):$(shell id -g) \
+		-w /usr/src/app \
+		-e HOME=/usr/src/app/cache \
+		-v $(PWD):/usr/src/app \
+		$(GPU) signal2image-modules-in-deep-neural-networks-for-eeg-classification \
+		python3 main.py $(ARGS) --cache-dir cache --results-dir results
+	touch results/.completed
+
+verify: # Verify paper reproducibility.
+	make clean && make ARGS=$(ARGS) GPU=$(GPU) INTERACTIVE=$(INTERACTIVE) && mv ms.pdf tmp.pdf
+	make clean && make ARGS=$(ARGS) GPU=$(GPU) INTERACTIVE=$(INTERACTIVE)
+	@diff ms.pdf tmp.pdf && (echo 'ms.pdf is reproducible with docker' && sha256sum ms.pdf) || echo 'ms.pdf is not reproducible with docker'
+	@rm tmp.pdf
+
+clean: # Remove cache, results directories and tex auxiliary files.
+	rm -rf __pycache__/ cache/* results/* results/.completed ms.bbl
 	docker run --rm \
 		--user $(shell id -u):$(shell id -g) \
 		-v $(PWD)/:/home/latex \
