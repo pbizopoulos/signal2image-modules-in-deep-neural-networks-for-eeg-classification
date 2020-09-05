@@ -1,13 +1,13 @@
 name: reproducible-build
 on: [push, pull_request]
 jobs:
-  verify:
+  test:
     runs-on: ubuntu-20.04
     steps:
       - name: Set up Git repository
         uses: actions/checkout@v2
-      - name: make verify
-        run: make verify GPU= INTERACTIVE=
+      - name: test the build determinism of the paper
+        run: make test INTERACTIVE=
       - name: Upload pdf for comparison
         uses: actions/upload-artifact@v2
         with:
@@ -15,7 +15,7 @@ jobs:
           path: ./ms.pdf
   release:
     if: contains(github.event.commit_head.message, '{release}')
-    needs: verify
+    needs: test
     runs-on: ubuntu-20.04
     outputs:
       upload_url: ${{ steps.create_release.outputs.upload_url }} 

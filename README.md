@@ -14,4 +14,4 @@ This repository contains the code that generates the results of the paper **Sign
 1. `git clone https://github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification`
 2. `cd signal2image-modules-in-deep-neural-networks-for-eeg-classification`
 3. `sudo systemctl start docker`
-4. `make verify`
+4. `make ARGS=--full`
