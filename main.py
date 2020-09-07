@@ -18,20 +18,21 @@ from utilities import save_signal, save_signal_as_image, save_spectrogram, save_
 
 
 if __name__ == '__main__':
-    # Set random seeds.
+    # DO NOT EDIT BLOCK
     np.random.seed(0)
     torch.backends.cudnn.benchmark = False
     torch.backends.cudnn.deterministic = True
     torch.manual_seed(0)
 
-    # Parse arguments.
     parser = argparse.ArgumentParser()
     parser.add_argument('--full', default=False, action='store_true')
-    parser.add_argument('--use-cuda', default=False, action='store_true')
-    parser.add_argument('--cache-dir')
-    parser.add_argument('--results-dir')
     args = parser.parse_args()
-    device = torch.device('cuda' if (torch.cuda.is_available() and args.use_cuda) else 'cpu')
+
+    cache_dir = 'cache'
+    results_dir = 'results'
+    # END OF DO NOT EDIT BLOCK
+
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     if args.full:
         num_samples = 11500
         num_epochs = 100
