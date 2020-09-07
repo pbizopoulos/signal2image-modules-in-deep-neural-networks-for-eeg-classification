@@ -1,10 +1,25 @@
-# NAME
-# 	Reproducible builds for computational research papers Makefile help.
+#NAME
+#	Reproducible Builds for Computational Research Papers Makefile help.
+#
+#SEE ALSO
+#	https://github.com/pbizopoulos/cookiecutter-reproducible-builds-for-computational-research-papers
+#	https://github.com/pbizopoulos/reproducible-builds-for-computational-research-papers
+#
+#SYNTAX
+#	make [OPTION] [ARGS=--full]
+#
+#USAGE
 # 
-# SYNTAX
-# 	make [OPTION] [ARGS=--full]
-# 
-# OPTIONS
+#	+-------------------+----------------------+---------------------------+
+#	|         \ ARGS    |       (empty)        |          --full           |
+#	|   OPTION \        |                      |                           |
+#	+-------------------+----------------------+---------------------------+
+#	| (ms.pdf or empty) |  debug/development   |       release paper       |
+#	+-------------------+----------------------+---------------------------+
+#	|       test        | test reproducibility | test reproducibility full |
+#	+-------------------+----------------------+---------------------------+
+#
+#OPTIONS
 
 .POSIX:
 
@@ -28,13 +43,13 @@ results/.completed: Dockerfile $(shell find . -maxdepth 1 -name '*.py')
 		-e HOME=/usr/src/app/cache \
 		-v $(PWD):/usr/src/app \
 		 $(GPU)  signal2image-modules-in-deep-neural-networks-for-eeg-classification \
-		python3 main.py $(ARGS) --cache-dir cache --results-dir results
+		python3 main.py $(ARGS)
 	touch results/.completed
 
-test: # Test whether the paper has a deterministic build.
+test: # Test whether the paper has a reproducible build.
 	make clean && make ARGS=$(ARGS) GPU="$(GPU)" INTERACTIVE= && mv ms.pdf tmp.pdf
 	make clean && make ARGS=$(ARGS) GPU="$(GPU)" INTERACTIVE= 
-	@diff ms.pdf tmp.pdf && echo 'ms.pdf has a deterministic build.' || echo 'ms.pdf has not a deterministic build.'
+	@diff ms.pdf tmp.pdf && echo 'ms.pdf has a reproducible build.' || echo 'ms.pdf has not a reproducible build.'
 	@rm tmp.pdf
 
 clean: # Remove cache, results directories and tex auxiliary files.
@@ -46,5 +61,5 @@ clean: # Remove cache, results directories and tex auxiliary files.
 		latexmk -C -cd /home/latex/ms.tex
 
 help: # Show help.
-	@grep '^# ' Makefile | cut -b 3-
-	@grep -E '^[a-z.-]*:.*# .*$$' Makefile | awk 'BEGIN {FS = ":.*# "}; {printf "\t%-18s - %s\n", $$1, $$2}'
+	@grep '^#' Makefile | cut -b 2-
+	@grep -E '^[a-z.-]*:.*# .*$$' Makefile | awk 'BEGIN {FS = ":.*# "}; {printf "\t%-6s - %s\n", $$1, $$2}'
