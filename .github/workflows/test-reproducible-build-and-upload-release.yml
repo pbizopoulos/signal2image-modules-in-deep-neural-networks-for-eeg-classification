@@ -7,7 +7,7 @@ jobs:
       - name: Set up Git repository
         uses: actions/checkout@v2
       - name: Test whether the paper is reproducible
-        run: make test ARGS=--full GPU= INTERACTIVE=
+        run: make test GPU= INTERACTIVE=
       - name: Upload pdf for comparison
         uses: actions/upload-artifact@v2
         with:
