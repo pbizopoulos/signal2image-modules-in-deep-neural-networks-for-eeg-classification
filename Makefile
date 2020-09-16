@@ -36,7 +36,7 @@ ms.pdf: ms.tex ms.bib results/.completed # Generate pdf.
 		ghcr.io/pbizopoulos/texlive-full \
 		latexmk -usepretex="\pdfinfoomitdate=1\pdfsuppressptexinfo=-1\pdftrailerid{}" -gg -pdf -cd /home/latex/ms.tex
 
-results/.completed: Dockerfile $(shell find . -maxdepth 1 -name '*.py')
+results/.completed: Dockerfile requirements.txt $(shell find . -maxdepth 1 -name '*.py')
 	rm -rf results/* results/.completed
 	docker image build --tag signal2image-modules-in-deep-neural-networks-for-eeg-classification .
 	docker container run \
