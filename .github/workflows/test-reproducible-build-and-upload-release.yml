@@ -10,13 +10,13 @@ jobs:
       - name: Test whether the paper has a reproducible build
         run: $(echo "${{ github.event.head_commit.message }}" | awk -F'[}{]' '{print $2}') DEBUG_ARGS= DOCKER_GPU_ARGS=
       - name: Upload pdf
-        if: contains(github.event.head_commit.message, 'release')
+        if: contains(github.event.head_commit.message, 'make release')
         uses: actions/upload-artifact@v2
         with:
           name: output
           path: ./ms.pdf
   create-release:
-    if: contains(github.event.head_commit.message, 'release')
+    if: contains(github.event.head_commit.message, 'make release')
     needs: make
     runs-on: ubuntu-latest
     steps:
