@@ -10,8 +10,8 @@ This repository contains the code that generates the results of the paper **Sign
 - make
 - nvidia-container-toolkit [required only when using CUDA]
 
-## Instructions for verifying the reproducibility of this paper
+## Instructions
 1. `git clone https://github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification`
 2. `cd signal2image-modules-in-deep-neural-networks-for-eeg-classification`
 3. `sudo systemctl start docker`
-4. `make ARGS=--full`
+4. `make help`
