@@ -1,4 +1,4 @@
-FROM pytorch/pytorch:1.6.0-cuda10.1-cudnn7-runtime
+FROM pytorch/pytorch:1.7.0-cuda11.0-cudnn8-runtime
 WORKDIR /usr/src/app
 ENV HOME=/usr/src/app/cache
 COPY requirements.txt .
