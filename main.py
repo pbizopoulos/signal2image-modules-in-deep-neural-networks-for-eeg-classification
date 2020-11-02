@@ -1,8 +1,8 @@
+import argparse
 import collections
 import numpy as np
+import os
 import pandas as pd
-import argparse
-import time
 import torch
 
 from torch import nn
@@ -79,7 +79,6 @@ if __name__ == '__main__':
         model = model.to(device)
         optimizer = Adam(model.parameters())
         best_validation_accuracy = -1
-        train_time = time.time()
         for epoch in range(num_epochs):
             model.train()
             training_loss_sum = 0
@@ -114,9 +113,6 @@ if __name__ == '__main__':
                 best_validation_accuracy = validation_accuracy
                 torch.save(model, f'{results_dir}/{combined_model_name}.pt')
                 print('saving as best model')
-        train_time = time.time() - train_time
-        results[combined_model_name]['train_time'] = train_time
-    for combined_model_name in combined_models_names:
         model = torch.load(f'{results_dir}/{combined_model_name}.pt')
         model.eval()
         test_loss_sum = 0
@@ -137,6 +133,8 @@ if __name__ == '__main__':
         results[combined_model_name]['test_confussion_matrix'] = test_confussion_matrix
         results[combined_model_name]['test_accuracy'] = test_accuracy
         print(f'Model: {combined_model_name}, Epoch: {epoch}, Loss: {test_loss:.3f}, Accuracy: {test_accuracy:.2f}%')
+        if combined_model_name != 'alexnet-cnn-one-layer':
+            os.remove(f'{results_dir}/{combined_model_name}.pt')
 
     results_test_accuracy_for_paper = np.zeros((75,))
     for index, model in enumerate(results):
