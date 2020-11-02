@@ -2,26 +2,23 @@ name: test-reproducible-build-and-upload-release
 on: [push, pull_request]
 jobs:
   make:
-    if: contains(github.event.head_commit.message, '{')
+    if: "!contains(github.event.head_commit.message, 'skip ci')"
     runs-on: ubuntu-latest
     steps:
       - name: Set up Git repository
         uses: actions/checkout@v2
       - name: Test whether the paper has a reproducible build
-        run: $(echo "${{ github.event.head_commit.message }}" | awk -F'[}{]' '{print $2}') DEBUG_ARGS=
-      - name: Upload pdf
-        if: contains(github.event.head_commit.message, 'make release')
-        uses: actions/upload-artifact@v2
-        with:
-          name: output
-          path: ./ms.pdf
-  create-release:
-    if: contains(github.event.head_commit.message, 'make release')
+        run: |
+          make DEBUG_ARGS=
+          make clean
+          make DEBUG_ARGS=
+  upload-release:
+    if: contains(github.event.head_commit.message, 'upload release')
     needs: make
     runs-on: ubuntu-latest
     steps:
       - name: Create Release
-        id: create_release
+        id: upload_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -30,16 +27,18 @@ jobs:
           release_name: ${{ github.event.head_commit.message }} v1
           draft: false
           prerelease: false
-      - name: Download pdfs from build
-        uses: actions/download-artifact@v2
+      - name: Set up Git repository
+        uses: actions/checkout@v2
+      - name: make full version of paper
+        run: make DEBUG_ARGS= ARGS=--full
       - name: Create sha256sum var
-        run: echo "::set-env name=sha256sumvar::$(sha256sum output/ms.pdf | cut -d ' ' -f 1)"
+        run: echo "::set-env name=sha256sumvar::$(sha256sum ms.pdf | cut -d ' ' -f 1)"
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./output/ms.pdf
+          upload_url: ${{ steps.upload_release.outputs.upload_url }}
+          asset_path: ./ms.pdf
           asset_name: ${{ env.sha256sumvar }}.pdf
           asset_content_type: application/pdf
