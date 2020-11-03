@@ -16,9 +16,9 @@ ms.pdf: ms.tex ms.bib results/completed
 		--volume $(MAKEFILE_DIR):/home/latex \
 		ghcr.io/pbizopoulos/texlive-full \
 		latexmk -usepretex="\pdfinfoomitdate=1\pdfsuppressptexinfo=-1\pdftrailerid{}" -gg -pdf -cd /home/latex/ms.tex
-	@if [ -f cache/.ms_previous.pdf ]; then \
-		cmp ms.pdf cache/.ms_previous.pdf && echo 'ms.pdf unchanged.' || echo 'ms.pdf changed.'; fi
-	@cp ms.pdf cache/.ms_previous.pdf
+	@if [ -f cache/.tmp.pdf ]; then \
+		cmp ms.pdf cache/.tmp.pdf && echo 'ms.pdf unchanged.' || echo 'ms.pdf changed.'; fi
+	@cp ms.pdf cache/.tmp.pdf
 
 results/completed: Dockerfile requirements.txt $(shell find . -maxdepth 1 -name '*.py')
 	rm -rf results/*
