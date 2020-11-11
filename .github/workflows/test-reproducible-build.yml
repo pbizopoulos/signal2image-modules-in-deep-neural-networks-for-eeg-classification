@@ -1,0 +1,14 @@
+name: test-reproducible-build
+on: [push, pull_request]
+jobs:
+  make:
+    if: "!contains(github.event.head_commit.message, 'skip ci')"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Git repository
+        uses: actions/checkout@v2
+      - name: Test whether the paper has a reproducible build
+        run: |
+          make DEBUG_ARGS=
+          make clean
+          make DEBUG_ARGS=
