@@ -12,7 +12,6 @@ endif
 cache/ms.pdf: ms.tex ms.bib results/completed
 	docker container run \
 		--rm \
-		--user `id -u`:`id -g` \
 		--volume $(MAKEFILE_DIR):/usr/src/app \
 		ghcr.io/pbizopoulos/texlive-full \
 		-outdir=cache/ -usepretex="\pdfinfoomitdate=1\pdfsuppressptexinfo=-1\pdftrailerid{}" -gg -pdf -cd /usr/src/app/ms.tex
@@ -26,11 +25,10 @@ results/completed: Dockerfile requirements.txt $(shell find . -maxdepth 1 -name 
 	docker container run \
 		$(DEBUG_ARGS) \
 		--rm \
-		--user `id -u`:`id -g` \
 		--volume $(MAKEFILE_DIR):/usr/src/app \
 		$(DOCKER_GPU_ARGS) \
 		signal2image-modules-in-deep-neural-networks-for-eeg-classification \
-		python main.py $(ARGS)
+		$(ARGS)
 	touch results/completed
 
 clean:
