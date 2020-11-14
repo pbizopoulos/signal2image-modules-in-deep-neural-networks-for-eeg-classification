@@ -1,20 +1,14 @@
 version: 2
 updates:
-  - package-ecosystem: "pip"
-    directory: "/"
-    schedule:
-      interval: "daily"
-    commit-message:
-      prefix: "{make test}"
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
       interval: "daily"
-    commit-message:
-      prefix: "{make test}"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "daily"
-    commit-message:
-      prefix: "{make test}"
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "daily"
