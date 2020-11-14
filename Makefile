@@ -1,40 +1,43 @@
 .POSIX:
 
 ARGS= 
+CACHE_DIR=cache
 DEBUG_ARGS=--interactive --tty
 MAKEFILE_DIR=$(dir $(realpath Makefile))
+RESULTS_DIR=results
 VOLUME_DIR=/usr/src/app
+
 ifeq (, $(shell which nvidia-smi))
 	GPU_ARGS=
 else
 	GPU_ARGS=--gpus all
 endif
 
-cache/ms.pdf: ms.tex ms.bib results/completed
+$(CACHE_DIR)/ms.pdf: ms.tex ms.bib $(RESULTS_DIR)/completed
 	docker container run \
 		--rm \
 		--user `id -u`:`id -g` \
 		--volume $(MAKEFILE_DIR):$(VOLUME_DIR) \
 		ghcr.io/pbizopoulos/texlive-full \
-		latexmk -outdir=cache/ -usepretex="\pdfinfoomitdate=1\pdfsuppressptexinfo=-1\pdftrailerid{}" -gg -pdf -cd $(VOLUME_DIR)/ms.tex
-	@if [ -f cache/.tmp.pdf ]; then \
-		cmp cache/ms.pdf cache/.tmp.pdf && echo 'ms.pdf unchanged.' || echo 'ms.pdf changed.'; fi
-	@cp cache/ms.pdf cache/.tmp.pdf
+		latexmk -outdir=$(CACHE_DIR)/ -usepretex="\pdfinfoomitdate=1\pdfsuppressptexinfo=-1\pdftrailerid{}" -gg -pdf -cd $(VOLUME_DIR)/ms.tex
+	@if [ -f $(CACHE_DIR)/.tmp.pdf ]; then \
+		cmp $(CACHE_DIR)/ms.pdf $(CACHE_DIR)/.tmp.pdf && echo 'ms.pdf unchanged.' || echo 'ms.pdf changed.'; fi
+	@cp $(CACHE_DIR)/ms.pdf $(CACHE_DIR)/.tmp.pdf
 
-results/completed: Dockerfile requirements.txt $(shell find . -maxdepth 1 -name '*.py')
-	rm -rf results/*
+$(RESULTS_DIR)/completed: Dockerfile requirements.txt $(shell find . -maxdepth 1 -name '*.py')
+	rm -rf $(RESULTS_DIR)/*
 	docker image build --tag signal2image-modules-in-deep-neural-networks-for-eeg-classification .
 	docker container run \
 		$(DEBUG_ARGS) \
-		--env HOME=$(VOLUME_DIR)/cache \
+		--env HOME=$(VOLUME_DIR)/$(CACHE_DIR)/ \
 		--rm \
 		--user `id -u`:`id -g` \
 		--volume $(MAKEFILE_DIR):$(VOLUME_DIR) \
 		--workdir $(VOLUME_DIR) \
 		$(GPU_ARGS) \
 		signal2image-modules-in-deep-neural-networks-for-eeg-classification \
-		python main.py $(ARGS)
-	touch results/completed
+		python main.py $(CACHE_DIR)/ $(RESULTS_DIR)/ $(ARGS)
+	touch $(RESULTS_DIR)/completed
 
 clean:
-	rm -rf __pycache__/ cache/* results/*
+	rm -rf __pycache__/ $(CACHE_DIR)/* $(RESULTS_DIR)/*
