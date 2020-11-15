@@ -3,7 +3,10 @@ on: [push, pull_request]
 jobs:
   make:
     if: "!contains(github.event.head_commit.message, 'skip ci')"
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-16.04, ubuntu-18.04, ubuntu-20.04]
     steps:
       - name: Set up Git repository
         uses: actions/checkout@v2
@@ -12,3 +15,11 @@ jobs:
           make DEBUG_ARGS=
           make clean
           make DEBUG_ARGS=
+      - name: Set env
+        run: echo "CHECKSUM=$(sha256sum cache/ms.pdf | cut -d' ' -f1)" >> $GITHUB_ENV
+      - name: rename to checksum
+        run: mv cache/ms.pdf ${{ matrix.os }}-${{ env.CHECKSUM }}
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.os }}-${{ env.CHECKSUM }}
+          path: ${{ github.workspace }}/${{ matrix.os }}-${{ env.CHECKSUM }}
