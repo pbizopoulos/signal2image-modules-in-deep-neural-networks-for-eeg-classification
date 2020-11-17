@@ -4,7 +4,7 @@
 [![test-reproducible-build](https://github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/workflows/test-reproducible-build/badge.svg)](https://github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/actions?query=workflow%3Atest-reproducible-build)
 
 # Signal2Image Modules in Deep Neural Networks for EEG Classification
-This repository contains the code that generates the results of the paper **Signal2Image Modules in Deep Neural Networks for EEG Classification** presented at EMBC 2019.
+This repository contains the code that generates the paper **Signal2Image Modules in Deep Neural Networks for EEG Classification** presented at EMBC 2019.
 
 ## Requirements
 - UNIX utilities (cmp, cp, echo, rm, touch)
@@ -19,4 +19,4 @@ This repository contains the code that generates the results of the paper **Sign
 4. make options
     * `make`             # Generate pdf.
     * `make ARGS=--full` # Generate full pdf.
-    * `make clean`       # Remove cache, results directories and tex auxiliary files.
+    * `make clean`       # Remove build and cache directories.

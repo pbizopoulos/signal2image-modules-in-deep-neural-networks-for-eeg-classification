@@ -1,12 +1,8 @@
 .POSIX:
 
 ARGS= 
-CACHE_DIR=cache
 DEBUG_ARGS=--interactive --tty
-MAKEFILE_DIR=$(dir $(realpath Makefile))
 PAPER_TITLE=signal2image-modules-in-deep-neural-networks-for-eeg-classification
-RESULTS_DIR=results
-VOLUME_DIR=/usr/src/app
 
 ifeq (, $(shell which nvidia-smi))
 	GPU_ARGS=
@@ -14,31 +10,33 @@ else
 	GPU_ARGS=--gpus all
 endif
 
-$(CACHE_DIR)/ms.pdf: ms.tex ms.bib $(RESULTS_DIR)/completed
+cache/ms.pdf: ms.tex ms.bib results/completed
 	docker container run \
 		--rm \
 		--user `id -u`:`id -g` \
-		--volume $(MAKEFILE_DIR):$(VOLUME_DIR) \
+		--volume $(dir $(realpath Makefile)):/usr/src/app \
 		ghcr.io/pbizopoulos/texlive-full \
-		latexmk -outdir=$(CACHE_DIR)/ -usepretex="\pdfinfoomitdate=1\pdfsuppressptexinfo=-1\pdftrailerid{}" -gg -pdf -cd $(VOLUME_DIR)/ms.tex
-	@if [ -f $(CACHE_DIR)/.tmp.pdf ]; then \
-		cmp $(CACHE_DIR)/ms.pdf $(CACHE_DIR)/.tmp.pdf && echo 'ms.pdf unchanged.' || echo 'ms.pdf changed.'; fi
-	@cp $(CACHE_DIR)/ms.pdf $(CACHE_DIR)/.tmp.pdf
+		latexmk -outdir=cache/ -usepretex="\pdfinfoomitdate=1\pdfsuppressptexinfo=-1\pdftrailerid{}" -gg -pdf -cd /usr/src/app/ms.tex
+	@if [ -f cache/.ms-latest.pdf ]; then \
+		cmp cache/ms.pdf cache/.ms-latest.pdf && echo 'cache/ms.pdf unchanged.' || echo 'cache/ms.pdf changed.'; fi
+	@cp cache/ms.pdf cache/ms-`date --iso-8601=seconds`.pdf
+	@cp cache/ms.pdf cache/.ms-latest.pdf
 
-$(RESULTS_DIR)/completed: Dockerfile requirements.txt $(shell find . -maxdepth 1 -name '*.py')
-	rm -rf $(RESULTS_DIR)/*
+results/completed: Dockerfile requirements.txt $(shell find . -maxdepth 1 -name '*.py')
+	rm -rf results/*
 	docker image build --tag $(PAPER_TITLE) .
 	docker container run \
 		$(DEBUG_ARGS) \
-		--env HOME=$(VOLUME_DIR)/$(CACHE_DIR)/ \
+		--env HOME=/usr/src/app/cache/ \
+		--detach-keys "ctrl-^,ctrl-^"  \
 		--rm \
 		--user `id -u`:`id -g` \
-		--volume $(MAKEFILE_DIR):$(VOLUME_DIR) \
-		--workdir $(VOLUME_DIR) \
+		--volume $(dir $(realpath Makefile)):/usr/src/app \
+		--workdir /usr/src/app \
 		$(GPU_ARGS) \
 		$(PAPER_TITLE) \
-		python main.py $(CACHE_DIR)/ $(RESULTS_DIR)/ $(ARGS)
-	touch $(RESULTS_DIR)/completed
+		python main.py cache/ results/ $(ARGS)
+	touch results/completed
 
 clean:
-	rm -rf __pycache__/ $(CACHE_DIR)/* $(RESULTS_DIR)/*
+	rm -rf __pycache__/ cache/* results/*

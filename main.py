@@ -18,18 +18,19 @@ from utilities import save_signal, save_signal_as_image, save_spectrogram, save_
 
 
 if __name__ == '__main__':
-    # DO NOT EDIT BLOCK
-    np.random.seed(0)
-    torch.backends.cudnn.benchmark = False
-    torch.backends.cudnn.deterministic = True
-    torch.manual_seed(0)
-
+    # DO NOT EDIT BLOCK - Required by the Makefile
     parser = argparse.ArgumentParser()
     parser.add_argument('cache_dir')
     parser.add_argument('results_dir')
     parser.add_argument('--full', default=False, action='store_true')
     args = parser.parse_args()
     # END OF DO NOT EDIT BLOCK
+
+    # Set random seeds for reproducibility.
+    np.random.seed(0)
+    torch.backends.cudnn.benchmark = False
+    torch.backends.cudnn.deterministic = True
+    torch.manual_seed(0)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     if args.full:
