@@ -9,6 +9,6 @@ jobs:
         uses: actions/checkout@v2
       - name: Test whether the paper has a reproducible build
         run: |
-          make DEBUG_ARGS=
+          make
           make clean
-          make DEBUG_ARGS=
+          make
