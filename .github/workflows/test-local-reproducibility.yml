@@ -1,4 +1,4 @@
-name: test-reproducible-build
+name: test-local-reproducibility
 on: [push, pull_request]
 jobs:
   make:
@@ -7,7 +7,7 @@ jobs:
     steps:
       - name: Set up Git repository
         uses: actions/checkout@v2
-      - name: Test whether the paper has a reproducible build
+      - name: Test local reproducibility of the paper
         run: |
           make
           make clean
