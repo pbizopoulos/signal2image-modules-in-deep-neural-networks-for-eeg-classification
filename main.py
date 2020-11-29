@@ -111,9 +111,9 @@ if __name__ == '__main__':
             results[combined_model_name]['validation_accuracy'].append(validation_accuracy)
             if validation_accuracy > best_validation_accuracy:
                 best_validation_accuracy = validation_accuracy
-                torch.save(model, f'{args.results_dir}/{combined_model_name}.pt')
+                torch.save(model, f'{args.tmp_dir}/{combined_model_name}.pt')
                 print('saving as best model')
-        model = torch.load(f'{args.results_dir}/{combined_model_name}.pt')
+        model = torch.load(f'{args.tmp_dir}/{combined_model_name}.pt')
         model.eval()
         test_loss_sum = 0
         corrects = 0
@@ -134,7 +134,7 @@ if __name__ == '__main__':
         results[combined_model_name]['test_accuracy'] = test_accuracy
         print(f'Model: {combined_model_name}, Epoch: {epoch}, Loss: {test_loss:.3f}, Accuracy: {test_accuracy:.2f}%')
         if combined_model_name != 'alexnet-cnn-one-layer':
-            os.remove(f'{args.results_dir}/{combined_model_name}.pt')
+            os.remove(f'{args.tmp_dir}/{combined_model_name}.pt')
 
     results_test_accuracy_for_paper = np.zeros((75,))
     for index, model in enumerate(results):
@@ -142,8 +142,7 @@ if __name__ == '__main__':
     results_test_accuracy_for_paper = results_test_accuracy_for_paper.reshape(5, 15)
     df = pd.DataFrame(results_test_accuracy_for_paper, index=['1D', '2D, signal as image', '2D, spectrogram', '2D, one layer CNN', '2D, two layer CNN'])
     df.columns = base_models_names
-    with open(f'{args.results_dir}/results.tex', 'w') as f:
-        df.to_latex(buf=f, bold_rows=True, escape=False, column_format='l|c|c|cccc|ccccc|cccc')
+    df.to_latex(f'{args.results_dir}/results.tex', bold_rows=True, escape=False, column_format='l|c|c|cccc|ccccc|cccc')
 
     dataset = pd.read_csv(f'{args.tmp_dir}/data.csv')
     signals_all = dataset.drop(columns=['Unnamed: 0', 'y'])
@@ -156,4 +155,4 @@ if __name__ == '__main__':
         save_signal(signals_all, signal_index, label_name, args.results_dir)
         save_signal_as_image(signals_all, signal_index, label_name, args.results_dir)
         save_spectrogram(signals_all, signal_index, label_name, args.results_dir)
-        save_cnn(signals_all, signal_index, label_name, args.results_dir)
+        save_cnn(signals_all, signal_index, label_name, args.results_dir, args.tmp_dir)

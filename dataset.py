@@ -7,8 +7,8 @@ from torch.utils.data import Dataset
 
 
 class UCI_epilepsy(Dataset):
-    def __init__(self, training_validation_test, num_samples, cache_dir):
-        filename = f'{cache_dir}/data.csv'
+    def __init__(self, training_validation_test, num_samples, tmp_dir):
+        filename = f'{tmp_dir}/data.csv'
         if not os.path.isfile(filename):
             urllib.request.urlretrieve("https://archive.ics.uci.edu/ml/machine-learning-databases/00388/data.csv", filename)
         dataset = pd.read_csv(filename)

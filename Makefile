@@ -17,7 +17,7 @@ tmp/ms.pdf: ms.tex ms.bib results/completed
 		--user `id -u`:`id -g` \
 		--volume $(dir $(realpath Makefile)):/usr/src/app \
 		ghcr.io/pbizopoulos/texlive-full \
-		latexmk -outdir=tmp/ -usepretex="\pdfinfoomitdate=1\pdfsuppressptexinfo=-1\pdftrailerid{}" -gg -pdf -cd /usr/src/app/ms.tex
+		latexmk -outdir=tmp -usepretex="\pdfinfoomitdate=1\pdfsuppressptexinfo=-1\pdftrailerid{}" -gg -pdf -cd /usr/src/app/ms.tex
 	@if [ -f tmp/.ms-latest.pdf ]; then \
 		cmp tmp/ms.pdf tmp/.ms-latest.pdf && echo 'tmp/ms.pdf unchanged.' || echo 'tmp/ms.pdf changed.'; fi
 	@cp tmp/ms.pdf tmp/ms-`date --iso-8601=seconds`.pdf
@@ -38,8 +38,8 @@ results/completed: Dockerfile requirements.txt $(shell find . -maxdepth 1 -name 
 		--workdir /usr/src/app \
 		$(GPU_ARGS) \
 		$(PAPER_TITLE) \
-		python main.py results/ tmp/ $(ARGS)
+		python main.py results tmp $(ARGS)
 	touch results/completed
 
 clean:
-	rm -rf results/ tmp/
+	rm -rf results tmp

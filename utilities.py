@@ -36,8 +36,8 @@ def save_spectrogram(signals_all, signal_index, label_name, results_dir):
     plt.imsave(f'{results_dir}/spectrogram-{label_name}.png', data, cmap='gray')
     plt.close()
 
-def save_cnn(signals_all, signal_index, label_name, results_dir):
-    model = torch.load(f'{results_dir}/alexnet-cnn-one-layer.pt')
+def save_cnn(signals_all, signal_index, label_name, results_dir, tmp_dir):
+    model = torch.load(f'{tmp_dir}/alexnet-cnn-one-layer.pt')
     device = next(model.parameters()).device
     signal = signals_all[signal_index].unsqueeze(0).to(device)
     outputs= []
