@@ -1,9 +1,7 @@
 .git
 
-cache/*
-results/*
-!cache/.gitkeep
-!results/.gitkeep
+results
+tmp
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

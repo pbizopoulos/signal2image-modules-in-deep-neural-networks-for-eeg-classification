@@ -20,8 +20,8 @@ from utilities import save_signal, save_signal_as_image, save_spectrogram, save_
 if __name__ == '__main__':
     # DO NOT EDIT BLOCK - Required by the Makefile
     parser = argparse.ArgumentParser()
-    parser.add_argument('cache_dir')
     parser.add_argument('results_dir')
+    parser.add_argument('tmp_dir')
     parser.add_argument('--full', default=False, action='store_true')
     args = parser.parse_args()
     # END OF DO NOT EDIT BLOCK
@@ -43,9 +43,9 @@ if __name__ == '__main__':
     batch_size = 20
     signals_all_max = 2047
     signals_all_min = -1885
-    training_dataset = UCI_epilepsy('training', num_samples, args.cache_dir)
-    validation_dataset = UCI_epilepsy('validation', num_samples, args.cache_dir)
-    test_dataset = UCI_epilepsy('test', num_samples, args.cache_dir)
+    training_dataset = UCI_epilepsy('training', num_samples, args.tmp_dir)
+    validation_dataset = UCI_epilepsy('validation', num_samples, args.tmp_dir)
+    test_dataset = UCI_epilepsy('test', num_samples, args.tmp_dir)
     training_dataloader = DataLoader(dataset=training_dataset, batch_size=batch_size, shuffle=True)
     validation_dataloader = DataLoader(dataset=validation_dataset, batch_size=batch_size, shuffle=False)
     test_dataloader = DataLoader(dataset=test_dataset, batch_size=batch_size)
@@ -145,7 +145,7 @@ if __name__ == '__main__':
     with open(f'{args.results_dir}/results.tex', 'w') as f:
         df.to_latex(buf=f, bold_rows=True, escape=False, column_format='l|c|c|cccc|ccccc|cccc')
 
-    dataset = pd.read_csv(f'{args.cache_dir}/data.csv')
+    dataset = pd.read_csv(f'{args.tmp_dir}/data.csv')
     signals_all = dataset.drop(columns=['Unnamed: 0', 'y'])
     labels_all = dataset['y']
     signals_all = torch.tensor(signals_all.values, dtype=torch.float)
