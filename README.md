@@ -19,4 +19,4 @@ This repository contains the code that generates **Signal2Image Modules in Deep 
 4. make options
     * `make`             # Generate pdf.
     * `make ARGS=--full` # Generate full pdf.
-    * `make clean`       # Remove results and tmp directories.
+    * `make clean`       # Remove tmp directory.
