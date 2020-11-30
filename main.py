@@ -20,8 +20,6 @@ from utilities import save_signal, save_signal_as_image, save_spectrogram, save_
 if __name__ == '__main__':
     # DO NOT EDIT BLOCK - Required by the Makefile
     parser = argparse.ArgumentParser()
-    parser.add_argument('results_dir')
-    parser.add_argument('tmp_dir')
     parser.add_argument('--full', default=False, action='store_true')
     args = parser.parse_args()
     # END OF DO NOT EDIT BLOCK
@@ -43,9 +41,9 @@ if __name__ == '__main__':
     batch_size = 20
     signals_all_max = 2047
     signals_all_min = -1885
-    training_dataset = UCI_epilepsy('training', num_samples, args.tmp_dir)
-    validation_dataset = UCI_epilepsy('validation', num_samples, args.tmp_dir)
-    test_dataset = UCI_epilepsy('test', num_samples, args.tmp_dir)
+    training_dataset = UCI_epilepsy('training', num_samples)
+    validation_dataset = UCI_epilepsy('validation', num_samples)
+    test_dataset = UCI_epilepsy('test', num_samples)
     training_dataloader = DataLoader(dataset=training_dataset, batch_size=batch_size, shuffle=True)
     validation_dataloader = DataLoader(dataset=validation_dataset, batch_size=batch_size, shuffle=False)
     test_dataloader = DataLoader(dataset=test_dataset, batch_size=batch_size)
@@ -111,9 +109,9 @@ if __name__ == '__main__':
             results[combined_model_name]['validation_accuracy'].append(validation_accuracy)
             if validation_accuracy > best_validation_accuracy:
                 best_validation_accuracy = validation_accuracy
-                torch.save(model, f'{args.tmp_dir}/{combined_model_name}.pt')
+                torch.save(model, f'tmp/{combined_model_name}.pt')
                 print('saving as best model')
-        model = torch.load(f'{args.tmp_dir}/{combined_model_name}.pt')
+        model = torch.load(f'tmp/{combined_model_name}.pt')
         model.eval()
         test_loss_sum = 0
         corrects = 0
@@ -134,7 +132,7 @@ if __name__ == '__main__':
         results[combined_model_name]['test_accuracy'] = test_accuracy
         print(f'Model: {combined_model_name}, Epoch: {epoch}, Loss: {test_loss:.3f}, Accuracy: {test_accuracy:.2f}%')
         if combined_model_name != 'alexnet-cnn-one-layer':
-            os.remove(f'{args.tmp_dir}/{combined_model_name}.pt')
+            os.remove(f'tmp/{combined_model_name}.pt')
 
     results_test_accuracy_for_paper = np.zeros((75,))
     for index, model in enumerate(results):
@@ -142,9 +140,9 @@ if __name__ == '__main__':
     results_test_accuracy_for_paper = results_test_accuracy_for_paper.reshape(5, 15)
     df = pd.DataFrame(results_test_accuracy_for_paper, index=['1D', '2D, signal as image', '2D, spectrogram', '2D, one layer CNN', '2D, two layer CNN'])
     df.columns = base_models_names
-    df.to_latex(f'{args.results_dir}/results.tex', bold_rows=True, escape=False, column_format='l|c|c|cccc|ccccc|cccc')
+    df.to_latex('tmp/results.tex', bold_rows=True, escape=False, column_format='l|c|c|cccc|ccccc|cccc')
 
-    dataset = pd.read_csv(f'{args.tmp_dir}/data.csv')
+    dataset = pd.read_csv('tmp/data.csv')
     signals_all = dataset.drop(columns=['Unnamed: 0', 'y'])
     labels_all = dataset['y']
     signals_all = torch.tensor(signals_all.values, dtype=torch.float)
@@ -152,7 +150,7 @@ if __name__ == '__main__':
     labels_names = ['eyes-open', 'eyes-closed', 'healthy-area', 'tumor-area', 'epilepsy']
     for index, label_name in enumerate(labels_names):
         signal_index = (labels_all == index).nonzero()[-1]
-        save_signal(signals_all, signal_index, label_name, args.results_dir)
-        save_signal_as_image(signals_all, signal_index, label_name, args.results_dir)
-        save_spectrogram(signals_all, signal_index, label_name, args.results_dir)
-        save_cnn(signals_all, signal_index, label_name, args.results_dir, args.tmp_dir)
+        save_signal(signals_all, signal_index, label_name)
+        save_signal_as_image(signals_all, signal_index, label_name)
+        save_spectrogram(signals_all, signal_index, label_name)
+        save_cnn(signals_all, signal_index, label_name)
