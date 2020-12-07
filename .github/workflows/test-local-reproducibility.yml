@@ -3,7 +3,7 @@ on: [push, pull_request]
 jobs:
   make:
     if: "!contains(github.event.head_commit.message, 'skip ci')"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Set up Git repository
         uses: actions/checkout@v2
