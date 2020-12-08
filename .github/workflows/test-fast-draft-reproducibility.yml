@@ -1,4 +1,4 @@
-name: test-local-reproducibility
+name: test-fast-draft-reproducibility
 on: [push, pull_request]
 jobs:
   make:
@@ -7,8 +7,10 @@ jobs:
     steps:
       - name: Set up Git repository
         uses: actions/checkout@v2
-      - name: Test local reproducibility
+      - name: Test fast/draft reproducibility
         run: |
           make
+          cp tmp/ms.pdf tmp/ms-previous.pdf
           touch main.py
           make
+          cmp tmp/ms.pdf tmp/ms-previous.pdf
