@@ -20,7 +20,7 @@ tmp/ms.pdf: ms.tex ms.bib tmp/results_computed
 
 tmp/results_computed: Dockerfile requirements.txt $(shell find . -maxdepth 1 -name '*.py')
 	mkdir -p tmp/
-	docker image build --tag $(document_title) .
+	docker image build --tag $(document_title)-results .
 	docker container run \
 		$(debug_args) \
 		$(gpu_args) \
@@ -30,8 +30,8 @@ tmp/results_computed: Dockerfile requirements.txt $(shell find . -maxdepth 1 -na
 		--user `id -u`:`id -g` \
 		--volume $(dir $(realpath Makefile)):/workspace/ \
 		--workdir /workspace/ \
-		$(document_title) \
-		python main.py $(ARG)
+		$(document_title)-results \
+		python main.py $(VER)
 	touch tmp/results_computed
 
 clean:
