@@ -6,7 +6,7 @@ ifeq (1, $(shell [ -t 0 ] && echo 1))
 	debug_args=--interactive --tty
 endif
 
-ifneq (, $(shell which nvidia-smi))
+ifneq (, $(shell which nvidia-container-cli))
 	gpu_args=--gpus all
 endif
 
