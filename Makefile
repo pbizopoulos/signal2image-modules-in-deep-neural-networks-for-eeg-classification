@@ -10,7 +10,7 @@ ifneq (, $(shell which nvidia-container-cli))
 	gpu_args=--gpus all
 endif
 
-tmp/ms.pdf: ms.tex ms.bib tmp/results_computed
+tmp/ms.pdf: ms.bib ms.tex tmp/results_computed
 	docker container run \
 		--rm \
 		--user `id -u`:`id -g` \
@@ -18,7 +18,7 @@ tmp/ms.pdf: ms.tex ms.bib tmp/results_computed
 		ghcr.io/pbizopoulos/texlive-full \
 		latexmk -gg -pdf -usepretex="\pdfinfoomitdate=1\pdfsuppressptexinfo=-1\pdftrailerid{}" -outdir=tmp/ -cd /workspace/ms.tex
 
-tmp/results_computed: Dockerfile requirements.txt $(shell find . -maxdepth 1 -name '*.py')
+tmp/results_computed: Dockerfile main.py requirements.txt
 	mkdir -p tmp/
 	docker image build --tag $(document_title)-results .
 	docker container run \
