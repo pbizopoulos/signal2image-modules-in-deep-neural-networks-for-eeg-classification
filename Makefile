@@ -1,8 +1,7 @@
 .POSIX:
 
-document_title=signal2image-modules-in-deep-neural-networks-for-eeg-classification
-
-ifeq (1, $(shell [ -t 0 ] && echo 1))
+is_interactive:=$(shell [ -t 0 ] && echo 1)
+ifdef is_interactive
 	debug_args=--interactive --tty
 endif
 
@@ -20,7 +19,6 @@ tmp/ms.pdf: ms.bib ms.tex tmp/results_computed
 
 tmp/results_computed: Dockerfile main.py requirements.txt
 	mkdir -p tmp/
-	docker image build --tag $(document_title)-results .
 	docker container run \
 		$(debug_args) \
 		$(gpu_args) \
@@ -30,7 +28,7 @@ tmp/results_computed: Dockerfile main.py requirements.txt
 		--user `id -u`:`id -g` \
 		--volume $(dir $(realpath Makefile)):/workspace/ \
 		--workdir /workspace/ \
-		$(document_title)-results \
+		`docker image build -q .` \
 		python main.py $(VER)
 	touch tmp/results_computed
 
