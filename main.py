@@ -3,8 +3,8 @@ import collections
 import numpy as np
 import os
 import pandas as pd
+import requests
 import torch
-import urllib
 
 from PIL import Image
 from matplotlib import pyplot as plt
@@ -529,8 +529,9 @@ def densenet161(num_samples):
 class UCI_epilepsy(Dataset):
     def __init__(self, training_validation_test, num_samples):
         filename = 'tmp/data.csv'
-        if not os.path.isfile(filename):
-            urllib.request.urlretrieve('https://web.archive.org/web/20200318000445/http://archive.ics.uci.edu/ml/machine-learning-databases/00388/data.csv', filename)
+        with open(filename, 'wb') as file:
+            response = requests.get('https://web.archive.org/web/20200318000445/http://archive.ics.uci.edu/ml/machine-learning-databases/00388/data.csv')
+            file.write(response.content)
         dataset = pd.read_csv(filename)
         dataset = dataset[:num_samples]
         signals_all = dataset.drop(columns=['Unnamed: 0', 'y'])
