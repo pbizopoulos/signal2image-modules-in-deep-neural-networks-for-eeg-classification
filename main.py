@@ -8,7 +8,7 @@ import torch
 
 from PIL import Image
 from matplotlib import pyplot as plt
-from scipy.signal import spectrogram, resample
+from scipy.signal import spectrogram
 from torch import nn
 from torch.nn import functional as F
 from torch.optim import Adam
@@ -17,11 +17,10 @@ from torchvision import models
 
 
 def save_signal(signals_all, signal_index, label_name):
-    data = signals_all[signal_index].squeeze().cpu().detach().numpy()
     plt.figure()
-    plt.plot(data, linewidth=4, color='k')
+    plt.plot(signals_all[signal_index].squeeze(), linewidth=4, color='k')
     plt.axis('off')
-    plt.xlim([0, 177])
+    plt.xlim([0, signals_all.shape[-1] - 1])
     plt.ylim([-1000, 1000])
     plt.savefig(f'tmp/signal-{label_name}.png')
     plt.close()
@@ -30,18 +29,18 @@ def save_signal_as_image(signals_all, signal_index, label_name):
     signals_all_min = -1000
     signals_all_max = 1000
     x = signals_all[signal_index] - signals_all_min
-    x = 178 * x / (signals_all_max - signals_all_min)
+    x = signals_all.shape[-1] * x / (signals_all_max - signals_all_min)
     x = x.squeeze(0).floor().long()
-    data = torch.zeros(178, 178)
-    for index in range(178):
-        data[177 - x[index], index] = 255
+    data = torch.zeros(signals_all.shape[-1], signals_all.shape[-1])
+    for index in range(signals_all.shape[-1]):
+        data[signals_all.shape[-1] - 1 - x[index], index] = 255
     plt.figure()
     plt.imsave(f'tmp/signal-as-image-{label_name}.png', data, cmap='gray')
     plt.close()
 
 def save_spectrogram(signals_all, signal_index, label_name):
-    _, _, Sxx = spectrogram(signals_all[signal_index].cpu(), fs=178, noverlap=4, nperseg=8, nfft=64, mode='magnitude')
-    data = np.array(Image.fromarray(Sxx[0, :, :]).resize((178, 178), resample=1))
+    _, _, Sxx = spectrogram(signals_all[signal_index], fs=signals_all.shape[-1], noverlap=4, nperseg=8, nfft=64, mode='magnitude')
+    data = np.array(Image.fromarray(Sxx[0, :, :]).resize((signals_all.shape[-1], signals_all.shape[-1]), resample=1))
     plt.figure()
     plt.imsave(f'tmp/spectrogram-{label_name}.png', data, cmap='gray')
     plt.close()
@@ -50,58 +49,56 @@ def save_cnn(signals_all, signal_index, label_name):
     model = torch.load('tmp/alexnet-cnn-one-layer.pt')
     device = next(model.parameters()).device
     signal = signals_all[signal_index].unsqueeze(0).to(device)
-    outputs= []
+    outputs = []
     def hook(module, input, output):
         outputs.append(output)
     model.conv.register_forward_hook(hook)
     model(signal)
     data = outputs[0][0, 0].cpu().detach().numpy()
-    data = np.array(Image.fromarray(data).resize((178, 178), resample=1))
+    data = np.array(Image.fromarray(data).resize((signals_all.shape[-1], signals_all.shape[-1]), resample=1))
     plt.figure()
     plt.imsave(f'tmp/cnn-{label_name}.png', data, cmap='gray')
     plt.close()
 
 def replace_last_layer(base_model, combined_model_name, num_classes):
-    if combined_model_name.startswith(('alexnet', 'vgg11', 'vgg13', 'vgg16', 'vgg19')):
+    if combined_model_name.startswith(('alexnet', 'vgg')):
         base_model.classifier[-1] = nn.Linear(base_model.classifier[-1].in_features, num_classes)
-    elif combined_model_name.startswith(('resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152')):
+    elif combined_model_name.startswith('resnet'):
         base_model.fc = nn.Linear(base_model.fc.in_features, num_classes)
-    elif combined_model_name.startswith(('densenet121', 'densenet161', 'densenet169', 'densenet201')):
+    elif combined_model_name.startswith('densenet'):
         base_model.classifier = nn.Linear(base_model.classifier.in_features, num_classes)
     return base_model
 
 
 class SignalAsImage(nn.Module):
-    def __init__(self, num_classes, base_model, combined_model_name, signals_all_max, signals_all_min, device):
+    def __init__(self, num_classes, base_model, combined_model_name, signals_all_max, signals_all_min):
         super(SignalAsImage, self).__init__()
-        self.device = device
         self.signals_all_max = signals_all_max
         self.signals_all_min = signals_all_min
         self.base_model = replace_last_layer(base_model, combined_model_name, num_classes)
 
     def forward(self, x):
         x = x - self.signals_all_min
-        x = 178 * x / (self.signals_all_max - self.signals_all_min)
+        x = x.shape[-1] * x / (self.signals_all_max - self.signals_all_min)
         x = x.floor().long()
-        out = torch.zeros(x.shape[0], 1, 178, 178, device=self.device)
+        out = torch.zeros(x.shape[0], 1, x.shape[-1], x.shape[-1]).to(x.device)
         for index, _ in enumerate(x):
-            out[index, 0, 177 - x[index, 0, :], range(178)] = 255
+            out[index, 0, x.shape[-1] - 1 - x[index, 0, :], range(x.shape[-1])] = 255
         out = torch.cat((out, out, out), 1)
         out = self.base_model(out)
         return out
 
 
 class Spectrogram(nn.Module):
-    def __init__(self, num_classes, base_model, combined_model_name, device):
+    def __init__(self, num_classes, base_model, combined_model_name):
         super(Spectrogram, self).__init__()
-        self.device = device
         self.base_model = replace_last_layer(base_model, combined_model_name, num_classes)
 
     def forward(self, x):
-        out = torch.zeros(x.shape[0], 1, 178, 178, device=self.device)
+        out = torch.zeros(x.shape[0], 1, x.shape[-1], x.shape[-1]).to(x.device)
         for index, signal in enumerate(x):
-            _, _, Sxx = spectrogram(signal.cpu(), fs=178, noverlap=4, nperseg=8, nfft=64, mode='magnitude')
-            out[index, 0, :, :] = F.interpolate(torch.tensor(Sxx[0, :, :]).unsqueeze(0).unsqueeze(0), 178, mode='bilinear')
+            _, _, Sxx = spectrogram(signal.cpu(), fs=x.shape[-1], noverlap=4, nperseg=8, nfft=64, mode='magnitude')
+            out[index, 0, :, :] = F.interpolate(torch.tensor(Sxx[0, :, :]).unsqueeze(0).unsqueeze(0), x.shape[-1], mode='bilinear')
         out = torch.cat((out, out, out), 1)
         out = self.base_model(out)
         return out
@@ -119,7 +116,7 @@ class CNN_two_layers(nn.Module):
         out = F.max_pool1d(out, 2)
         out = self.conv2(out)
         out.unsqueeze_(1)
-        out = F.interpolate(out, 178, mode='bilinear')
+        out = F.interpolate(out, x.shape[-1], mode='bilinear')
         out = torch.cat((out, out, out), 1)
         out = self.base_model(out)
         return out
@@ -134,7 +131,7 @@ class CNN_one_layer(nn.Module):
     def forward(self, x):
         out = self.conv(x)
         out.unsqueeze_(1)
-        out = F.interpolate(out, 178, mode='bilinear')
+        out = F.interpolate(out, x.shape[-1], mode='bilinear')
         out = torch.cat((out, out, out), 1)
         out = self.base_model(out)
         return out
@@ -576,6 +573,7 @@ class lenet_2D(nn.Module):
         out = self.fc3(out)
         return out
 
+
 if __name__ == '__main__':
     # DO NOT EDIT BLOCK - Required by the Makefile
     parser = argparse.ArgumentParser()
@@ -626,9 +624,9 @@ if __name__ == '__main__':
         if combined_model_name.endswith('-1D'):
             model = base_model(num_classes)
         elif combined_model_name.endswith('-signal-as-image'):
-            model = SignalAsImage(num_classes, base_model(), combined_model_name, signals_all_max, signals_all_min, device)
+            model = SignalAsImage(num_classes, base_model(), combined_model_name, signals_all_max, signals_all_min)
         elif combined_model_name.endswith('-spectrogram'):
-            model = Spectrogram(num_classes, base_model(), combined_model_name, device)
+            model = Spectrogram(num_classes, base_model(), combined_model_name)
         elif combined_model_name.endswith('-cnn-one-layer'):
             model = CNN_one_layer(num_classes, base_model(), combined_model_name)
         elif combined_model_name.endswith('-cnn-two-layers'):
