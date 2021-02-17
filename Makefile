@@ -29,7 +29,7 @@ tmp/results_computed: Dockerfile main.py requirements.txt
 		--volume $(dir $(realpath Makefile)):/workspace/ \
 		--workdir /workspace/ \
 		`docker image build -q .` \
-		python main.py $(VER)
+		python main.py $(VERSION)
 	touch tmp/results_computed
 
 clean:

@@ -575,11 +575,16 @@ class lenet_2D(nn.Module):
 
 
 if __name__ == '__main__':
-    # DO NOT EDIT BLOCK - Required by the Makefile
+    # Set appropriate variables (e.g. num_samples) to a lower value to reduce the computational cost of the draft (fast) version document.
     parser = argparse.ArgumentParser()
     parser.add_argument('--full', default=False, action='store_true')
     args = parser.parse_args()
-    # END OF DO NOT EDIT BLOCK
+    if args.full:
+        num_samples = 11500
+        num_epochs = 100
+    else:
+        num_samples = 10
+        num_epochs = 1
 
     # Set random seeds for reproducibility.
     np.random.seed(0)
@@ -588,12 +593,6 @@ if __name__ == '__main__':
     torch.manual_seed(0)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    if args.full:
-        num_samples = 11500
-        num_epochs = 100
-    else:
-        num_samples = 10
-        num_epochs = 1
     num_classes = 5
     batch_size = 20
     signals_all_max = 2047

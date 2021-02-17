@@ -17,6 +17,6 @@ This repository contains the code that generates **Signal2Image Modules in Deep 
 2. `cd signal2image-modules-in-deep-neural-networks-for-eeg-classification/`
 3. `sudo systemctl start docker`
 4. make options
-    * `make`             # Generate the draft (fast) version document.
-    * `make VER=--full`  # Generate the full (slow) version document.
-    * `make clean`       # Remove the tmp/ directory.
+    * `make`                # Generate the draft (fast) version document.
+    * `make VERSION=--full` # Generate the full (slow) version document.
+    * `make clean`          # Remove the tmp/ directory.
