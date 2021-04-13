@@ -1,4 +1,4 @@
 matplotlib==3.4.1
-pandas==1.2.3
+pandas==1.2.4
 requests==2.25.1
 scipy==1.6.2
