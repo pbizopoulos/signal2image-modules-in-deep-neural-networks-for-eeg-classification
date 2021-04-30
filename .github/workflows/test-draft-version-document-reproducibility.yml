@@ -10,7 +10,7 @@ jobs:
       - name: Test draft version document reproducibility
         run: |
           make
-          cp tmp/ms.pdf tmp/ms-previous.pdf
-          touch main.py
+          cp tmp/ms.pdf ms-previous.pdf
+          rm -rf tmp/
           make
-          cmp tmp/ms.pdf tmp/ms-previous.pdf
+          cmp tmp/ms.pdf ms-previous.pdf
