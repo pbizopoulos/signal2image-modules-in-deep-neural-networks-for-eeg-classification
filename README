@@ -1,0 +1,24 @@
+This repository generates 'Signal2Image Modules in Deep Neural Networks for EEG Classification'.
+- https://arxiv.org/abs/1904.13216
+- https://ieeexplore.ieee.org/abstract/document/8856620/
+
+Requirements:
+- POSIX-oriented operating system https://en.wikipedia.org/wiki/POSIX#POSIX-oriented_operating_systems
+- Make https://www.gnu.org/software/make/
+- Docker https://docs.docker.com/get-docker/
+- [Optional] NVIDIA Container Toolkit https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html
+
+Instructions:
+1. git clone https://github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification
+2. cd signal2image-modules-in-deep-neural-networks-for-eeg-classification/
+3. sudo systemctl start docker
+
+Usage:
+make				# Generate draft (fast) version document.
+make VERSION=--full 		# Generate full (slow) version document.
+make clean 			# Remove tmp/ directory.
+make tmp/format-python 		# Format main.py using autopep8 and isort.
+make tmp/lint-texlive 		# Lint ms.tex using chktex and lacheck.
+make tmp/ms-from-arxiv.pdf	# Generate full version document from arxiv.
+make tmp/update-makefile	# Update Makefile.
+make tmp/update-docker-images 	# Update docker images.
