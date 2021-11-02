@@ -1,0 +1,20 @@
+name: docs
+on:
+  push:
+    paths:
+      - 'docs/requirements.txt'
+jobs:
+  make:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: checkout repo
+        uses: actions/checkout@v2
+      - name: git commands for index.html
+        run: |
+          cd docs
+          make
+          git add index.html
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git commit -m "update index.html"
+          git push

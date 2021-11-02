@@ -1,0 +1,1 @@
+git+https://github.com/pbizopoulos/pyjsclient.git@da7f9fbacf121ef7984fdb356d9422a266f2b580
