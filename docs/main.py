@@ -15,7 +15,8 @@ def main():
     url = 'https://github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification'
     block_width = 256
     block_height = 256
-    pyjsclient(model_dir, problem_type, class_names, title, description, url, block_width, block_height)
+    input_filename = 'example-signal.txt'
+    pyjsclient(model_dir, problem_type, class_names, title, description, url, block_width, block_height, input_filename)
 
 
 if __name__ == '__main__':

@@ -1,5 +1,12 @@
 name: tests
-on: [push, pull_request]
+on:
+  push:
+    paths-ignore:
+      - 'docs/'
+  pull_request:
+    paths-ignore:
+      - 'docs/'
+
 jobs:
   make:
     runs-on: ubuntu-20.04
@@ -7,4 +14,4 @@ jobs:
       - name: Set up Git repository
         uses: actions/checkout@v2
       - name: Test
-        run: make check
+        run: make
