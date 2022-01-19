@@ -1,1 +1,1 @@
-git+https://github.com/pbizopoulos/pyclientsideml.git@cd293c12ccbf0a3c2ff6bb4e7605f444da3c9c58
+git+https://github.com/pbizopoulos/pyclientsideml.git@4c8205db698a85e2fe1b7d40e2453aac47ceea57
