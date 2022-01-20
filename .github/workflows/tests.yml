@@ -14,4 +14,4 @@ jobs:
       - name: Set up Git repository
         uses: actions/checkout@v2
       - name: Test
-        run: make
+        run: make test
