@@ -1,7 +1,8 @@
-from pyclientsideml import generate_page_signal_classification
+from pyclientsideml import generate_page
 
 
 def main():
+    ml_type = 'signal-classification'
     model_dirs = [
             'https://raw.githubusercontent.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification-tfjs/master/alexnet-1D/model.json',
             'https://raw.githubusercontent.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification-tfjs/master/lenet-1D/model.json',
@@ -15,7 +16,7 @@ def main():
     block_width = 256
     block_height = 256
     input_filename = 'https://raw.githubusercontent.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/master/docs/example-signal.txt'
-    generate_page_signal_classification(model_dirs, class_names, title, description, url, block_width, block_height, input_filename)
+    generate_page(ml_type, model_dirs, class_names, title, description, url, block_width, block_height, input_filename)
 
 
 if __name__ == '__main__':
