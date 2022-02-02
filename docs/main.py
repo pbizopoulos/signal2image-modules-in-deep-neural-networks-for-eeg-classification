@@ -9,6 +9,7 @@ def main():
             'https://raw.githubusercontent.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification-tfjs/master/resnet18-1D/model.json',
             'https://raw.githubusercontent.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification-tfjs/master/resnet34-1D/model.json',
             'https://raw.githubusercontent.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification-tfjs/master/resnet50-1D/model.json']
+    output_filename = 'index.html'
     class_names = ['Open', 'Closed', 'Healthy', 'Tumor', 'Epilepsy']
     input_filename = 'https://raw.githubusercontent.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/master/docs/example-signal-1.txt'
     title = 'EEG signal classification demo'
@@ -16,7 +17,7 @@ def main():
     url = 'https://github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification'
     block_width = 256
     block_height = 256
-    generate_page(ml_type, model_dirs, class_names, input_filename, title, description, url, block_width, block_height)
+    generate_page(ml_type, model_dirs, output_filename, class_names, input_filename, title, description, url, block_width, block_height)
 
 
 if __name__ == '__main__':
