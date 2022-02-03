@@ -35,7 +35,7 @@ def save_tfjs_from_torch(model, model_name, input_shape):
     os.remove(f'{model_name_dir}/model.onnx')
 
 
-def save_signal_figure(signals_all, signal_index, label_name):
+def save_figure_signal(signals_all, signal_index, label_name):
     plt.figure()
     plt.plot(signals_all[signal_index].squeeze(), linewidth=4, color='k')
     plt.axis('off')
@@ -45,7 +45,7 @@ def save_signal_figure(signals_all, signal_index, label_name):
     plt.close()
 
 
-def save_signal_as_image_figure(signals_all, signal_index, label_name):
+def save_figure_signal_as_image(signals_all, signal_index, label_name):
     signals_all_min = -1000
     signals_all_max = 1000
     x = signals_all[signal_index] - signals_all_min
@@ -59,7 +59,7 @@ def save_signal_as_image_figure(signals_all, signal_index, label_name):
     plt.close()
 
 
-def save_spectrogram_figure(signals_all, signal_index, label_name):
+def save_figure_spectrogram(signals_all, signal_index, label_name):
     _, _, Sxx = spectrogram(signals_all[signal_index], fs=signals_all.shape[-1], noverlap=4, nperseg=8, nfft=64, mode='magnitude')
     data = np.array(Image.fromarray(Sxx[0]).resize((signals_all.shape[-1], signals_all.shape[-1]), resample=1))
     plt.figure()
@@ -67,7 +67,7 @@ def save_spectrogram_figure(signals_all, signal_index, label_name):
     plt.close()
 
 
-def save_cnn_figure(signals_all, signal_index, label_name, num_classes):
+def save_figure_cnn(signals_all, signal_index, label_name, num_classes):
     model = CNNOneLayer(num_classes, models.alexnet(), 'alexnet-cnn-one-layer')
     model.load_state_dict(torch.load(f'{tmpdir}/alexnet-cnn-one-layer.pt'))
     signal = signals_all[signal_index].unsqueeze(0)
@@ -576,7 +576,6 @@ class LeNet2D(nn.Module):
 
 
 def main():
-    torch.hub.set_dir(tmpdir)
     num_samples = 11500
     num_epochs = 100
     if not full:
@@ -702,10 +701,10 @@ def main():
     labels_names = ['eyes-open', 'eyes-closed', 'healthy-area', 'tumor-area', 'epilepsy']
     for index, label_name in enumerate(labels_names):
         signal_index = (labels_all == index).nonzero()[-1]
-        save_signal_figure(signals_all, signal_index, label_name)
-        save_signal_as_image_figure(signals_all, signal_index, label_name)
-        save_spectrogram_figure(signals_all, signal_index, label_name)
-        save_cnn_figure(signals_all, signal_index, label_name, num_classes)
+        save_figure_signal(signals_all, signal_index, label_name)
+        save_figure_signal_as_image(signals_all, signal_index, label_name)
+        save_figure_spectrogram(signals_all, signal_index, label_name)
+        save_figure_cnn(signals_all, signal_index, label_name, num_classes)
 
 
 if __name__ == '__main__':
