@@ -22,20 +22,20 @@ tmpdir = os.getenv('TMPDIR')
 full = os.getenv('FULL')
 
 
-def save_tfjs(model, combined_model_name):
-    combined_model_name_dir = f'{tmpdir}/tfjs-models/{combined_model_name}'
-    os.makedirs(combined_model_name_dir, exist_ok=True)
-    example_input = torch.randn(1, 1, 176, requires_grad=False)
-    torch.onnx.export(model.cpu(), example_input, f'{combined_model_name_dir}/model.onnx', export_params=True, opset_version=11)
-    onnx_model = onnx.load(f'{combined_model_name_dir}/model.onnx')
+def save_tfjs_from_torch(model, model_name, input_shape):
+    model_name_dir = f'{tmpdir}/tfjs-models/{model_name}'
+    os.makedirs(model_name_dir, exist_ok=True)
+    example_input = torch.randn(*input_shape, requires_grad=False)
+    torch.onnx.export(model.cpu(), example_input, f'{model_name_dir}/model.onnx', export_params=True, opset_version=11)
+    onnx_model = onnx.load(f'{model_name_dir}/model.onnx')
     tf_model = prepare(onnx_model)
-    tf_model.export_graph(f'{combined_model_name_dir}/model')
-    tf_saved_model_conversion_v2.convert_tf_saved_model(f'{combined_model_name_dir}/model', combined_model_name_dir, skip_op_check=True)
-    rmtree(f'{combined_model_name_dir}/model')
-    os.remove(f'{combined_model_name_dir}/model.onnx')
+    tf_model.export_graph(f'{model_name_dir}/model')
+    tf_saved_model_conversion_v2.convert_tf_saved_model(f'{model_name_dir}/model', model_name_dir, skip_op_check=True)
+    rmtree(f'{model_name_dir}/model')
+    os.remove(f'{model_name_dir}/model.onnx')
 
 
-def save_signal(signals_all, signal_index, label_name):
+def save_signal_figure(signals_all, signal_index, label_name):
     plt.figure()
     plt.plot(signals_all[signal_index].squeeze(), linewidth=4, color='k')
     plt.axis('off')
@@ -45,7 +45,7 @@ def save_signal(signals_all, signal_index, label_name):
     plt.close()
 
 
-def save_signal_as_image(signals_all, signal_index, label_name):
+def save_signal_as_image_figure(signals_all, signal_index, label_name):
     signals_all_min = -1000
     signals_all_max = 1000
     x = signals_all[signal_index] - signals_all_min
@@ -59,7 +59,7 @@ def save_signal_as_image(signals_all, signal_index, label_name):
     plt.close()
 
 
-def save_spectrogram(signals_all, signal_index, label_name):
+def save_spectrogram_figure(signals_all, signal_index, label_name):
     _, _, Sxx = spectrogram(signals_all[signal_index], fs=signals_all.shape[-1], noverlap=4, nperseg=8, nfft=64, mode='magnitude')
     data = np.array(Image.fromarray(Sxx[0]).resize((signals_all.shape[-1], signals_all.shape[-1]), resample=1))
     plt.figure()
@@ -67,7 +67,7 @@ def save_spectrogram(signals_all, signal_index, label_name):
     plt.close()
 
 
-def save_cnn(signals_all, signal_index, label_name, num_classes):
+def save_cnn_figure(signals_all, signal_index, label_name, num_classes):
     model = CNNOneLayer(num_classes, models.alexnet(), 'alexnet-cnn-one-layer')
     model.load_state_dict(torch.load(f'{tmpdir}/alexnet-cnn-one-layer.pt'))
     signal = signals_all[signal_index].unsqueeze(0)
@@ -682,7 +682,7 @@ def main():
         results[combined_model_name]['test_accuracy'] = test_accuracy
         print(f'Model: {combined_model_name}, Epoch: {epoch}, Loss: {test_loss:.3f}, Accuracy: {test_accuracy:.2f}%')
         if combined_model_name in ['lenet-1D', 'alexnet-1D', 'resnet18-1D', 'resnet34-1D', 'resnet50-1D', 'resnet18-signal-as-image', 'resnet34-signal-as-image', 'resnet50-signal-as-image']:
-            save_tfjs(model, combined_model_name)
+            save_tfjs_from_torch(model, combined_model_name, [1, 1, 176])
             if (not full):
                 rmtree(f'{tmpdir}/tfjs-models/{combined_model_name}')
         if (not full) and (combined_model_name != 'alexnet-cnn-one-layer'):
@@ -702,10 +702,10 @@ def main():
     labels_names = ['eyes-open', 'eyes-closed', 'healthy-area', 'tumor-area', 'epilepsy']
     for index, label_name in enumerate(labels_names):
         signal_index = (labels_all == index).nonzero()[-1]
-        save_signal(signals_all, signal_index, label_name)
-        save_signal_as_image(signals_all, signal_index, label_name)
-        save_spectrogram(signals_all, signal_index, label_name)
-        save_cnn(signals_all, signal_index, label_name, num_classes)
+        save_signal_figure(signals_all, signal_index, label_name)
+        save_signal_as_image_figure(signals_all, signal_index, label_name)
+        save_spectrogram_figure(signals_all, signal_index, label_name)
+        save_cnn_figure(signals_all, signal_index, label_name, num_classes)
 
 
 if __name__ == '__main__':
