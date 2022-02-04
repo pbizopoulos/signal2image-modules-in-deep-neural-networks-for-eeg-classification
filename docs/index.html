@@ -36,7 +36,7 @@
                         </div>
                         <div>
                                 
-                                <input accept=".txt,.csv" onchange="signalClassificationLoadView();" type="file">
+                                <input accept=".txt,.csv" onchange="signalLoadView();" type="file">
                                 
                         </div>
                         <div>
@@ -140,7 +140,7 @@
                             signalClassificationPredictView();
                             };
 
-                    function signalClassificationLoadView() {
+                    function signalLoadView() {
                             const files = event.currentTarget.files;
                             if (files[0]) {
                                 signalFileReader.readAsText(files[0]);
@@ -164,7 +164,7 @@
                                 document.getElementById('divOutput').innerHTML += `<div>${classNames[i]}: ${(classProbabilities[0][i]).toFixed(2)}%</div>`;
                                 }
                             }
-                    
+                
 
                     function disableUI(argument) {
                             const nodes = document.getElementById('divInputControl').getElementsByTagName('*');
@@ -175,7 +175,9 @@
 
                     let model;
                     async function loadModel(predictFunction) {
+                            
                             model = await tf.loadGraphModel(selectModel.value, {onProgress: disableUI(true)});
+                            
                             predictFunction();
                             disableUI(false);
                             }
