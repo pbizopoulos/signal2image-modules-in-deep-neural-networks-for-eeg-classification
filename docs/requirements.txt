@@ -1,1 +1,1 @@
-https://github.com/pbizopoulos/pyclientsideml/tarball/master/f8eb196aaa5ad977dd30f43dfd3b42dd832108ee
+https://github.com/pbizopoulos/pyclientsideml/tarball/master/7c4425f103a10bf22762e34908e292b697a88cf9
