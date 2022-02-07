@@ -26,3 +26,4 @@ make tmp/texlive-test 		# Test document reproducibility.
 make tmp/texlive-update 	# Update texlive docker image.
 make tmp/arxiv-download.pdf	# Generate document from arxiv.
 make tmp/arxiv-upload.tar	# Generate tar for arxiv.
+make index.html			# Generate index.html for app.

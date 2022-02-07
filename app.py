@@ -11,7 +11,7 @@ def main():
             'https://raw.githubusercontent.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification-tfjs/master/resnet50-1D/model.json']
     output_filename = 'index.html'
     class_names = ['Open', 'Closed', 'Healthy', 'Tumor', 'Epilepsy']
-    input_filename = 'https://raw.githubusercontent.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/master/docs/example-signal-1.txt'
+    input_filename = 'https://raw.githubusercontent.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/master/example-signal-1.txt'
     title = 'EEG signal classification demo'
     description = 'NOT FOR MEDICAL USE. Choose a EEG csv file (.txt,.csv) and classify epilepsy using a DNN.'
     url = 'https://github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification'

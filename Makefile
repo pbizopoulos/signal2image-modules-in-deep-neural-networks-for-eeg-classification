@@ -153,3 +153,27 @@ $(tmpdir)/arxiv-upload.tar:
 		--workdir $(workdir)/ \
 		texlive/texlive bash -c 'tar cf $(tmpdir)/arxiv-upload.tar ms.bbl $(bibfile) $(texfile) `grep "./$(tmpdir)" $(tmpdir)/ms.fls | uniq | cut -b 9-`'
 	rm ms.bbl
+
+# For app
+
+appfile=app.py
+
+index.html: $(appfile) Dockerfile.app app-requirements.txt
+	$(container_engine) container run \
+		$(debug_args) \
+		$(user_arg) \
+		--detach-keys "ctrl-^,ctrl-^" \
+		--env HOME=$(workdir)/$(tmpdir) \
+		--rm \
+		--volume `pwd`:$(workdir)/ \
+		--workdir $(workdir)/ \
+		`$(container_engine) image build -q -f Dockerfile.app .` python3 $(appfile)
+
+$(appfile):
+	printf "from pyclientsideml import generate_page\n\n\n\ndef main():\n    generate_page('signal-classification', 'tmp/')\n\n\nif __name__ == '__main__':\n    main()\n" > $(appfile)
+
+Dockerfile.app:
+	printf "FROM python\nCOPY app-requirements.txt .\nRUN python3 -m pip install --no-cache-dir --upgrade pip wheel && python3 -m pip install --no-cache-dir -r app-requirements.txt\n" > Dockerfile
+
+app-requirements.txt:
+	printf "https://github.com/pbizopoulos/pyclientsideml/tarball/master\n" > requirements.txt

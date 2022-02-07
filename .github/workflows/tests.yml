@@ -2,10 +2,12 @@ name: tests
 on:
   push:
     paths-ignore:
-      - 'docs/*'
+      - 'app-requirements.txt'
+      - 'index.html'
   pull_request:
     paths-ignore:
-      - 'docs/*'
+      - 'app-requirements.txt'
+      - 'index.html'
 
 jobs:
   make:
