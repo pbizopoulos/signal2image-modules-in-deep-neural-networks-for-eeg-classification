@@ -173,7 +173,7 @@ $(appfile):
 	printf "from pyclientsideml import generate_page\n\n\n\ndef main():\n    generate_page('signal-classification', 'tmp/')\n\n\nif __name__ == '__main__':\n    main()\n" > $(appfile)
 
 Dockerfile.app:
-	printf "FROM python\nCOPY app-requirements.txt .\nRUN python3 -m pip install --no-cache-dir --upgrade pip wheel && python3 -m pip install --no-cache-dir -r app-requirements.txt\n" > Dockerfile
+	printf "FROM python\nCOPY app-requirements.txt .\nRUN python3 -m pip install --no-cache-dir --upgrade pip wheel && python3 -m pip install --no-cache-dir -r app-requirements.txt\n" > Dockerfile.app
 
 app-requirements.txt:
-	printf "https://github.com/pbizopoulos/pyclientsideml/tarball/master\n" > requirements.txt
+	printf "https://github.com/pbizopoulos/pyclientsideml/tarball/master\n" > app-requirements.txt
