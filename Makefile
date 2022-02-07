@@ -169,6 +169,17 @@ index.html: $(appfile) Dockerfile.app app-requirements.txt
 		--workdir $(workdir)/ \
 		`$(container_engine) image build -q -f Dockerfile.app .` python3 $(appfile)
 
+serve: index.html
+	$(container_engine) container run \
+		$(user_arg) \
+		--detach-keys "ctrl-^,ctrl-^" \
+		--env HOME=$(workdir)/$(tmpdir) \
+		--publish 8000:8000 \
+		--rm \
+		--volume `pwd`:$(workdir)/ \
+		--workdir $(workdir)/ \
+		python python3 -m http.server --directory .
+
 $(appfile):
 	printf "from pyclientsideml import generate_page\n\n\n\ndef main():\n    generate_page('signal-classification', 'tmp/')\n\n\nif __name__ == '__main__':\n    main()\n" > $(appfile)
 
@@ -177,3 +188,20 @@ Dockerfile.app:
 
 app-requirements.txt:
 	printf "https://github.com/pbizopoulos/pyclientsideml/tarball/master\n" > app-requirements.txt
+
+help:
+	@echo "Advanced usage:							"
+	@echo "make				# Generate draft (fast) results."
+	@echo "make FULL=1			# Generate full (slow) results.	"
+	@echo "make tmp/python-coverage 	# Code coverage for main.py.	"
+	@echo "make tmp/python-format 		# Format main.py.		"
+	@echo "make clean 			# Remove tmp/ directory.	"
+	@echo "make tmp/ms.pdf			# Generate document.		"
+	@echo "make tmp/texlive-lint 		# Lint ms.tex.			"
+	@echo "make tmp/texlive-test 		# Test document reproducibility."
+	@echo "make tmp/texlive-update		# Update texlive container image.	"
+	@echo "make tmp/arxiv-download.pdf	# Generate document from arxiv.	"
+	@echo "make tmp/arxiv-upload.tar	# Generate tar for arxiv.	"
+	@echo "make index.html			# Generate index.html for app.	"
+	@echo "make serve			# Serve index.html for app.	"
+	@echo "make help			# Show help.			"
