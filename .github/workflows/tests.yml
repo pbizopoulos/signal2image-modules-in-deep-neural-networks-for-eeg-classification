@@ -1,13 +1,17 @@
 name: tests
 on:
   push:
-    paths-ignore:
-      - 'app-requirements.txt'
-      - 'index.html'
+    paths:
+      - 'Dockerfile'
+      - 'Makefile'
+      - 'main.py'
+      - 'requirements.txt'
   pull_request:
-    paths-ignore:
-      - 'app-requirements.txt'
-      - 'index.html'
+    paths:
+      - 'Dockerfile'
+      - 'Makefile'
+      - 'main.py'
+      - 'requirements.txt'
 
 jobs:
   make:
