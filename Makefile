@@ -17,7 +17,7 @@ gpus_arg_0_docker=
 gpus_arg_1_docker=--gpus all
 gpus_arg_0_podman=
 gpus_arg_1_podman=
-gpus_arg=$(gpus_arg_$(shell which nvidia-container-toolkit > /dev/null && echo 1)_$(container_engine))
+gpus_arg=$(gpus_arg_$(shell command -V nvidia-container-toolkit > /dev/null && echo 1)_$(container_engine))
 
 user_arg_podman=
 user_arg_docker=--user `id -u`:`id -g`
