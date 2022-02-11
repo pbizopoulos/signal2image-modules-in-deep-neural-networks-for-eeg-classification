@@ -9,15 +9,13 @@ workdir=/app
 
 .PHONY: clean
 
-debug_args_0=
-debug_args_1=--interactive --tty
-debug_args=$(debug_args_$(shell [ -t 0 ] && echo 1))
+debug_args=$(shell [ -t 0 ] && echo --interactive --tty)
 
 gpus_arg_0_docker=
 gpus_arg_1_docker=--gpus all
 gpus_arg_0_podman=
 gpus_arg_1_podman=
-gpus_arg=$(gpus_arg_$(shell command -V nvidia-container-toolkit > /dev/null && echo 1)_$(container_engine))
+gpus_arg=$(gpus_arg_$(shell command -V nvidia-container-toolkit > /dev/null && echo 1 || echo 0)_$(container_engine))
 
 user_arg_podman=
 user_arg_docker=--user `id -u`:`id -g`
@@ -38,7 +36,7 @@ $(tmpdir)/python-run: $(pythonfile) .dockerignore .gitignore Dockerfile requirem
 		--rm \
 		--volume `pwd`:$(workdir)/ \
 		--workdir $(workdir)/ \
-		`$(container_engine) image build -q .` python3 $(pythonfile)
+		`$(container_engine) image build --quiet .` python3 $(pythonfile)
 	touch $(tmpdir)/python-run
 
 $(tmpdir)/python-coverage: $(pythonfile) Dockerfile requirements.txt
@@ -53,7 +51,7 @@ $(tmpdir)/python-coverage: $(pythonfile) Dockerfile requirements.txt
 		--rm \
 		--volume `pwd`:$(workdir)/ \
 		--workdir $(workdir)/ \
-		`$(container_engine) image build -q .` bash -c "coverage run $(pythonfile) && coverage html && rm -rf $(tmpdir)/htmlcov && mv htmlcov/ $(tmpdir)/ && mv .coverage $(tmpdir)/"
+		`$(container_engine) image build --quiet .` bash -c "coverage run $(pythonfile) && coverage html && rm -rf $(tmpdir)/htmlcov && mv htmlcov/ $(tmpdir)/ && mv .coverage $(tmpdir)/"
 	touch $(tmpdir)/python-coverage
 
 $(tmpdir)/python-format: $(pythonfile)
@@ -63,7 +61,7 @@ $(tmpdir)/python-format: $(pythonfile)
 		--rm \
 		--volume `pwd`:$(workdir)/ \
 		--workdir $(workdir)/ \
-		`$(container_engine) image build -q .` bash -c "isort $(pythonfile) && autoflake --in-place --remove-all-unused-imports --remove-unused-variables $(pythonfile) && autopep8 -i --max-line-length 1000 $(pythonfile)"
+		`$(container_engine) image build --quiet .` bash -c "isort $(pythonfile) && autoflake --in-place --remove-all-unused-imports --remove-unused-variables $(pythonfile) && autopep8 -i --max-line-length 1000 $(pythonfile)"
 	touch $(tmpdir)/python-format
 
 clean:
@@ -167,7 +165,7 @@ index.html: $(appfile) Dockerfile.app app-requirements.txt
 		--rm \
 		--volume `pwd`:$(workdir)/ \
 		--workdir $(workdir)/ \
-		`$(container_engine) image build -q -f Dockerfile.app .` python3 $(appfile)
+		`$(container_engine) image build --quiet --file Dockerfile.app .` python3 $(appfile)
 
 serve: index.html
 	$(container_engine) container run \

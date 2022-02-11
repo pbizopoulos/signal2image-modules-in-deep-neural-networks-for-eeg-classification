@@ -2,12 +2,14 @@ name: tests
 on:
   push:
     paths:
+      - '.github/workflows/tests.yml'
       - 'Dockerfile'
       - 'Makefile'
       - 'main.py'
       - 'requirements.txt'
   pull_request:
     paths:
+      - '.github/workflows/tests.yml'
       - 'Dockerfile'
       - 'Makefile'
       - 'main.py'
