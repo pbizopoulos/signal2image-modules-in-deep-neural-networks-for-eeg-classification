@@ -10,6 +10,7 @@ import torch
 from matplotlib import pyplot as plt
 from onnx_tf.backend import prepare
 from PIL import Image
+from pyclientsideml import generate_page
 from scipy.signal import spectrogram
 from tensorflowjs.converters import tf_saved_model_conversion_v2
 from torch import nn
@@ -20,6 +21,25 @@ from torchvision import models
 
 tmpdir = os.getenv('TMPDIR')
 full = os.getenv('FULL')
+
+
+def pyclientsideml_generate_page():
+    ml_type = 'signal-classification'
+    model_dirs = [
+        'https://raw.githubusercontent.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification-tfjs/master/alexnet-1D/model.json',
+        'https://raw.githubusercontent.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification-tfjs/master/lenet-1D/model.json',
+        'https://raw.githubusercontent.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification-tfjs/master/resnet18-1D/model.json',
+        'https://raw.githubusercontent.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification-tfjs/master/resnet34-1D/model.json',
+        'https://raw.githubusercontent.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification-tfjs/master/resnet50-1D/model.json']
+    output_filename = 'index.html'
+    class_names = ['Open', 'Closed', 'Healthy', 'Tumor', 'Epilepsy']
+    input_filename = 'https://raw.githubusercontent.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/master/example-signal-1.txt'
+    title = 'EEG signal classification demo'
+    description = 'NOT FOR MEDICAL USE. Choose a EEG csv file (.txt,.csv) and classify epilepsy using a DNN.'
+    url = 'https://github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification'
+    block_width = 256
+    block_height = 256
+    generate_page(ml_type, model_dirs, output_filename, class_names, input_filename, title, description, url, block_width, block_height)
 
 
 def save_tfjs_from_torch(model, model_name, input_shape):
@@ -705,6 +725,7 @@ def main():
         save_figure_signal_as_image(signals_all, signal_index, label_name)
         save_figure_spectrogram(signals_all, signal_index, label_name)
         save_figure_cnn(signals_all, signal_index, label_name, num_classes)
+    pyclientsideml_generate_page()
 
 
 if __name__ == '__main__':
