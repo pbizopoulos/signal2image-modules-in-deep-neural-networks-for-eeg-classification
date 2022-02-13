@@ -28,5 +28,5 @@ jobs:
           git add index.html
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git commit -m "update index.html"
+          git diff-index --quiet HEAD || git commit -m "update index.html"
           git push
