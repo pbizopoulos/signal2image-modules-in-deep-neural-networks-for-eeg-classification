@@ -54,6 +54,7 @@
                     
                 </select>
             </div>
+            <div id="divModelDownloadFraction">0%</div>
             <div style="position:absolute;bottom:0;">Made with 
                 <a href="https://github.com/pbizopoulos/pyclientsideml">pyclientsideml</a>.
             </div>
@@ -165,8 +166,17 @@
             let model;
             async function loadModel(predictFunction) {
                     
-                    model = await tf.loadGraphModel(selectModel.value, {onProgress: disableUI(true)});
+                    const loadModelFunction = tf.loadGraphModel;
                     
+                    model = await loadModelFunction(selectModel.value, {
+                        onProgress: function (fraction) {
+                            document.getElementById('divModelDownloadFraction').innerHTML = 'Downloading model, please wait ' + Math.round(100*fraction) + '%.';
+                            if (fraction == 1) {
+                                document.getElementById('divModelDownloadFraction').innerHTML = 'Model downloaded.';
+                                }
+                            disableUI(true);
+                            }
+                        });
                     predictFunction();
                     disableUI(false);
                     }
