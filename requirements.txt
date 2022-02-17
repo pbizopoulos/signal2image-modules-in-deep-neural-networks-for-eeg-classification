@@ -5,7 +5,7 @@ coverage
 isort
 
 # pythonfile requirements
-https://github.com/pbizopoulos/pyclientsideml/tarball/master/04871269c9221fb50c1844ad7b8f7624b098b2a4
+https://github.com/pbizopoulos/pyclientsideml/tarball/master/a6fa92122957c0ccfec6434388625e3827b757eb
 matplotlib==3.5.1
 onnx-tf==1.9.0
 pandas==1.3.5
