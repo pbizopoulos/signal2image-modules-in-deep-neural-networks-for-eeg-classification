@@ -3,5 +3,5 @@
 	"classNames": ["Open", "Closed", "Healthy", "Tumor", "Epilepsy"],
 	"exampleData": "https://raw.githubusercontent.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/master/wbml/eeg-classification-example-data.txt",
 	"name": "eeg-classification-resnet34-1D",
-	"type": "signal-classification",
+	"type": "signal-classification"
 }
