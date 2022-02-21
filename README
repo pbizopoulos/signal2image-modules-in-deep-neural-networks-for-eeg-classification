@@ -1,6 +1,7 @@
 Signal2Image Modules in Deep Neural Networks for EEG Classification:
 - https://arxiv.org/abs/1904.13216
 - https://ieeexplore.ieee.org/abstract/document/8856620/
+- https://pbizopoulos.github.io/signal2image-modules-in-deep-neural-networks-for-eeg-classification/
 
 Requirements:
 - POSIX-oriented operating system https://en.wikipedia.org/wiki/POSIX#POSIX-oriented_operating_systems
