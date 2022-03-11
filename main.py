@@ -1,4 +1,3 @@
-import collections
 import os
 from shutil import rmtree
 
@@ -85,22 +84,22 @@ def save_figure_cnn(signals_all, signal_index, label_name, num_classes):
     plt.close()
 
 
-def replace_last_layer(base_model, combined_model_name, num_classes):
-    if combined_model_name.startswith(('alexnet', 'vgg')):
-        base_model.classifier[-1] = nn.Linear(base_model.classifier[-1].in_features, num_classes)
-    elif combined_model_name.startswith('resnet'):
-        base_model.fc = nn.Linear(base_model.fc.in_features, num_classes)
-    elif combined_model_name.startswith('densenet'):
-        base_model.classifier = nn.Linear(base_model.classifier.in_features, num_classes)
-    return base_model
+def replace_last_layer(model_base, model_full_name, num_classes):
+    if model_full_name.startswith(('alexnet', 'vgg')):
+        model_base.classifier[-1] = nn.Linear(model_base.classifier[-1].in_features, num_classes)
+    elif model_full_name.startswith('resnet'):
+        model_base.fc = nn.Linear(model_base.fc.in_features, num_classes)
+    elif model_full_name.startswith('densenet'):
+        model_base.classifier = nn.Linear(model_base.classifier.in_features, num_classes)
+    return model_base
 
 
 class SignalAsImage(nn.Module):
-    def __init__(self, num_classes, base_model, combined_model_name, signals_all_max, signals_all_min):
+    def __init__(self, num_classes, model_base, model_full_name, signals_all_max, signals_all_min):
         super().__init__()
         self.signals_all_max = signals_all_max
         self.signals_all_min = signals_all_min
-        self.base_model = replace_last_layer(base_model, combined_model_name, num_classes)
+        self.model_base = replace_last_layer(model_base, model_full_name, num_classes)
 
     def forward(self, x):
         x = x - self.signals_all_min
@@ -110,14 +109,14 @@ class SignalAsImage(nn.Module):
         for index, _ in enumerate(x):
             out[index, 0, x.shape[-1] - 1 - x[index, 0, :], range(x.shape[-1])] = 255
         out = torch.cat((out, out, out), 1)
-        out = self.base_model(out)
+        out = self.model_base(out)
         return out
 
 
 class Spectrogram(nn.Module):
-    def __init__(self, num_classes, base_model, combined_model_name):
+    def __init__(self, num_classes, model_base, model_full_name):
         super().__init__()
-        self.base_model = replace_last_layer(base_model, combined_model_name, num_classes)
+        self.model_base = replace_last_layer(model_base, model_full_name, num_classes)
 
     def forward(self, x):
         out = torch.zeros(x.shape[0], 1, x.shape[-1], x.shape[-1]).to(x.device)
@@ -125,16 +124,16 @@ class Spectrogram(nn.Module):
             _, _, Sxx = spectrogram(signal.cpu(), fs=x.shape[-1], noverlap=4, nperseg=8, nfft=64, mode='magnitude')
             out[index, 0] = F.interpolate(torch.tensor(Sxx).unsqueeze(0), x.shape[-1], mode='bilinear')
         out = torch.cat((out, out, out), 1)
-        out = self.base_model(out)
+        out = self.model_base(out)
         return out
 
 
 class CNNTwoLayers(nn.Module):
-    def __init__(self, num_classes, base_model, combined_model_name):
+    def __init__(self, num_classes, model_base, model_full_name):
         super().__init__()
         self.conv1 = nn.Conv1d(1, 8, 3, padding=2)
         self.conv2 = nn.Conv1d(8, 16, 3, padding=2)
-        self.base_model = replace_last_layer(base_model, combined_model_name, num_classes)
+        self.model_base = replace_last_layer(model_base, model_full_name, num_classes)
 
     def forward(self, x):
         out = F.relu(self.conv1(x))
@@ -143,22 +142,22 @@ class CNNTwoLayers(nn.Module):
         out.unsqueeze_(1)
         out = F.interpolate(out, x.shape[-1], mode='bilinear')
         out = torch.cat((out, out, out), 1)
-        out = self.base_model(out)
+        out = self.model_base(out)
         return out
 
 
 class CNNOneLayer(nn.Module):
-    def __init__(self, num_classes, base_model, combined_model_name):
+    def __init__(self, num_classes, model_base, model_full_name):
         super().__init__()
         self.conv = nn.Conv1d(1, 8, 3, padding=2)
-        self.base_model = replace_last_layer(base_model, combined_model_name, num_classes)
+        self.model_base = replace_last_layer(model_base, model_full_name, num_classes)
 
     def forward(self, x):
         out = self.conv(x)
         out.unsqueeze_(1)
         out = F.interpolate(out, x.shape[-1], mode='bilinear')
         out = torch.cat((out, out, out), 1)
-        out = self.base_model(out)
+        out = self.model_base(out)
         return out
 
 
@@ -597,102 +596,79 @@ def main():
     validation_dataloader = DataLoader(dataset=validation_dataset, batch_size=batch_size, shuffle=False)
     test_dataloader = DataLoader(dataset=test_dataset, batch_size=batch_size)
     criterion = nn.CrossEntropyLoss()
-    base_models_names = ['lenet', 'alexnet', 'vgg11', 'vgg13', 'vgg16', 'vgg19', 'resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152', 'densenet121', 'densenet161', 'densenet169', 'densenet201']
-    base_models_1D = [lenet, alexnet, vgg11, vgg13, vgg16, vgg19, resnet18, resnet34, resnet50, resnet101, resnet152, densenet121, densenet161, densenet169, densenet201]
-    base_models_2D = [LeNet2D, models.alexnet, models.vgg11, models.vgg13, models.vgg16, models.vgg19, models.resnet18, models.resnet34, models.resnet50, models.resnet101, models.resnet152, models.densenet121, models.densenet161, models.densenet169, models.densenet201]
-    base_models_1D_names = [f'{model_name}-1D' for model_name in base_models_names]
-    combined_models_signal_as_image_names = [f'{model_name}-signal-as-image' for model_name in base_models_names]
-    combined_models_spectrogram_names = [f'{model_name}-spectrogram' for model_name in base_models_names]
-    combined_models_cnn_one_layer_names = [f'{model_name}-cnn-one-layer' for model_name in base_models_names]
-    combined_models_cnn_two_layers_names = [f'{model_name}-cnn-two-layers' for model_name in base_models_names]
-    base_models = base_models_1D + base_models_2D + base_models_2D + base_models_2D + base_models_2D
-    combined_models_names = base_models_1D_names + combined_models_signal_as_image_names + combined_models_spectrogram_names + combined_models_cnn_one_layer_names + combined_models_cnn_two_layers_names
-    results = collections.defaultdict(dict)
-    for combined_model_name in combined_models_names:
-        results[combined_model_name]['training_loss'] = []
-        results[combined_model_name]['validation_loss'] = []
-        results[combined_model_name]['validation_accuracy'] = []
-    for base_model, combined_model_name in zip(base_models, combined_models_names):
-        if combined_model_name.endswith('-1D'):
-            model = base_model(num_classes)
-        elif combined_model_name.endswith('-signal-as-image'):
-            model = SignalAsImage(num_classes, base_model(), combined_model_name, signals_all_max, signals_all_min)
-        elif combined_model_name.endswith('-spectrogram'):
-            model = Spectrogram(num_classes, base_model(), combined_model_name)
-        elif combined_model_name.endswith('-cnn-one-layer'):
-            model = CNNOneLayer(num_classes, base_model(), combined_model_name)
-        elif combined_model_name.endswith('-cnn-two-layers'):
-            model = CNNTwoLayers(num_classes, base_model(), combined_model_name)
-        model = model.to(device)
-        optimizer = Adam(model.parameters())
-        best_validation_accuracy = -1
-        for epoch in range(num_epochs):
-            model.train()
-            training_loss_sum = 0
-            for signals, labels in training_dataloader:
-                signals = signals.to(device)
-                labels = labels.to(device)
-                outputs = model(signals)
-                loss = criterion(outputs, labels)
-                optimizer.zero_grad()
-                loss.backward()
-                optimizer.step()
-                training_loss_sum += loss.item()
-            training_loss = training_loss_sum / (batch_size * len(training_dataloader))
-            validation_loss_sum = 0
-            corrects = 0
+    model_base_name_list = ['lenet', 'alexnet', 'vgg11', 'vgg13', 'vgg16', 'vgg19', 'resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152', 'densenet121', 'densenet161', 'densenet169', 'densenet201']
+    model_base_1D_list = [lenet, alexnet, vgg11, vgg13, vgg16, vgg19, resnet18, resnet34, resnet50, resnet101, resnet152, densenet121, densenet161, densenet169, densenet201]
+    model_base_2D_list = [LeNet2D, models.alexnet, models.vgg11, models.vgg13, models.vgg16, models.vgg19, models.resnet18, models.resnet34, models.resnet50, models.resnet101, models.resnet152, models.densenet121, models.densenet161, models.densenet169, models.densenet201]
+    test_accuracy_array = np.zeros((5, 15))
+    for index_model_base_name, model_base_name in enumerate(model_base_name_list):
+        for index_model_module, model_module in enumerate(['1D', 'signal-as-image', 'spectrogram', 'cnn-one-layer', 'cnn-two-layers']):
+            model_full_name = f'{model_base_name}-{model_module}'
+            if model_module == '1D':
+                model = model_base_1D_list[index_model_base_name](num_classes)
+            elif model_module == 'signal-as-image':
+                model = SignalAsImage(num_classes, model_base_2D_list[index_model_base_name](), model_full_name, signals_all_max, signals_all_min)
+            elif model_module == 'spectrogram':
+                model = Spectrogram(num_classes, model_base_2D_list[index_model_base_name](), model_full_name)
+            elif model_module == 'cnn-one-layer':
+                model = CNNOneLayer(num_classes, model_base_2D_list[index_model_base_name](), model_full_name)
+            elif model_module == 'cnn-two-layers':
+                model = CNNTwoLayers(num_classes, model_base_2D_list[index_model_base_name](), model_full_name)
+            model = model.to(device)
+            optimizer = Adam(model.parameters())
+            best_validation_accuracy = -1
+            for epoch in range(num_epochs):
+                model.train()
+                for signals, labels in training_dataloader:
+                    signals = signals.to(device)
+                    labels = labels.to(device)
+                    outputs = model(signals)
+                    loss = criterion(outputs, labels)
+                    optimizer.zero_grad()
+                    loss.backward()
+                    optimizer.step()
+                validation_loss_sum = 0
+                corrects = 0
+                model.eval()
+                with torch.no_grad():
+                    for signals, labels in validation_dataloader:
+                        signals = signals.to(device)
+                        labels = labels.to(device)
+                        outputs = model(signals)
+                        loss = criterion(outputs, labels)
+                        corrects += sum(outputs.argmax(dim=1) == labels).item()
+                        validation_loss_sum += loss.item()
+                validation_accuracy = 100 * corrects / (batch_size * len(validation_dataloader))
+                validation_loss = validation_loss_sum / (batch_size * len(validation_dataloader))
+                print(f'Model: {model_full_name}, Epoch: {epoch}, Val loss: {validation_loss:.3f}, Val accuracy: {validation_accuracy:.2f}%')
+                if validation_accuracy > best_validation_accuracy:
+                    best_validation_accuracy = validation_accuracy
+                    torch.save(model.state_dict(), f'{tmpdir}/{model_full_name}.pt')
+            model.load_state_dict(torch.load(f'{tmpdir}/{model_full_name}.pt'))
             model.eval()
+            test_loss_sum = 0
+            corrects = 0
             with torch.no_grad():
-                for signals, labels in validation_dataloader:
+                for signals, labels in test_dataloader:
                     signals = signals.to(device)
                     labels = labels.to(device)
                     outputs = model(signals)
                     loss = criterion(outputs, labels)
                     corrects += sum(outputs.argmax(dim=1) == labels).item()
-                    validation_loss_sum += loss.item()
-            validation_accuracy = 100 * corrects / (batch_size * len(validation_dataloader))
-            validation_loss = validation_loss_sum / (batch_size * len(validation_dataloader))
-            print(f'Model: {combined_model_name}, Epoch: {epoch}, Loss: {validation_loss:.3f}, Accuracy: {validation_accuracy:.2f}%')
-            results[combined_model_name]['training_loss'].append(training_loss)
-            results[combined_model_name]['validation_loss'].append(validation_loss)
-            results[combined_model_name]['validation_accuracy'].append(validation_accuracy)
-            if validation_accuracy > best_validation_accuracy:
-                best_validation_accuracy = validation_accuracy
-                torch.save(model.state_dict(), f'{tmpdir}/{combined_model_name}.pt')
-                print('Saved as best model')
-        model.load_state_dict(torch.load(f'{tmpdir}/{combined_model_name}.pt'))
-        model.eval()
-        test_loss_sum = 0
-        corrects = 0
-        test_confussion_matrix = torch.zeros(num_classes, num_classes)
-        with torch.no_grad():
-            for signals, labels in test_dataloader:
-                signals = signals.to(device)
-                labels = labels.to(device)
-                outputs = model(signals)
-                loss = criterion(outputs, labels)
-                corrects += sum(outputs.argmax(dim=1) == labels).item()
-                for t, p in zip(labels.view(-1), torch.argmax(outputs, 1).view(-1)):
-                    test_confussion_matrix[t.long(), p.long()] += 1
-                test_loss_sum += loss.item()
-        test_accuracy = 100 * corrects / (batch_size * len(test_dataloader))
-        test_loss = test_loss_sum / (batch_size * len(test_dataloader))
-        results[combined_model_name]['test_confussion_matrix'] = test_confussion_matrix
-        results[combined_model_name]['test_accuracy'] = test_accuracy
-        print(f'Model: {combined_model_name}, Epoch: {epoch}, Loss: {test_loss:.3f}, Accuracy: {test_accuracy:.2f}%')
-        if combined_model_name in ['lenet-1D', 'alexnet-1D', 'resnet18-1D', 'resnet34-1D', 'resnet50-1D', 'resnet18-signal-as-image', 'resnet34-signal-as-image', 'resnet50-signal-as-image']:
-            save_tfjs_from_torch(model, combined_model_name, [1, 1, 176])
-            if (not full):
-                rmtree(f'{tmpdir}/tfjs-models/{combined_model_name}')
-        if (not full) and (combined_model_name != 'alexnet-cnn-one-layer'):
-            os.remove(f'{tmpdir}/{combined_model_name}.pt')
-    results_test_accuracy_for_paper = np.zeros((75,))
-    for index, model in enumerate(results):
-        results_test_accuracy_for_paper[index] = np.around(results[model]['test_accuracy'], 1)
-    results_test_accuracy_for_paper = results_test_accuracy_for_paper.reshape(5, 15)
-    df = pd.DataFrame(results_test_accuracy_for_paper, index=['1D', '2D, signal as image', '2D, spectrogram', '2D, one layer CNN', '2D, two layer CNN'])
-    df.columns = base_models_names
-    df.to_latex(f'{tmpdir}/results.tex', bold_rows=True, escape=False)
+                    test_loss_sum += loss.item()
+            test_accuracy = 100 * corrects / (batch_size * len(test_dataloader))
+            test_loss = test_loss_sum / (batch_size * len(test_dataloader))
+            test_accuracy_array[index_model_module, index_model_base_name] = test_accuracy
+            print(f'Model: {model_full_name}, Test loss: {test_loss:.3f}, Test accuracy: {test_accuracy:.2f}%')
+            if model_full_name in ['lenet-1D', 'alexnet-1D', 'resnet18-1D', 'resnet34-1D', 'resnet50-1D', 'resnet18-signal-as-image', 'resnet34-signal-as-image', 'resnet50-signal-as-image']:
+                save_tfjs_from_torch(model, model_full_name, [1, 1, 176])
+                if (not full):
+                    rmtree(f'{tmpdir}/tfjs-models/{model_full_name}')
+            if (not full) and (model_full_name != 'alexnet-cnn-one-layer'):
+                os.remove(f'{tmpdir}/{model_full_name}.pt')
+    styler = pd.DataFrame(test_accuracy_array, index=['1D', '2D, signal as image', '2D, spectrogram', '2D, one layer CNN', '2D, two layer CNN'], columns=model_base_name_list).style
+    styler.format(precision=1)
+    styler.highlight_max(props='bfseries: ;')
+    styler.to_latex(f'{tmpdir}/results.tex', hrules=True)
     dataset = pd.read_csv(f'{tmpdir}/data.csv')
     signals_all = dataset.drop(columns=['Unnamed: 0', 'y'])
     labels_all = dataset['y']
