@@ -593,7 +593,7 @@ def main():
     validation_dataset = UCIEpilepsy('validation', num_samples)
     test_dataset = UCIEpilepsy('test', num_samples)
     training_dataloader = DataLoader(dataset=training_dataset, batch_size=batch_size, shuffle=True)
-    validation_dataloader = DataLoader(dataset=validation_dataset, batch_size=batch_size, shuffle=False)
+    validation_dataloader = DataLoader(dataset=validation_dataset, batch_size=batch_size)
     test_dataloader = DataLoader(dataset=test_dataset, batch_size=batch_size)
     criterion = nn.CrossEntropyLoss()
     model_base_name_list = ['lenet', 'alexnet', 'vgg11', 'vgg13', 'vgg16', 'vgg19', 'resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152', 'densenet121', 'densenet161', 'densenet169', 'densenet201']
@@ -601,17 +601,17 @@ def main():
     model_base_2D_list = [LeNet2D, models.alexnet, models.vgg11, models.vgg13, models.vgg16, models.vgg19, models.resnet18, models.resnet34, models.resnet50, models.resnet101, models.resnet152, models.densenet121, models.densenet161, models.densenet169, models.densenet201]
     test_accuracy_array = np.zeros((5, 15))
     for index_model_base_name, model_base_name in enumerate(model_base_name_list):
-        for index_model_module, model_module in enumerate(['1D', 'signal-as-image', 'spectrogram', 'cnn-one-layer', 'cnn-two-layers']):
-            model_full_name = f'{model_base_name}-{model_module}'
-            if model_module == '1D':
+        for index_model_module_name, model_module_name in enumerate(['1D', 'signal-as-image', 'spectrogram', 'cnn-one-layer', 'cnn-two-layers']):
+            model_full_name = f'{model_base_name}-{model_module_name}'
+            if model_module_name == '1D':
                 model = model_base_1D_list[index_model_base_name](num_classes)
-            elif model_module == 'signal-as-image':
+            elif model_module_name == 'signal-as-image':
                 model = SignalAsImage(num_classes, model_base_2D_list[index_model_base_name](), model_full_name, signals_all_max, signals_all_min)
-            elif model_module == 'spectrogram':
+            elif model_module_name == 'spectrogram':
                 model = Spectrogram(num_classes, model_base_2D_list[index_model_base_name](), model_full_name)
-            elif model_module == 'cnn-one-layer':
+            elif model_module_name == 'cnn-one-layer':
                 model = CNNOneLayer(num_classes, model_base_2D_list[index_model_base_name](), model_full_name)
-            elif model_module == 'cnn-two-layers':
+            elif model_module_name == 'cnn-two-layers':
                 model = CNNTwoLayers(num_classes, model_base_2D_list[index_model_base_name](), model_full_name)
             model = model.to(device)
             optimizer = Adam(model.parameters())
@@ -657,7 +657,7 @@ def main():
                     test_loss_sum += loss.item()
             test_accuracy = 100 * corrects / (batch_size * len(test_dataloader))
             test_loss = test_loss_sum / (batch_size * len(test_dataloader))
-            test_accuracy_array[index_model_module, index_model_base_name] = test_accuracy
+            test_accuracy_array[index_model_module_name, index_model_base_name] = test_accuracy
             print(f'Model: {model_full_name}, Test loss: {test_loss:.3f}, Test accuracy: {test_accuracy:.2f}%')
             if model_full_name in ['lenet-1D', 'alexnet-1D', 'resnet18-1D', 'resnet34-1D', 'resnet50-1D', 'resnet18-signal-as-image', 'resnet34-signal-as-image', 'resnet50-signal-as-image']:
                 save_tfjs_from_torch(model, model_full_name, [1, 1, 176])
