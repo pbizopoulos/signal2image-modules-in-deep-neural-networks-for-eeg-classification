@@ -3,6 +3,8 @@ autoflake
 autopep8
 coverage
 isort
+pipreqs
+python-minimizer
 
 # pythonfile requirements
 matplotlib==3.5.1

@@ -9,7 +9,7 @@ user_arg=$(shell [ $(container_engine) = "docker" ] && echo --user `id -u`:`id -
 
 # Basic commands.
 
-.PHONY: clean
+.PHONY: clean help
 
 pythonfile=main.py
 
@@ -36,24 +36,25 @@ clean:
 	rm -rf $(tmpdir)/
 
 help:
-	@echo "Basic/Advanced commands:                                   "
-	@echo "                         # Basic commands.                 "
-	@echo "make                     # Generate draft (fast) results.  "
-	@echo "make FULL=1              # Generate full (slow) results.   "
-	@echo "make clean               # Remove tmp/ directory.          "
-	@echo "make help                # Show basic/advanced commands.   "
-	@echo "                         # Advanced commands.              "
-	@echo "                         # python commands.                "
-	@echo "make tmp/python-coverage # Code coverage for main.py.      "
-	@echo "make tmp/python-format   # Format main.py.                 "
-	@echo "                         # texlive commands.               "
-	@echo "make tmp/ms.pdf          # Generate document.              "
-	@echo "make tmp/texlive-lint    # Lint ms.tex.                    "
-	@echo "make tmp/texlive-test    # Test document reproducibility.  "
-	@echo "make tmp/texlive-update  # Update texlive container image. "
-	@echo "                         # arxiv commands.                 "
-	@echo "make tmp/arxiv-ms.pdf    # Generate document from arxiv.   "
-	@echo "make tmp/arxiv.tar       # Generate tar for arxiv.         "
+	@echo "Basic/Advanced commands:                                                "
+	@echo "                             # Basic commands.                          "
+	@echo "make                         # Generate draft (fast) results.           "
+	@echo "make FULL=1                  # Generate full (slow) results.            "
+	@echo "make clean                   # Remove tmp/ directory.                   "
+	@echo "make help                    # Show basic/advanced commands.            "
+	@echo "                             # Advanced commands.                       "
+	@echo "                             # python commands.                         "
+	@echo "make tmp/python-coverage     # Code coverage for $(pythonfile).         "
+	@echo "make tmp/python-format       # Format $(pythonfile).                    "
+	@echo "make tmp/python-requirements # Generate $(pythonfile) requirements.txt. "
+	@echo "                             # texlive commands.                        "
+	@echo "make tmp/ms.pdf              # Generate document.                       "
+	@echo "make tmp/texlive-lint        # Lint $(texfile).                         "
+	@echo "make tmp/texlive-test        # Test document reproducibility.           "
+	@echo "make tmp/texlive-update      # Update texlive container image.          "
+	@echo "                             # arxiv commands.                          "
+	@echo "make tmp/arxiv-ms.pdf        # Generate document from arxiv.            "
+	@echo "make tmp/arxiv.tar           # Generate tar for arxiv.                  "
 
 $(pythonfile):
 	printf "import os\n\ntmpdir = os.getenv('TMPDIR')\nfull = os.getenv('FULL')\n\n\ndef main():\n    pass\n\n\nif __name__ == '__main__':\n    main()\n" > $(pythonfile)
@@ -68,9 +69,11 @@ Dockerfile:
 	printf "FROM python\nCOPY requirements.txt .\nRUN python3 -m pip install --no-cache-dir --upgrade pip && python3 -m pip install --no-cache-dir -r requirements.txt\n" > Dockerfile
 
 requirements.txt:
-	printf "# Makefile requirements\nautoflake\nautopep8\ncoverage\nisort\n\n# document requirements\n\n" > requirements.txt
+	printf "# Makefile requirements\nautoflake\nautopep8\ncoverage\nisort\npipreqs\npython-minimizer\n\n# $(pythonfile) requirements\n" > requirements.txt
 
 # python commands.
+
+.PHONY: $(tmpdir)/python-requirements
 
 $(tmpdir)/python-coverage: $(pythonfile) Dockerfile requirements.txt
 	mkdir -p $(tmpdir)/
@@ -94,8 +97,19 @@ $(tmpdir)/python-format: $(pythonfile)
 		--rm \
 		--volume `pwd`:$(workdir)/ \
 		--workdir $(workdir)/ \
-		`$(container_engine) image build --quiet .` bash -c "isort $(pythonfile) && autoflake --in-place --remove-all-unused-imports --remove-unused-variables $(pythonfile) && autopep8 -i --max-line-length 1000 $(pythonfile)"
+		`$(container_engine) image build --quiet .` bash -c "python-minimizer --indent-char ' ' --keep-whitespace --out-path $(pythonfile) $(pythonfile) && isort $(pythonfile) && autoflake --in-place --remove-all-unused-imports --remove-unused-variables $(pythonfile) && autopep8 -i --max-line-length 1000 $(pythonfile)"
 	touch $(tmpdir)/python-format
+
+$(tmpdir)/python-requirements:
+	mkdir -p $(tmpdir)/
+	rm requirements.txt
+	make requirements.txt
+	$(container_engine) container run \
+		$(user_arg) \
+		--rm \
+		--volume `pwd`:$(workdir)/ \
+		--workdir $(workdir)/ \
+		`$(container_engine) image build --quiet .` bash -c "pipreqs --print . >> requirements.txt"
 
 # texlive commands.
 

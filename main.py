@@ -74,7 +74,6 @@ def save_figure_cnn(signals_all, signal_index, label_name, num_classes):
 
     def hook(_, __, output):
         outputs.append(output)
-
     model.conv.register_forward_hook(hook)
     model(signal)
     data = outputs[0][0, 0].cpu().detach().numpy()
@@ -185,30 +184,8 @@ class lenet(nn.Module):
 class alexnet(nn.Module):
     def __init__(self, num_classes):
         super().__init__()
-        self.features = nn.Sequential(
-            nn.Conv1d(1, 64, kernel_size=11, stride=4, padding=2),
-            nn.ReLU(inplace=True),
-            nn.MaxPool1d(kernel_size=3, stride=2),
-            nn.Conv1d(64, 192, kernel_size=5, padding=2),
-            nn.ReLU(inplace=True),
-            nn.MaxPool1d(kernel_size=3, stride=2),
-            nn.Conv1d(192, 384, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            nn.Conv1d(384, 256, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            nn.Conv1d(256, 256, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            nn.MaxPool1d(kernel_size=3, stride=2),
-        )
-        self.classifier = nn.Sequential(
-            nn.Dropout(),
-            nn.Linear(256 * 4, 4096),
-            nn.ReLU(inplace=True),
-            nn.Dropout(),
-            nn.Linear(4096, 4096),
-            nn.ReLU(inplace=True),
-            nn.Linear(4096, num_classes),
-        )
+        self.features = nn.Sequential(nn.Conv1d(1, 64, kernel_size=11, stride=4, padding=2), nn.ReLU(inplace=True), nn.MaxPool1d(kernel_size=3, stride=2), nn.Conv1d(64, 192, kernel_size=5, padding=2), nn.ReLU(inplace=True), nn.MaxPool1d(kernel_size=3, stride=2), nn.Conv1d(192, 384, kernel_size=3, padding=1), nn.ReLU(inplace=True), nn.Conv1d(384, 256, kernel_size=3, padding=1), nn.ReLU(inplace=True), nn.Conv1d(256, 256, kernel_size=3, padding=1), nn.ReLU(inplace=True), nn.MaxPool1d(kernel_size=3, stride=2),)
+        self.classifier = nn.Sequential(nn.Dropout(), nn.Linear(256 * 4, 4096), nn.ReLU(inplace=True), nn.Dropout(), nn.Linear(4096, 4096), nn.ReLU(inplace=True), nn.Linear(4096, num_classes),)
 
     def forward(self, x):
         x = self.features(x)
@@ -221,15 +198,7 @@ class VGG(nn.Module):
     def __init__(self, features, num_classes):
         super().__init__()
         self.features = features
-        self.classifier = nn.Sequential(
-            nn.Linear(2560, 4096),
-            nn.ReLU(True),
-            nn.Dropout(),
-            nn.Linear(4096, 4096),
-            nn.ReLU(True),
-            nn.Dropout(),
-            nn.Linear(4096, num_classes),
-        )
+        self.classifier = nn.Sequential(nn.Linear(2560, 4096), nn.ReLU(True), nn.Dropout(), nn.Linear(4096, 4096), nn.ReLU(True), nn.Dropout(), nn.Linear(4096, num_classes),)
         self._initialize_weights()
 
     def forward(self, x):
@@ -262,12 +231,7 @@ def make_layers(cfg, batch_norm=False):
     return nn.Sequential(*layers)
 
 
-cfg = {
-    'A': [64, 'M', 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'],
-    'B': [64, 64, 'M', 128, 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'],
-    'D': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M'],
-    'E': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 256, 'M', 512, 512, 512, 512, 'M', 512, 512, 512, 512, 'M'],
-}
+cfg = {'A': [64, 'M', 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'], 'B': [64, 64, 'M', 128, 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'], 'D': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M'], 'E': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 256, 'M', 512, 512, 512, 512, 'M', 512, 512, 512, 512, 'M'], }
 
 
 def vgg11(num_classes):
@@ -381,10 +345,7 @@ class ResNet(nn.Module):
     def _make_layer(self, block, planes, blocks, stride=1):
         downsample = None
         if stride != 1 or self.inplanes != planes * block.expansion:
-            downsample = nn.Sequential(
-                conv1x1(self.inplanes, planes * block.expansion, stride),
-                nn.BatchNorm1d(planes * block.expansion),
-            )
+            downsample = nn.Sequential(conv1x1(self.inplanes, planes * block.expansion, stride), nn.BatchNorm1d(planes * block.expansion),)
         layers = []
         layers.append(block(self.inplanes, planes, stride, downsample))
         self.inplanes = planes * block.expansion
@@ -468,12 +429,7 @@ class DenseNet(nn.Module):
     def __init__(self, num_classes, num_init_features, growth_rate, block_config):
         super().__init__()
         bn_size = 4
-        self.features = nn.Sequential(
-            nn.Conv1d(1, num_init_features, kernel_size=7, stride=2, padding=3, bias=False),
-            nn.BatchNorm1d(num_init_features),
-            nn.ReLU(inplace=True),
-            nn.MaxPool1d(kernel_size=3, stride=2, padding=1),
-        )
+        self.features = nn.Sequential(nn.Conv1d(1, num_init_features, kernel_size=7, stride=2, padding=3, bias=False), nn.BatchNorm1d(num_init_features), nn.ReLU(inplace=True), nn.MaxPool1d(kernel_size=3, stride=2, padding=1),)
         num_features = num_init_features
         for i, num_layers in enumerate(block_config):
             block = _DenseBlock(num_layers=num_layers, num_input_features=num_features, bn_size=bn_size, growth_rate=growth_rate)
