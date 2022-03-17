@@ -97,7 +97,7 @@ $(tmpdir)/python-format: $(pythonfile)
 		--rm \
 		--volume `pwd`:$(workdir)/ \
 		--workdir $(workdir)/ \
-		`$(container_engine) image build --quiet .` bash -c "python-minimizer --indent-char ' ' --keep-whitespace --out-path $(pythonfile) $(pythonfile) && isort $(pythonfile) && autoflake --in-place --remove-all-unused-imports --remove-unused-variables $(pythonfile) && autopep8 -i --max-line-length 1000 $(pythonfile)"
+		`$(container_engine) image build --quiet .` bash -c "python-minimizer --keep-whitespace --out-path $(pythonfile) $(pythonfile) && isort $(pythonfile) && autoflake --expand-star-imports --in-place --remove-all-unused-imports --remove-duplicate-keys --remove-unused-variables $(pythonfile) && autopep8 -a -a -a --in-place --max-line-length 10000 $(pythonfile)"
 	touch $(tmpdir)/python-format
 
 $(tmpdir)/python-requirements:
@@ -109,7 +109,7 @@ $(tmpdir)/python-requirements:
 		--rm \
 		--volume `pwd`:$(workdir)/ \
 		--workdir $(workdir)/ \
-		`$(container_engine) image build --quiet .` bash -c "pipreqs --print . >> requirements.txt"
+		`$(container_engine) image build --quiet .` bash -c 'pipreqs --print . >> requirements.txt'
 
 # texlive commands.
 
