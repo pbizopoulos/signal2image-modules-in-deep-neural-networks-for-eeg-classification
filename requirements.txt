@@ -5,8 +5,9 @@ coverage
 isort
 pipreqs
 python-minimizer
+pyupgrade
 
-# pythonfile requirements
+# main.py requirements
 matplotlib==3.5.1
 onnx-tf==1.9.0
 pandas==1.4.1
