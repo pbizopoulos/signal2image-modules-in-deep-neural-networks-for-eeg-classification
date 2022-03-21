@@ -1,4 +1,5 @@
 import os
+from os.path import join
 from shutil import rmtree
 
 import numpy as np
@@ -17,21 +18,21 @@ from torch.optim import Adam
 from torch.utils.data import DataLoader, Dataset
 from torchvision import models
 
-tmpdir = os.getenv('TMPDIR')
+artifacts_dir = os.getenv('ARTIFACTSDIR')
 full = os.getenv('FULL')
 
 
 def save_tfjs_from_torch(model, model_name, input_shape):
-    model_name_dir = f'{tmpdir}/tfjs-models/{model_name}'
+    model_name_dir = join(artifacts_dir, 'tfjs-models', model_name)
     os.makedirs(model_name_dir, exist_ok=True)
     example_input = torch.randn(*input_shape, requires_grad=False)
-    torch.onnx.export(model.cpu(), example_input, f'{model_name_dir}/model.onnx', export_params=True, opset_version=11)
-    onnx_model = onnx.load(f'{model_name_dir}/model.onnx')
+    torch.onnx.export(model.cpu(), example_input, join(model_name_dir, 'model.onnx'), export_params=True, opset_version=11)
+    onnx_model = onnx.load(join(model_name_dir, 'model.onnx'))
     tf_model = prepare(onnx_model)
-    tf_model.export_graph(f'{model_name_dir}/model')
-    tf_saved_model_conversion_v2.convert_tf_saved_model(f'{model_name_dir}/model', model_name_dir, skip_op_check=True)
-    rmtree(f'{model_name_dir}/model')
-    os.remove(f'{model_name_dir}/model.onnx')
+    tf_model.export_graph(join(model_name_dir, 'model'))
+    tf_saved_model_conversion_v2.convert_tf_saved_model(join(model_name_dir, 'model'), model_name_dir, skip_op_check=True)
+    rmtree(join(model_name_dir, 'model'))
+    os.remove(join(model_name_dir, 'model.onnx'))
 
 
 def save_figure_signal(signals_all, signal_index, label_name):
@@ -40,7 +41,7 @@ def save_figure_signal(signals_all, signal_index, label_name):
     plt.axis('off')
     plt.xlim([0, signals_all.shape[-1] - 1])
     plt.ylim([-1000, 1000])
-    plt.savefig(f'{tmpdir}/signal-{label_name}.png')
+    plt.savefig(join(artifacts_dir, f'signal-{label_name}.png'))
     plt.close()
 
 
@@ -54,7 +55,7 @@ def save_figure_signal_as_image(signals_all, signal_index, label_name):
     for index in range(signals_all.shape[-1]):
         data[signals_all.shape[-1] - 1 - x[index], index] = 255
     plt.figure()
-    plt.imsave(f'{tmpdir}/signal-as-image-{label_name}.png', data, cmap='gray')
+    plt.imsave(join(artifacts_dir, f'signal-as-image-{label_name}.png'), data, cmap='gray')
     plt.close()
 
 
@@ -62,13 +63,13 @@ def save_figure_spectrogram(signals_all, signal_index, label_name):
     _, _, Sxx = spectrogram(signals_all[signal_index], fs=signals_all.shape[-1], noverlap=4, nperseg=8, nfft=64, mode='magnitude')
     data = np.array(Image.fromarray(Sxx[0]).resize((signals_all.shape[-1], signals_all.shape[-1]), resample=1))
     plt.figure()
-    plt.imsave(f'{tmpdir}/spectrogram-{label_name}.png', data, cmap='gray')
+    plt.imsave(join(artifacts_dir, f'spectrogram-{label_name}.png'), data, cmap='gray')
     plt.close()
 
 
 def save_figure_cnn(signals_all, signal_index, label_name, num_classes):
     model = CNNOneLayer(num_classes, models.alexnet(), 'alexnet-cnn-one-layer')
-    model.load_state_dict(torch.load(f'{tmpdir}/alexnet-cnn-one-layer.pt'))
+    model.load_state_dict(torch.load(join(artifacts_dir, 'alexnet-cnn-one-layer.pt')))
     signal = signals_all[signal_index].unsqueeze(0)
     outputs = []
 
@@ -79,7 +80,7 @@ def save_figure_cnn(signals_all, signal_index, label_name, num_classes):
     data = outputs[0][0, 0].cpu().detach().numpy()
     data = np.array(Image.fromarray(data).resize((signals_all.shape[-1], signals_all.shape[-1]), resample=1))
     plt.figure()
-    plt.imsave(f'{tmpdir}/cnn-{label_name}.png', data, cmap='gray')
+    plt.imsave(join(artifacts_dir, f'cnn-{label_name}.png'), data, cmap='gray')
     plt.close()
 
 
@@ -480,7 +481,7 @@ def densenet161(num_samples):
 
 class UCIEpilepsy(Dataset):
     def __init__(self, training_validation_test, num_samples):
-        filename = f'{tmpdir}/data.csv'
+        filename = join(artifacts_dir, 'data.csv')
         if not os.path.isfile(filename):
             with open(filename, 'wb') as file:
                 response = requests.get('https://web.archive.org/web/20200318000445/http://archive.ics.uci.edu/ml/machine-learning-databases/00388/data.csv')
@@ -598,8 +599,8 @@ def main():
                 print(f'Model: {model_full_name}, Epoch: {epoch}, Val loss: {validation_loss:.3f}, Val accuracy: {validation_accuracy:.2f}%')
                 if validation_accuracy > best_validation_accuracy:
                     best_validation_accuracy = validation_accuracy
-                    torch.save(model.state_dict(), f'{tmpdir}/{model_full_name}.pt')
-            model.load_state_dict(torch.load(f'{tmpdir}/{model_full_name}.pt'))
+                    torch.save(model.state_dict(), join(artifacts_dir, f'{model_full_name}.pt'))
+            model.load_state_dict(torch.load(join(artifacts_dir, f'{model_full_name}.pt')))
             model.eval()
             test_loss_sum = 0
             corrects = 0
@@ -618,14 +619,14 @@ def main():
             if model_full_name in ['lenet-1D', 'alexnet-1D', 'resnet18-1D', 'resnet34-1D', 'resnet50-1D', 'resnet18-signal-as-image', 'resnet34-signal-as-image', 'resnet50-signal-as-image']:
                 save_tfjs_from_torch(model, model_full_name, [1, 1, 176])
                 if (not full):
-                    rmtree(f'{tmpdir}/tfjs-models/{model_full_name}')
+                    rmtree(join(artifacts_dir, 'tfjs-models', model_full_name))
             if (not full) and (model_full_name != 'alexnet-cnn-one-layer'):
-                os.remove(f'{tmpdir}/{model_full_name}.pt')
+                os.remove(join(artifacts_dir, f'{model_full_name}.pt'))
     styler = pd.DataFrame(test_accuracy_array, index=['1D', '2D, signal as image', '2D, spectrogram', '2D, one layer CNN', '2D, two layer CNN'], columns=model_base_name_list).style
     styler.format(precision=1)
     styler.highlight_max(props='bfseries: ;')
-    styler.to_latex(f'{tmpdir}/results.tex', hrules=True)
-    dataset = pd.read_csv(f'{tmpdir}/data.csv')
+    styler.to_latex(join(artifacts_dir, 'results.tex'), hrules=True)
+    dataset = pd.read_csv(join(artifacts_dir, 'data.csv'))
     signals_all = dataset.drop(columns=['Unnamed: 0', 'y'])
     labels_all = dataset['y']
     signals_all = torch.tensor(signals_all.values, dtype=torch.float)
