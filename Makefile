@@ -7,7 +7,7 @@ workdir=/app
 
 user_arg=$(shell [ $(container_engine) = 'docker' ] && printf '%s' '--user `id -u`:`id -g`')
 
-				## Basic commands.
+############################### basic commands ##############################
 
 .PHONY: clean help
 
@@ -53,7 +53,7 @@ Dockerfile:
 requirements.txt:
 	printf '# Makefile requirements\nautoflake\nautopep8\ncoverage\nisort\npipreqs\npython-minimizer\npyupgrade\n\n# $(codefile) requirements\n' > requirements.txt
 
-				## code commands.
+############################### code commands ###############################
 
 .PHONY: $(artifactsdir)/code-requirements
 
@@ -103,7 +103,7 @@ $(artifactsdir)/code-requirements: ## 	Generate $(codefile) requirements.txt.
 		--workdir $(workdir)/ \
 		`$(container_engine) image build --quiet .` /bin/bash -c 'pipreqs --print . >> requirements.txt'
 
-				## texlive commands.
+############################### texlive commands ############################
 
 .PHONY: $(artifactsdir)/texlive-test $(artifactsdir)/texlive-update
 
@@ -147,7 +147,7 @@ $(bibfile):
 $(texfile):
 	printf '\documentclass{article}\n\\\begin{document}\nTitle\n\\\end{document}\n' > $(texfile)
 
-				## arxiv commands.
+############################### arxiv commands ##############################
 
 $(artifactsdir)/arxiv-ms.pdf: ## 	Generate document from arxiv (ARXIVID=0000.00000 is required).
 	mkdir -p $(artifactsdir)/
