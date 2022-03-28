@@ -22,10 +22,9 @@ artifacts_dir = os.getenv('ARTIFACTSDIR')
 full = os.getenv('FULL')
 
 
-def save_tfjs_from_torch(model, model_name, input_shape):
+def save_tfjs_from_torch(model, model_name, example_input):
     model_name_dir = join(artifacts_dir, 'tfjs-models', model_name)
     os.makedirs(model_name_dir, exist_ok=True)
-    example_input = torch.randn(*input_shape, requires_grad=False)
     torch.onnx.export(model.cpu(), example_input, join(model_name_dir, 'model.onnx'), export_params=True, opset_version=11)
     onnx_model = onnx.load(join(model_name_dir, 'model.onnx'))
     tf_model = prepare(onnx_model)
@@ -617,7 +616,7 @@ def main():
             test_accuracy_array[index_model_module_name, index_model_base_name] = test_accuracy
             print(f'Model: {model_full_name}, Test loss: {test_loss:.3f}, Test accuracy: {test_accuracy:.2f}%')
             if model_full_name in ['lenet-1D', 'alexnet-1D', 'resnet18-1D', 'resnet34-1D', 'resnet50-1D', 'resnet18-signal-as-image', 'resnet34-signal-as-image', 'resnet50-signal-as-image']:
-                save_tfjs_from_torch(model, model_full_name, [1, 1, 176])
+                save_tfjs_from_torch(model, model_full_name, training_dataset[0][0].unsqueeze(0))
                 if (not full):
                     rmtree(join(artifacts_dir, 'tfjs-models', model_full_name))
             if (not full) and (model_full_name != 'alexnet-cnn-one-layer'):
