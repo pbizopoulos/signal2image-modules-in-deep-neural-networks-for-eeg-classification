@@ -22,4 +22,4 @@ jobs:
       - name: Set up Git repository
         uses: actions/checkout@v3
       - name: Test
-        run: make artifacts/texlive-test
+        run: make artifacts/tex-test
