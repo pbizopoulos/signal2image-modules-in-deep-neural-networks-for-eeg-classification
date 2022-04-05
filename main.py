@@ -595,7 +595,7 @@ def main():
                         validation_loss_sum += loss.item()
                 validation_accuracy = 100 * corrects / (batch_size * len(validation_dataloader))
                 validation_loss = validation_loss_sum / (batch_size * len(validation_dataloader))
-                print(f'Model: {model_full_name}, Epoch: {epoch}, Val loss: {validation_loss:.3f}, Val accuracy: {validation_accuracy:.2f}%')
+                print(f'{model_full_name = }, {epoch = }, {validation_loss = :.3f}, {validation_accuracy = :.2f}%')
                 if validation_accuracy > best_validation_accuracy:
                     best_validation_accuracy = validation_accuracy
                     torch.save(model.state_dict(), join(artifacts_dir, f'{model_full_name}.pt'))
@@ -614,7 +614,7 @@ def main():
             test_accuracy = 100 * corrects / (batch_size * len(test_dataloader))
             test_loss = test_loss_sum / (batch_size * len(test_dataloader))
             test_accuracy_array[index_model_module_name, index_model_base_name] = test_accuracy
-            print(f'Model: {model_full_name}, Test loss: {test_loss:.3f}, Test accuracy: {test_accuracy:.2f}%')
+            print(f'{model_full_name = }, {test_loss = :.3f}, {test_accuracy = :.2f}%')
             if model_full_name in ['lenet-1D', 'alexnet-1D', 'resnet18-1D', 'resnet34-1D', 'resnet50-1D', 'resnet18-signal-as-image', 'resnet34-signal-as-image', 'resnet50-signal-as-image']:
                 save_tfjs_from_torch(model, model_full_name, training_dataset[0][0].unsqueeze(0))
                 if (not full):

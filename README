@@ -19,4 +19,4 @@ Basic commands:
 make		# Generate draft artifacts (fast).
 make FULL=1	# Generate full artifacts (slow).
 make clean 	# Remove artifacts/ directory.
-make help	# Show basic/advanced commands.
+make help	# Show all commands.

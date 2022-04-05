@@ -7,9 +7,9 @@ workdir=/app
 
 user_arg=$(shell [ $(container_engine) = 'docker' ] && printf '%s' '--user `id -u`:`id -g`')
 
-############################### basic commands ##############################
+############################### code commands ##############################
 
-.PHONY: clean help
+.PHONY: $(artifactsdir)/code-requirements clean help
 
 codefile=main.py
 
@@ -31,31 +31,6 @@ $(artifactsdir)/code-run: $(codefile) .dockerignore .gitignore Dockerfile requir
 		--workdir $(workdir)/ \
 		`$(container_engine) image build --quiet .` python3 $(codefile)
 	touch $(artifactsdir)/code-run
-
-clean: ## 			Remove artifacts/ directory.
-	rm -rf $(artifactsdir)/
-
-help: ## 				Show basic/advanced commands.
-	@grep '##' $(MAKEFILE_LIST) | sed 's/\(\:.*\#\#\)/\:\ /' | sed 's/\$$(artifactsdir)/$(artifactsdir)/' | sed 's/\$$(codefile)/$(codefile)/' | sed 's/\$$(texfile)/$(texfile)/' | grep -v grep
-
-$(codefile):
-	printf "import os\n\nartifacts_dir = os.getenv('ARTIFACTSDIR')\nfull = os.getenv('FULL')\n\n\ndef main():\n    pass\n\n\nif __name__ == '__main__':\n    main()\n" > $(codefile)
-
-.dockerignore:
-	printf '**\n!requirements.txt\n' > .dockerignore
-
-.gitignore:
-	printf '$(artifactsdir)/\n' > .gitignore
-
-Dockerfile:
-	printf 'FROM python\nCOPY requirements.txt .\nRUN python3 -m pip install --no-cache-dir --upgrade pip && python3 -m pip install --no-cache-dir -r requirements.txt\n' > Dockerfile
-
-requirements.txt:
-	printf '# Makefile requirements\nautoflake\nautopep8\ncoverage\nisort\npipreqs\npython-minimizer\npyupgrade\n\n# $(codefile) requirements\n' > requirements.txt
-
-############################### code commands ###############################
-
-.PHONY: $(artifactsdir)/code-requirements
 
 $(artifactsdir)/code-coverage: $(codefile) Dockerfile requirements.txt ## 	Code coverage for $(codefile).
 	mkdir -p $(artifactsdir)/
@@ -103,14 +78,35 @@ $(artifactsdir)/code-requirements: ## 	Generate $(codefile) requirements.txt.
 		--workdir $(workdir)/ \
 		`$(container_engine) image build --quiet .` /bin/bash -c 'pipreqs --print . >> requirements.txt'
 
-############################### texlive commands ############################
+clean: ## 			Remove artifacts/ directory.
+	rm -rf $(artifactsdir)/
 
-.PHONY: $(artifactsdir)/texlive-test $(artifactsdir)/texlive-update
+help: ## 				Show all commands.
+	@grep '##' $(MAKEFILE_LIST) | sed 's/\(\:.*\#\#\)/\:\ /' | sed 's/\$$(artifactsdir)/$(artifactsdir)/' | sed 's/\$$(codefile)/$(codefile)/' | sed 's/\$$(texfile)/$(texfile)/' | grep -v grep
+
+$(codefile):
+	printf "import os\n\nartifacts_dir = os.getenv('ARTIFACTSDIR')\nfull = os.getenv('FULL')\n\n\ndef main():\n    pass\n\n\nif __name__ == '__main__':\n    main()\n" > $(codefile)
+
+.dockerignore:
+	printf '**\n!requirements.txt\n' > .dockerignore
+
+.gitignore:
+	printf '$(artifactsdir)/\n' > .gitignore
+
+Dockerfile:
+	printf 'FROM python\nCOPY requirements.txt .\nRUN python3 -m pip install --no-cache-dir --upgrade pip && python3 -m pip install --no-cache-dir -r requirements.txt\n' > Dockerfile
+
+requirements.txt:
+	printf '# Makefile requirements\nautoflake\nautopep8\ncoverage\nisort\npipreqs\npython-minimizer\npyupgrade\n\n# $(codefile) requirements\n' > requirements.txt
+
+############################### document commands ##########################
+
+.PHONY: $(artifactsdir)/tex-test $(artifactsdir)/texlive-update $(artifactsdir)/pandoc-update
 
 bibfile=ms.bib
 texfile=ms.tex
 
-$(artifactsdir)/ms.pdf: $(bibfile) $(texfile) $(artifactsdir)/code-run ## 		Generate document.
+$(artifactsdir)/ms.pdf: $(bibfile) $(texfile) $(artifactsdir)/code-run ## 		Generate pdf document.
 	$(container_engine) container run \
 		$(user_arg) \
 		--rm \
@@ -118,7 +114,39 @@ $(artifactsdir)/ms.pdf: $(bibfile) $(texfile) $(artifactsdir)/code-run ## 		Gene
 		--workdir $(workdir)/ \
 		texlive/texlive latexmk -gg -pdf -usepretex='\pdfinfoomitdate=1\pdfsuppressptexinfo=-1\pdftrailerid{}' -outdir=$(artifactsdir)/ $(texfile)
 
-$(artifactsdir)/texlive-lint: $(bibfile) $(texfile) $(artifactsdir)/code-run ## 	Lint $(texfile).
+$(artifactsdir)/ms-server.pdf: ##	Generate pdf document from server (SERVER_URL=https://arxiv.org/e-print/0000.00000 is required).
+	mkdir -p $(artifactsdir)/
+	$(container_engine) container run \
+		$(user_arg) \
+		--rm \
+		--volume `pwd`:$(workdir)/ \
+		--workdir $(workdir)/ \
+		texlive/texlive /bin/bash -c '\
+		curl -L -o $(artifactsdir)/download.tar $(SERVER_URL) && \
+		tar xfz $(artifactsdir)/download.tar'
+	rm $(artifactsdir)/download.tar
+	mv ms.bbl $(artifactsdir)/
+	touch $(artifactsdir)/code-run
+	make $(artifactsdir)/ms.pdf
+	mv $(artifactsdir)/ms.pdf $(artifactsdir)/ms-server.pdf
+
+$(artifactsdir)/ms.html: $(bibfile) $(texfile) $(artifactsdir)/code-run ## 		Generate html document.
+	$(container_engine) container run \
+		$(user_arg) \
+		--rm \
+		--volume `pwd`:$(workdir)/ \
+		--workdir $(workdir)/ \
+		pandoc/latex $(texfile) -o $(artifactsdir)/ms.html
+
+$(artifactsdir)/ms.epub: $(bibfile) $(texfile) $(artifactsdir)/code-run ## 		Generate epub document.
+	$(container_engine) container run \
+		$(user_arg) \
+		--rm \
+		--volume `pwd`:$(workdir)/ \
+		--workdir $(workdir)/ \
+		pandoc/latex $(texfile) -o $(artifactsdir)/ms.epub
+
+$(artifactsdir)/tex-lint: $(bibfile) $(texfile) $(artifactsdir)/code-run ##	 	Lint $(texfile).
 	mkdir -p $(artifactsdir)/
 	$(container_engine) container run \
 		$(user_arg) \
@@ -128,9 +156,9 @@ $(artifactsdir)/texlive-lint: $(bibfile) $(texfile) $(artifactsdir)/code-run ## 
 		texlive/texlive /bin/bash -c '\
 		chktex $(texfile) && \
 		lacheck $(texfile)'
-	touch $(artifactsdir)/texlive-lint
+	touch $(artifactsdir)/tex-lint
 
-$(artifactsdir)/texlive-test: ## 	Test document reproducibility.
+$(artifactsdir)/tex-test: ## 		Test document reproducibility.
 	make clean
 	make $(artifactsdir)/ms.pdf
 	cp $(artifactsdir)/ms.pdf $(artifactsdir)/ms-first-run.pdf
@@ -138,39 +166,24 @@ $(artifactsdir)/texlive-test: ## 	Test document reproducibility.
 	make $(artifactsdir)/ms.pdf
 	cmp $(artifactsdir)/ms.pdf $(artifactsdir)/ms-first-run.pdf
 
-$(artifactsdir)/texlive-update: ## 	Update texlive container image.
-	$(container_engine) image pull texlive/texlive
-
-$(bibfile):
-	touch $(bibfile)
-
-$(texfile):
-	printf '\documentclass{article}\n\\\begin{document}\nTitle\n\\\end{document}\n' > $(texfile)
-
-############################### arxiv commands ##############################
-
-$(artifactsdir)/arxiv-ms.pdf: ## 	Generate document from arxiv (ARXIVID=0000.00000 is required).
-	mkdir -p $(artifactsdir)/
-	$(container_engine) container run \
-		$(user_arg) \
-		--rm \
-		--volume `pwd`:$(workdir)/ \
-		--workdir $(workdir)/ \
-		texlive/texlive /bin/bash -c '\
-		curl -L -o $(artifactsdir)/arxiv-download.tar https://arxiv.org/e-print/$(ARXIVID) && \
-		tar xfz $(artifactsdir)/arxiv-download.tar'
-	rm $(artifactsdir)/arxiv-download.tar
-	mv ms.bbl $(artifactsdir)/
-	touch $(artifactsdir)/code-run
-	make $(artifactsdir)/ms.pdf
-	mv $(artifactsdir)/ms.pdf $(artifactsdir)/arxiv-ms.pdf
-
-$(artifactsdir)/arxiv-upload.tar: ## 	Generate tar for arxiv.
+$(artifactsdir)/tex.tar: $(artifactsdir)/ms.pdf ##		Generate tar file that contains the tex code.
 	cp $(artifactsdir)/ms.bbl .
 	$(container_engine) container run \
 		$(user_arg) \
 		--rm \
 		--volume `pwd`:$(workdir)/ \
 		--workdir $(workdir)/ \
-		texlive/texlive /bin/bash -c 'tar cf $(artifactsdir)/arxiv-upload.tar ms.bbl $(bibfile) $(texfile) `grep "./$(artifactsdir)" $(artifactsdir)/ms.fls | uniq | cut -b 9-`'
+		texlive/texlive /bin/bash -c 'tar cf $(artifactsdir)/tex.tar ms.bbl $(bibfile) $(texfile) `grep "./$(artifactsdir)" $(artifactsdir)/ms.fls | uniq | cut -b 9-`'
 	rm ms.bbl
+
+$(artifactsdir)/texlive-update: ## 	Update texlive container image.
+	$(container_engine) image pull texlive/texlive
+
+$(artifactsdir)/pandoc-update: ## 	Update pandoc container image.
+	$(container_engine) image pull pandoc/latex
+
+$(bibfile):
+	touch $(bibfile)
+
+$(texfile):
+	printf "\documentclass{article}\n\\\begin{document}\nTitle\n\\\end{document}\n" > $(texfile)
