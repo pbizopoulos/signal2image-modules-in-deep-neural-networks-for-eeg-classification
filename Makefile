@@ -9,7 +9,7 @@ user_arg=$(shell [ $(container_engine) = 'docker' ] && printf '%s' '--user `id -
 
 ############################### code commands ##############################
 
-.PHONY: $(artifactsdir)/code-requirements clean help
+.PHONY: $(artifactsdir)/code-requirements
 
 codefile=main.py
 
@@ -78,20 +78,8 @@ $(artifactsdir)/code-requirements: ## 	Generate $(codefile) requirements.txt.
 		--workdir $(workdir)/ \
 		`$(container_engine) image build --quiet .` /bin/bash -c 'pipreqs --print . >> requirements.txt'
 
-clean: ## 			Remove artifacts/ directory.
-	rm -rf $(artifactsdir)/
-
-help: ## 				Show all commands.
-	@grep '##' $(MAKEFILE_LIST) | sed 's/\(\:.*\#\#\)/\:\ /' | sed 's/\$$(artifactsdir)/$(artifactsdir)/' | sed 's/\$$(codefile)/$(codefile)/' | sed 's/\$$(texfile)/$(texfile)/' | grep -v grep
-
 $(codefile):
 	printf "import os\n\nartifacts_dir = os.getenv('ARTIFACTSDIR')\nfull = os.getenv('FULL')\n\n\ndef main():\n    pass\n\n\nif __name__ == '__main__':\n    main()\n" > $(codefile)
-
-.dockerignore:
-	printf '**\n!requirements.txt\n' > .dockerignore
-
-.gitignore:
-	printf '$(artifactsdir)/\n' > .gitignore
 
 Dockerfile:
 	printf 'FROM python\nCOPY requirements.txt .\nRUN python3 -m pip install --no-cache-dir --upgrade pip && python3 -m pip install --no-cache-dir -r requirements.txt\n' > Dockerfile
@@ -106,7 +94,7 @@ requirements.txt:
 bibfile=ms.bib
 texfile=ms.tex
 
-$(artifactsdir)/ms.pdf: $(bibfile) $(texfile) $(artifactsdir)/code-run ## 		Generate pdf document.
+$(artifactsdir)/ms.pdf: .dockerignore .gitignore $(bibfile) $(texfile) $(artifactsdir)/code-run ## 		Generate pdf document.
 	$(container_engine) container run \
 		$(user_arg) \
 		--rm \
@@ -130,21 +118,13 @@ $(artifactsdir)/ms-server.pdf: ##	Generate pdf document from server (SERVER_URL=
 	make $(artifactsdir)/ms.pdf
 	mv $(artifactsdir)/ms.pdf $(artifactsdir)/ms-server.pdf
 
-$(artifactsdir)/ms.html: $(bibfile) $(texfile) $(artifactsdir)/code-run ## 		Generate html document.
+$(artifactsdir)/ms.%: $(bibfile) $(texfile) $(artifactsdir)/code-run ## 		Generate document using pandoc (replace % with the output format).
 	$(container_engine) container run \
 		$(user_arg) \
 		--rm \
 		--volume `pwd`:$(workdir)/ \
 		--workdir $(workdir)/ \
-		pandoc/latex $(texfile) -o $(artifactsdir)/ms.html
-
-$(artifactsdir)/ms.epub: $(bibfile) $(texfile) $(artifactsdir)/code-run ## 		Generate epub document.
-	$(container_engine) container run \
-		$(user_arg) \
-		--rm \
-		--volume `pwd`:$(workdir)/ \
-		--workdir $(workdir)/ \
-		pandoc/latex $(texfile) -o $(artifactsdir)/ms.epub
+		pandoc/latex $(texfile) -o $@
 
 $(artifactsdir)/tex-lint: $(bibfile) $(texfile) $(artifactsdir)/code-run ##	 	Lint $(texfile).
 	mkdir -p $(artifactsdir)/
@@ -187,3 +167,33 @@ $(bibfile):
 
 $(texfile):
 	printf "\documentclass{article}\n\\\begin{document}\nTitle\n\\\end{document}\n" > $(texfile)
+
+############################### Makefile commands ##############################
+
+.PHONY: $(artifactsdir)/code-only $(artifactsdir)/document-only clean help
+
+$(artifactsdir)/code-only: ## 		Process Makefile to keep only code commands.
+	mkdir -p $(artifactsdir)/
+	@sed '90,170d;172,185d' $(MAKEFILE_LIST) > $(artifactsdir)/$(MAKEFILE_LIST)
+	@mv $(artifactsdir)/$(MAKEFILE_LIST) $(MAKEFILE_LIST)
+	@rm -f $(bibfile) $(texfile) .dockerignore .gitignore Dockerfile requirements.txt
+
+$(artifactsdir)/document-only: ## 	Process Makefile to keep only document commands.
+	mkdir -p $(artifactsdir)/
+	@sed '10,89d;172,185d;117d;145d;s/\$$(artifactsdir)\/code-run//;s/\!requirements.txt\\n//' $(MAKEFILE_LIST) > $(artifactsdir)/$(MAKEFILE_LIST)
+	@mv $(artifactsdir)/$(MAKEFILE_LIST) $(MAKEFILE_LIST)
+	@rm -f $(codefile) .dockerignore .gitignore Dockerfile requirements.txt
+
+.PHONY: clean help
+
+clean: ## 			Remove artifacts/ directory.
+	rm -rf $(artifactsdir)/
+
+help: ## 				Show all commands.
+	@grep '##' $(MAKEFILE_LIST) | sed 's/\(\:.*\#\#\)/\:\ /' | sed 's/\$$(artifactsdir)/$(artifactsdir)/' | sed 's/\$$(codefile)/$(codefile)/' | sed 's/\$$(texfile)/$(texfile)/' | grep -v grep
+
+.dockerignore:
+	printf '**\n**/.*\n!requirements.txt\n' > .dockerignore
+
+.gitignore:
+	printf '$(artifactsdir)/\n' > .gitignore
