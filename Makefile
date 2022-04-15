@@ -79,7 +79,7 @@ $(artifactsdir)/code-requirements: ## 	Generate $(codefile) requirements.txt.
 		`$(container_engine) image build --quiet .` /bin/bash -c 'pipreqs --print . >> requirements.txt'
 
 $(codefile):
-	printf "import os\n\nartifacts_dir = os.getenv('ARTIFACTSDIR')\nfull = os.getenv('FULL')\n\n\ndef main():\n    pass\n\n\nif __name__ == '__main__':\n    main()\n" > $(codefile)
+	printf "import os\n\n\ndef main():\n    artifacts_dir = os.getenv('ARTIFACTSDIR')\n    full = os.getenv('FULL')\n\n\nif __name__ == '__main__':\n    main()\n" > $(codefile)
 
 Dockerfile:
 	printf 'FROM python\nCOPY requirements.txt .\nRUN python3 -m pip install --no-cache-dir --upgrade pip && python3 -m pip install --no-cache-dir -r requirements.txt\n' > Dockerfile

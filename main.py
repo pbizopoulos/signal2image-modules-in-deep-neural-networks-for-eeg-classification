@@ -18,69 +18,13 @@ from torch.optim import Adam
 from torch.utils.data import DataLoader, Dataset
 from torchvision import models
 
-artifacts_dir = os.getenv('ARTIFACTSDIR')
-full = os.getenv('FULL')
 
+class Hook:
+    def __init__(self):
+        self.outputs = []
 
-def save_tfjs_from_torch(model, model_name, example_input):
-    model_name_dir = join(artifacts_dir, 'tfjs-models', model_name)
-    os.makedirs(model_name_dir, exist_ok=True)
-    torch.onnx.export(model.cpu(), example_input, join(model_name_dir, 'model.onnx'), export_params=True, opset_version=11)
-    onnx_model = onnx.load(join(model_name_dir, 'model.onnx'))
-    tf_model = prepare(onnx_model)
-    tf_model.export_graph(join(model_name_dir, 'model'))
-    tf_saved_model_conversion_v2.convert_tf_saved_model(join(model_name_dir, 'model'), model_name_dir, skip_op_check=True)
-    rmtree(join(model_name_dir, 'model'))
-    os.remove(join(model_name_dir, 'model.onnx'))
-
-
-def save_figure_signal(signals_all, signal_index, label_name):
-    plt.figure()
-    plt.plot(signals_all[signal_index].squeeze(), linewidth=4, color='k')
-    plt.axis('off')
-    plt.xlim([0, signals_all.shape[-1] - 1])
-    plt.ylim([-1000, 1000])
-    plt.savefig(join(artifacts_dir, f'signal-{label_name}.png'))
-    plt.close()
-
-
-def save_figure_signal_as_image(signals_all, signal_index, label_name):
-    signals_all_min = -1000
-    signals_all_max = 1000
-    x = signals_all[signal_index] - signals_all_min
-    x = signals_all.shape[-1] * x / (signals_all_max - signals_all_min)
-    x = x.squeeze(0).floor().long()
-    data = torch.zeros(signals_all.shape[-1], signals_all.shape[-1])
-    for index in range(signals_all.shape[-1]):
-        data[signals_all.shape[-1] - 1 - x[index], index] = 255
-    plt.figure()
-    plt.imsave(join(artifacts_dir, f'signal-as-image-{label_name}.png'), data, cmap='gray')
-    plt.close()
-
-
-def save_figure_spectrogram(signals_all, signal_index, label_name):
-    _, _, Sxx = spectrogram(signals_all[signal_index], fs=signals_all.shape[-1], noverlap=4, nperseg=8, nfft=64, mode='magnitude')
-    data = np.array(Image.fromarray(Sxx[0]).resize((signals_all.shape[-1], signals_all.shape[-1]), resample=1))
-    plt.figure()
-    plt.imsave(join(artifacts_dir, f'spectrogram-{label_name}.png'), data, cmap='gray')
-    plt.close()
-
-
-def save_figure_cnn(signals_all, signal_index, label_name, num_classes):
-    model = CNNOneLayer(num_classes, models.alexnet(), 'alexnet-cnn-one-layer')
-    model.load_state_dict(torch.load(join(artifacts_dir, 'alexnet-cnn-one-layer.pt')))
-    signal = signals_all[signal_index].unsqueeze(0)
-    outputs = []
-
-    def hook(_, __, output):
-        outputs.append(output)
-    model.conv.register_forward_hook(hook)
-    model(signal)
-    data = outputs[0][0, 0].cpu().detach().numpy()
-    data = np.array(Image.fromarray(data).resize((signals_all.shape[-1], signals_all.shape[-1]), resample=1))
-    plt.figure()
-    plt.imsave(join(artifacts_dir, f'cnn-{label_name}.png'), data, cmap='gray')
-    plt.close()
+    def __call__(self, module, module_in, module_out):
+        self.outputs.append(module_out)
 
 
 def replace_last_layer(model_base, model_full_name, num_classes):
@@ -93,8 +37,20 @@ def replace_last_layer(model_base, model_full_name, num_classes):
     return model_base
 
 
+def save_tfjs_from_torch(artifacts_dir, example_input, model, model_name):
+    model_name_dir = join(artifacts_dir, 'tfjs-models', model_name)
+    os.makedirs(model_name_dir, exist_ok=True)
+    torch.onnx.export(model.cpu(), example_input, join(model_name_dir, 'model.onnx'), export_params=True, opset_version=11)
+    onnx_model = onnx.load(join(model_name_dir, 'model.onnx'))
+    tf_model = prepare(onnx_model)
+    tf_model.export_graph(join(model_name_dir, 'model'))
+    tf_saved_model_conversion_v2.convert_tf_saved_model(join(model_name_dir, 'model'), model_name_dir, skip_op_check=True)
+    rmtree(join(model_name_dir, 'model'))
+    os.remove(join(model_name_dir, 'model.onnx'))
+
+
 class SignalAsImage(nn.Module):
-    def __init__(self, num_classes, model_base, model_full_name, signals_all_max, signals_all_min):
+    def __init__(self, model_base, model_full_name, num_classes, signals_all_max, signals_all_min):
         super().__init__()
         self.signals_all_max = signals_all_max
         self.signals_all_min = signals_all_min
@@ -113,7 +69,7 @@ class SignalAsImage(nn.Module):
 
 
 class Spectrogram(nn.Module):
-    def __init__(self, num_classes, model_base, model_full_name):
+    def __init__(self, model_base, model_full_name, num_classes):
         super().__init__()
         self.model_base = replace_last_layer(model_base, model_full_name, num_classes)
 
@@ -128,7 +84,7 @@ class Spectrogram(nn.Module):
 
 
 class CNNTwoLayers(nn.Module):
-    def __init__(self, num_classes, model_base, model_full_name):
+    def __init__(self, model_base, model_full_name, num_classes):
         super().__init__()
         self.conv1 = nn.Conv1d(1, 8, 3, padding=2)
         self.conv2 = nn.Conv1d(8, 16, 3, padding=2)
@@ -146,7 +102,7 @@ class CNNTwoLayers(nn.Module):
 
 
 class CNNOneLayer(nn.Module):
-    def __init__(self, num_classes, model_base, model_full_name):
+    def __init__(self, model_base, model_full_name, num_classes):
         super().__init__()
         self.conv = nn.Conv1d(1, 8, 3, padding=2)
         self.model_base = replace_last_layer(model_base, model_full_name, num_classes)
@@ -218,7 +174,7 @@ class VGG(nn.Module):
                 nn.init.constant_(m.bias, 0)
 
 
-def make_layers(cfg, batch_norm=False):
+def make_layers(cfg):
     layers = []
     in_channels = 1
     for v in cfg:
@@ -231,26 +187,27 @@ def make_layers(cfg, batch_norm=False):
     return nn.Sequential(*layers)
 
 
-cfg = {'A': [64, 'M', 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'], 'B': [64, 64, 'M', 128, 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'], 'D': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M'], 'E': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 256, 'M', 512, 512, 512, 512, 'M', 512, 512, 512, 512, 'M'], }
-
-
 def vgg11(num_classes):
-    model = VGG(make_layers(cfg['A']), num_classes)
+    cfg = [64, 'M', 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M']
+    model = VGG(make_layers(cfg), num_classes)
     return model
 
 
 def vgg13(num_classes):
-    model = VGG(make_layers(cfg['B']), num_classes)
+    cfg = [64, 64, 'M', 128, 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M']
+    model = VGG(make_layers(cfg), num_classes)
     return model
 
 
 def vgg16(num_classes):
-    model = VGG(make_layers(cfg['D']), num_classes)
+    cfg = [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M']
+    model = VGG(make_layers(cfg), num_classes)
     return model
 
 
 def vgg19(num_classes):
-    model = VGG(make_layers(cfg['E']), num_classes)
+    cfg = [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 256, 'M', 512, 512, 512, 512, 'M', 512, 512, 512, 512, 'M']
+    model = VGG(make_layers(cfg), num_classes)
     return model
 
 
@@ -479,7 +436,7 @@ def densenet161(num_samples):
 
 
 class UCIEpilepsy(Dataset):
-    def __init__(self, training_validation_test, num_samples):
+    def __init__(self, artifacts_dir, num_samples, training_validation_test):
         filename = join(artifacts_dir, 'data.csv')
         if not os.path.isfile(filename):
             with open(filename, 'wb') as file:
@@ -531,6 +488,8 @@ class LeNet2D(nn.Module):
 
 
 def main():
+    artifacts_dir = os.getenv('ARTIFACTSDIR')
+    full = os.getenv('FULL')
     num_samples = 11500
     num_epochs = 100
     if not full:
@@ -545,9 +504,9 @@ def main():
     batch_size = 20
     signals_all_max = 2047
     signals_all_min = -1885
-    training_dataset = UCIEpilepsy('training', num_samples)
-    validation_dataset = UCIEpilepsy('validation', num_samples)
-    test_dataset = UCIEpilepsy('test', num_samples)
+    training_dataset = UCIEpilepsy(artifacts_dir, num_samples, 'training')
+    validation_dataset = UCIEpilepsy(artifacts_dir, num_samples, 'validation')
+    test_dataset = UCIEpilepsy(artifacts_dir, num_samples, 'test')
     training_dataloader = DataLoader(dataset=training_dataset, batch_size=batch_size, shuffle=True)
     validation_dataloader = DataLoader(dataset=validation_dataset, batch_size=batch_size)
     test_dataloader = DataLoader(dataset=test_dataset, batch_size=batch_size)
@@ -562,13 +521,13 @@ def main():
             if model_module_name == '1D':
                 model = model_base_1D_list[index_model_base_name](num_classes)
             elif model_module_name == 'signal-as-image':
-                model = SignalAsImage(num_classes, model_base_2D_list[index_model_base_name](), model_full_name, signals_all_max, signals_all_min)
+                model = SignalAsImage(model_base_2D_list[index_model_base_name](), model_full_name, num_classes, signals_all_max, signals_all_min)
             elif model_module_name == 'spectrogram':
-                model = Spectrogram(num_classes, model_base_2D_list[index_model_base_name](), model_full_name)
+                model = Spectrogram(model_base_2D_list[index_model_base_name](), model_full_name, num_classes)
             elif model_module_name == 'cnn-one-layer':
-                model = CNNOneLayer(num_classes, model_base_2D_list[index_model_base_name](), model_full_name)
+                model = CNNOneLayer(model_base_2D_list[index_model_base_name](), model_full_name, num_classes)
             elif model_module_name == 'cnn-two-layers':
-                model = CNNTwoLayers(num_classes, model_base_2D_list[index_model_base_name](), model_full_name)
+                model = CNNTwoLayers(model_base_2D_list[index_model_base_name](), model_full_name, num_classes)
             model = model.to(device)
             optimizer = Adam(model.parameters())
             best_validation_accuracy = -1
@@ -616,7 +575,7 @@ def main():
             test_accuracy_array[index_model_module_name, index_model_base_name] = test_accuracy
             print(f'{model_full_name = }, {test_loss = :.3f}, {test_accuracy = :.2f}%')
             if model_full_name in ['lenet-1D', 'alexnet-1D', 'resnet18-1D', 'resnet34-1D', 'resnet50-1D', 'resnet18-signal-as-image', 'resnet34-signal-as-image', 'resnet50-signal-as-image']:
-                save_tfjs_from_torch(model, model_full_name, training_dataset[0][0].unsqueeze(0))
+                save_tfjs_from_torch(artifacts_dir, training_dataset[0][0].unsqueeze(0), model, model_full_name)
                 if (not full):
                     rmtree(join(artifacts_dir, 'tfjs-models', model_full_name))
             if (not full) and (model_full_name != 'alexnet-cnn-one-layer'):
@@ -633,10 +592,40 @@ def main():
     labels_names = ['eyes-open', 'eyes-closed', 'healthy-area', 'tumor-area', 'epilepsy']
     for index, label_name in enumerate(labels_names):
         signal_index = (labels_all == index).nonzero()[-1]
-        save_figure_signal(signals_all, signal_index, label_name)
-        save_figure_signal_as_image(signals_all, signal_index, label_name)
-        save_figure_spectrogram(signals_all, signal_index, label_name)
-        save_figure_cnn(signals_all, signal_index, label_name, num_classes)
+        plt.figure()
+        plt.plot(signals_all[signal_index].squeeze(), linewidth=4, color='k')
+        plt.axis('off')
+        plt.xlim([0, signals_all.shape[-1] - 1])
+        plt.ylim([-1000, 1000])
+        plt.savefig(join(artifacts_dir, f'signal-{label_name}.png'))
+        plt.close()
+        signals_all_min = -1000
+        signals_all_max = 1000
+        x = signals_all[signal_index] - signals_all_min
+        x = signals_all.shape[-1] * x / (signals_all_max - signals_all_min)
+        x = x.squeeze(0).floor().long()
+        data = torch.zeros(signals_all.shape[-1], signals_all.shape[-1])
+        for index in range(signals_all.shape[-1]):
+            data[signals_all.shape[-1] - 1 - x[index], index] = 255
+        plt.figure()
+        plt.imsave(join(artifacts_dir, f'signal-as-image-{label_name}.png'), data, cmap='gray')
+        plt.close()
+        _, _, Sxx = spectrogram(signals_all[signal_index], fs=signals_all.shape[-1], noverlap=4, nperseg=8, nfft=64, mode='magnitude')
+        data = np.array(Image.fromarray(Sxx[0]).resize((signals_all.shape[-1], signals_all.shape[-1]), resample=1))
+        plt.figure()
+        plt.imsave(join(artifacts_dir, f'spectrogram-{label_name}.png'), data, cmap='gray')
+        plt.close()
+        model = CNNOneLayer(models.alexnet(), 'alexnet-cnn-one-layer', num_classes)
+        model.load_state_dict(torch.load(join(artifacts_dir, 'alexnet-cnn-one-layer.pt')))
+        signal = signals_all[signal_index].unsqueeze(0)
+        hook = Hook()
+        model.conv.register_forward_hook(hook)
+        model(signal)
+        data = hook.outputs[0][0, 0].cpu().detach().numpy()
+        data = np.array(Image.fromarray(data).resize((signals_all.shape[-1], signals_all.shape[-1]), resample=1))
+        plt.figure()
+        plt.imsave(join(artifacts_dir, f'cnn-{label_name}.png'), data, cmap='gray')
+        plt.close()
 
 
 if __name__ == '__main__':
