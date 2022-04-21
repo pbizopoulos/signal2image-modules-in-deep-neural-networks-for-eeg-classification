@@ -63,7 +63,7 @@ Here we also refer to CNN as a neural network consisting of alternating convolut
 
 \section{DATA}
 The UCI EEG epileptic seizure recognition dataset~\cite{andrzejak2001indications} consists of $500$ signals each one with $4097$ samples (23.5 seconds).
-The dataset is annotated into five classes with $100$ signals for each class (in parenthesis the shortened label names used in Fig.~\ref{fig:highleveloverview} and~\ref{fig:signal2imageoutputs}):
+The dataset is annotated into five classes with $100$ signals for each class (in parenthesis the shortened class names used in Fig.~\ref{fig:highleveloverview} and~\ref{fig:signal2imageoutputs}):
 \begin{enumerate}
 	\item healthy patient while having his eyes open (Open),
 	\item healthy patient while having his eyes closed (Closed),
@@ -95,7 +95,7 @@ For the purposes of this paper we use a variation of the database\footnote{\url{
 	\end{tikzpicture}
 	\caption{High level overview of a feed-forward pass of the combined methods.
 	$x_i$ is the input, $m$ is the Signal2Image module, $b_{d}$ is the 1D or 2D architecture `base model' for $d=1,2$ respectively and $\hat{y_i}$ is the predicted output.
-	The names of the labels are depicted at the right along with the predictions for this example signal.
+	The names of the classes are depicted at the right along with the predictions for this example signal.
 	The image between $m$ and $b_{d}$ depicts the output of the one layer CNN Signal2Image module, while the `signal as image' and spectrogram have intermediate images as those depicted at the second and third row of Fig.~\ref{fig:signal2imageoutputs}.
 	Arrows denote the flow of the feed-forward pass.
 	For the 1D architectures $m$ is omitted and no intermediate image is generated.}\label{fig:highleveloverview}
@@ -103,7 +103,7 @@ For the purposes of this paper we use a variation of the database\footnote{\url{
 
 \section{METHODS}
 \subsection{Definitions}
-We define the dataset $D=\{x_i, y_i\}_{i=1\ldots N}$ where $x_i \in \mathbb{Z}^n$ and $y_i \in \{1, 2, 3, 4, 5\}$ denote the $i^{th}$ input signal with dimensionality $n=178$ and the $i^{th}$ label with five possible classes respectively.
+We define the dataset $D=\{x_i, y_i\}_{i=1\ldots N}$ where $x_i \in \mathbb{Z}^n$ and $y_i \in \{1, 2, 3, 4, 5\}$ denote the $i^{th}$ input signal with dimensionality $n=178$ and the $i^{th}$ class with five possible classes respectively.
 $N=11500$ is the number of observations.
 
 We also define the set of S2Is as $M$ and the member of this set as $m$ which include the following modules:
