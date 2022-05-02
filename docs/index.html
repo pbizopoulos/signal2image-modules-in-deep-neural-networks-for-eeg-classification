@@ -4,12 +4,12 @@
 		<title>EEG signal classification demo</title>
 		<meta charset="UTF-8">
 		<link href="data:" rel="icon">
-		<link rel="stylesheet" href="styles.css">
+		<link href="styles.css" rel="stylesheet">
 		<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
 		<script src="https://d3js.org/d3.v7.min.js"></script>
 	</head>
 	<body>
-		<div id="divInputControl" style="width:256px;height:256px;position:fixed;top:0px;left:0px;">
+		<div id="inputControlDiv" style="width:256px;height:256px;position:fixed;top:0px;left:0px;">
 			<div>NOT FOR MEDICAL USE. Choose a EEG csv file (.txt,.csv) and classify epilepsy using a DNN.</div>
 			<div>
 				<a href=https://github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification>[url]</a>
@@ -17,11 +17,11 @@
 			<div>
 				<input accept=".txt,.csv" onchange="signalLoadView();" type="file">
 			</div>
-			<div id="divModelDownloadFraction">0%</div>
+			<div id="modelDownloadFractionDiv">0%</div>
 		</div>
-		<div id="divInput" style="width:256px;height:256px;position:fixed;top:0px;left:256px;">
+		<div id="inputDiv" style="width:256px;height:256px;position:fixed;top:0px;left:256px;">
 		</div>
-		<div id="divOutput" style="height:256px;width:256px;position:fixed;top:0px;left:512px;">
+		<div id="outputDiv" style="height:256px;width:256px;position:fixed;top:0px;left:512px;">
 		</div>
 		<script src="script.js"></script>
 	</body>

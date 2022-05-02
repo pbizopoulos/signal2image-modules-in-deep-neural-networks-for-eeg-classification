@@ -1,15 +1,15 @@
-#divInputControl{
+#inputControlDiv {
 	border-style: groove;
 }
 
-#divInput{
+#inputDiv {
 	border-style: groove;
 }
 
-#divOutput{
+#outputDiv {
 	border-style: groove;
 }
 
-#divInput:hover{
+#inputDiv:hover {
 	border-style: solid;
 }

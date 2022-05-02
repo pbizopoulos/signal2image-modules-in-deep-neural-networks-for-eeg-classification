@@ -1,16 +1,6 @@
-# Makefile requirements
-autoflake
-autopep8
-coverage
-isort
-pipreqs
-python-minimizer
-pyupgrade
-
-# main.py requirements
 matplotlib==3.5.1
 onnx-tf==1.10.0
-pandas==1.4.1
+pandas==1.4.2
 requests==2.27.1
 scipy==1.8.0
 tensorflow-probability==0.16.0

@@ -32,51 +32,20 @@ $(artifactsdir)/code-run: $(codefile) .dockerignore .gitignore Dockerfile requir
 		`$(container_engine) image build --quiet .` python3 $(codefile)
 	touch $(artifactsdir)/code-run
 
-$(artifactsdir)/code-coverage: $(codefile) Dockerfile requirements.txt ## 	Code coverage for $(codefile).
-	mkdir -p $(artifactsdir)/
-	$(container_engine) container run \
-		$(debug_args) \
-		$(gpus_arg) \
-		$(user_arg) \
-		--detach-keys 'ctrl-^,ctrl-^' \
-		--env ARTIFACTSDIR=$(artifactsdir) \
-		--env HOME=$(workdir)/$(artifactsdir) \
-		--rm \
-		--volume `pwd`:$(workdir)/ \
-		--workdir $(workdir)/ \
-		`$(container_engine) image build --quiet .` /bin/bash -c '\
-		coverage run $(codefile) && \
-		coverage html'
-	rm -rf $(artifactsdir)/htmlcov
-	mv htmlcov/ $(artifactsdir)/
-	mv .coverage $(artifactsdir)/
-	touch $(artifactsdir)/code-coverage)
-
 $(artifactsdir)/code-format: $(codefile) ## 	Format $(codefile).
 	mkdir -p $(artifactsdir)/
 	$(container_engine) container run \
 		$(user_arg) \
+		--env HOME=$(workdir)/$(artifactsdir) \
 		--rm \
 		--volume `pwd`:$(workdir)/ \
 		--workdir $(workdir)/ \
-		`$(container_engine) image build --quiet .` /bin/bash -c '\
-		python-minimizer --keep-whitespace --out-path $(codefile) $(codefile) && \
-		isort $(codefile) && \
-		autoflake --expand-star-imports --in-place --remove-all-unused-imports --remove-duplicate-keys --remove-unused-variables $(codefile) && \
-		pyupgrade $(codefile) && \
-		autopep8 -a -a -a --in-place --max-line-length 10000 $(codefile)'
+		python /bin/bash -c '\
+		python3 -m pip install --no-cache-dir --upgrade pip && \
+		python3 -m pip install --no-cache-dir https://github.com/pbizopoulos/source_normalizer/archive/main.zip && \
+		$(artifactsdir)/.local/bin/source_normalizer $(codefile) > $(artifactsdir)/tmp.py && \
+		mv $(artifactsdir)/tmp.py $(codefile)'
 	touch $(artifactsdir)/code-format
-
-$(artifactsdir)/code-requirements: ## 	Generate $(codefile) requirements.txt.
-	mkdir -p $(artifactsdir)/
-	rm -f requirements.txt
-	make requirements.txt
-	$(container_engine) container run \
-		$(user_arg) \
-		--rm \
-		--volume `pwd`:$(workdir)/ \
-		--workdir $(workdir)/ \
-		`$(container_engine) image build --quiet .` /bin/bash -c 'pipreqs --print . >> requirements.txt'
 
 $(codefile):
 	printf "import os\n\n\ndef main():\n    artifacts_dir = os.getenv('ARTIFACTSDIR')\n    full = os.getenv('FULL')\n\n\nif __name__ == '__main__':\n    main()\n" > $(codefile)
@@ -85,7 +54,7 @@ Dockerfile:
 	printf 'FROM python\nCOPY requirements.txt .\nRUN python3 -m pip install --no-cache-dir --upgrade pip && python3 -m pip install --no-cache-dir -r requirements.txt\n' > Dockerfile
 
 requirements.txt:
-	printf '# Makefile requirements\nautoflake\nautopep8\ncoverage\nisort\npipreqs\npython-minimizer\npyupgrade\n\n# $(codefile) requirements\n' > requirements.txt
+	touch requirements.txt
 
 ############################### document commands ##########################
 
@@ -169,20 +138,6 @@ $(texfile):
 	printf "\documentclass{article}\n\\\begin{document}\nTitle\n\\\end{document}\n" > $(texfile)
 
 ############################### Makefile commands ##############################
-
-.PHONY: $(artifactsdir)/code-only $(artifactsdir)/document-only clean help
-
-$(artifactsdir)/code-only: ## 		Process Makefile to keep only code commands.
-	mkdir -p $(artifactsdir)/
-	@sed '90,170d;172,185d' $(MAKEFILE_LIST) > $(artifactsdir)/$(MAKEFILE_LIST)
-	@mv $(artifactsdir)/$(MAKEFILE_LIST) $(MAKEFILE_LIST)
-	@rm -f $(bibfile) $(texfile) .dockerignore .gitignore Dockerfile requirements.txt
-
-$(artifactsdir)/document-only: ## 	Process Makefile to keep only document commands.
-	mkdir -p $(artifactsdir)/
-	@sed '10,89d;172,185d;117d;145d;s/\$$(artifactsdir)\/code-run//;s/\!requirements.txt\\n//' $(MAKEFILE_LIST) > $(artifactsdir)/$(MAKEFILE_LIST)
-	@mv $(artifactsdir)/$(MAKEFILE_LIST) $(MAKEFILE_LIST)
-	@rm -f $(codefile) .dockerignore .gitignore Dockerfile requirements.txt
 
 .PHONY: clean help
 
