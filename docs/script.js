@@ -1,3 +1,17 @@
+'use strict';
+
+const canvasHeight = 256;
+const canvasWidth = 256;
+const classNames = ['Open', 'Closed', 'Healthy', 'Tumor', 'Epilepsy'];
+const inputDiv = document.getElementById('inputDiv');
+const inputFileName = 'https://raw.githubusercontent.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/master/docs/eeg-classification-example-data.txt';
+const signalFileReader = new FileReader();
+let csvDataset;
+let csvDatasetMax;
+let csvDatasetMin;
+let line;
+let model;
+
 function disableUI(argument) {
 	const nodes = document.getElementById('inputControlDiv').getElementsByTagName('*');
 	for(let i = 0; i < nodes.length; i++){
@@ -45,7 +59,7 @@ async function predictView() {
 	if (model === undefined) {
 		return;
 	}
-	csvDatasetTmp = csvDataset.expandDims(0).expandDims(2);
+	let csvDatasetTmp = csvDataset.expandDims(0).expandDims(2);
 	csvDatasetTmp = tf.image.resizeBilinear(csvDatasetTmp, [1, model.inputs[0].shape[2]]);
 	csvDatasetTmp = csvDatasetTmp.reshape([1, 1, model.inputs[0].shape[2]]);
 	const modelOutput = await model.executeAsync(csvDatasetTmp);
@@ -65,15 +79,11 @@ function signalLoadView() {
 	}
 }
 
-const inputFilename = 'https://raw.githubusercontent.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/master/docs/eeg-classification-example-data.txt';
-let csvDataset;
-let csvDatasetMax;
-let csvDatasetMin;
-let line;
-let model;
-const classNames = ['Open', 'Closed', 'Healthy', 'Tumor', 'Epilepsy'];
-const canvasWidth = 256;
-const canvasHeight = 256;
+signalFileReader.onload = function() {
+	drawSignal(signalFileReader.result);
+	predictView();
+};
+
 const inputSvg = d3.select('#inputDiv')
 	.append('svg')
 	.attr('viewBox', [0, 0, canvasWidth, canvasHeight]);
@@ -86,7 +96,9 @@ d3.select('#inputDiv')
 		.on('start', (event) => {
 			event.on('drag', () => {
 				const buffer = tf.buffer(csvDataset.shape, csvDataset.dtype, csvDataset.dataSync());
-				buffer.set(csvDatasetMin + csvDatasetMax*(canvasHeight - window.event.pageY)/canvasHeight, Math.round(csvDataset.size*(window.event.pageX - canvasWidth)/canvasWidth));
+				const x = window.event.clientX - inputDiv.getBoundingClientRect().x
+				const y = window.event.clientY - inputDiv.getBoundingClientRect().y
+				buffer.set(csvDatasetMax - csvDatasetMax*y/canvasHeight, Math.round(csvDataset.size*x/canvasWidth));
 				tf.dispose(csvDataset);
 				csvDataset = buffer.toTensor();
 				d3.select('#pathInput')
@@ -94,15 +106,11 @@ d3.select('#inputDiv')
 				predictView();
 			});
 		}));
-fetch(inputFilename)
+
+fetch(inputFileName)
 	.then(response => response.text())
 	.then((text) => {
 		drawSignal(text);
 		predictView();
 	})
-const signalFileReader = new FileReader();
-signalFileReader.onload = () => {
-	drawSignal(signalFileReader.result);
-	predictView();
-};
 loadModel(predictView);
