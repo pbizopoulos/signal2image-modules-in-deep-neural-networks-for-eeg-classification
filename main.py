@@ -321,9 +321,9 @@ class _DenseBlock(nn.Sequential):
 
     def __init__(self, layers_num, input_features_num, bn_size, growth_rate):
         super().__init__()
-        for i in range(layers_num):
-            layer = _DenseLayer(input_features_num + i * growth_rate, growth_rate, bn_size)
-            self.add_module('denselayer%d' % (i + 1), layer)
+        for index in range(layers_num):
+            layer = _DenseLayer(input_features_num + index * growth_rate, growth_rate, bn_size)
+            self.add_module('denselayer%d' % (index + 1), layer)
 
 
 class _DenseLayer(nn.Sequential):
