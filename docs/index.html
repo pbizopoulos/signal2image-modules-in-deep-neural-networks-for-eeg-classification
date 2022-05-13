@@ -22,16 +22,18 @@
 			<a href="https://pbizopoulos.github.io">Home page</a>
 		</div>
 		<hr style="width:100%;">
-		<div class="block" id="inputControlDiv">
-			<div>NOT FOR MEDICAL USE. Choose a EEG csv file (.txt,.csv) and classify epilepsy using a DNN.</div>
-			<div>
-				<input accept=".txt,.csv" onchange="signalLoadView();" type="file">
+		<div style="position:relative;">
+			<div class="block" id="inputControlDiv" style="left:0px;">
+				<div>NOT FOR MEDICAL USE. Choose a EEG csv file (.txt,.csv) and classify epilepsy using a DNN.</div>
+				<div>
+					<input accept=".txt,.csv" onchange="signalLoadView();" type="file">
+				</div>
+				<div id="modelDownloadFractionDiv">0%</div>
 			</div>
-			<div id="modelDownloadFractionDiv">0%</div>
-		</div>
-		<div class="block" id="inputDiv">
-		</div>
-		<div class="block" id="outputDiv">
+			<div class="block" id="inputDiv" style="left:256px;">
+			</div>
+			<div class="block" id="outputDiv" style="left:512px;">
+			</div>
 		</div>
 	</body>
 </html>

@@ -1,7 +1,7 @@
 .block {
 	border-style: groove;
-	float: left;
 	height: 256px;
+	position: absolute;
 	width: 256px;
 }
 
