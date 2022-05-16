@@ -1,18 +1,4 @@
-on:
-  push:
-    paths:
-      - '.github/workflows/tests.yml'
-      - 'Dockerfile'
-      - 'Makefile'
-      - 'main.py'
-      - 'requirements.txt'
-  pull_request:
-    paths:
-      - '.github/workflows/tests.yml'
-      - 'Dockerfile'
-      - 'Makefile'
-      - 'main.py'
-      - 'requirements.txt'
+on: [push, pull_request]
 
 jobs:
   make:
@@ -21,4 +7,12 @@ jobs:
       - name: Set up Git repository
         uses: actions/checkout@v3
       - name: Test
-        run: make artifacts/tex-test
+        run: |
+          make -C python/
+          make
+          cp artifacts/ms.pdf artifacts/ms-first-run.pdf
+          touch python/main.py
+          make -C python/
+          touch ms.tex
+          make
+          cmp artifacts/ms.pdf artifacts/ms-first-run.pdf

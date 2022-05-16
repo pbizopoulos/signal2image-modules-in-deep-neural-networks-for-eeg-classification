@@ -15,8 +15,7 @@ git clone https://github.com/pbizopoulos/signal2image-modules-in-deep-neural-net
 cd signal2image-modules-in-deep-neural-networks-for-eeg-classification/
 sudo systemctl start docker
 
-Basic commands:
-make		# Generate draft artifacts (fast).
-make FULL=1	# Generate full artifacts (slow).
-make clean 	# Remove artifacts/ directory.
-make help	# Show all commands.
+Basic usage:
+make -C python/ && make	# Generate draft python and tex artifacts.
+make -C python/ help	# Show all python commands.
+make help		# Show all tex commands.

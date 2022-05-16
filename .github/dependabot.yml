@@ -1,14 +1,14 @@
 version: 2
 updates:
-  - package-ecosystem: "docker"
-    directory: "/"
+  - package-ecosystem: 'docker'
+    directory: '/python'
     schedule:
-      interval: "monthly"
-  - package-ecosystem: "github-actions"
-    directory: "/"
+      interval: 'monthly'
+  - package-ecosystem: 'github-actions'
+    directory: '/'
     schedule:
-      interval: "monthly"
-  - package-ecosystem: "pip"
-    directory: "/"
+      interval: 'monthly'
+  - package-ecosystem: 'pip'
+    directory: '/python'
     schedule:
-      interval: "monthly"
+      interval: 'monthly'

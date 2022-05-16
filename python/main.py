@@ -1,6 +1,7 @@
 from PIL import Image
 from matplotlib import pyplot as plt
 from onnx_tf.backend import prepare
+from os import environ
 from os.path import join
 from scipy.signal import spectrogram
 from shutil import rmtree
@@ -417,8 +418,8 @@ def densenet201(samples_num):
 
 
 def main():
-    artifacts_dir = os.getenv('ARTIFACTSDIR')
-    full = os.getenv('FULL')
+    artifacts_dir = environ['ARTIFACTSDIR']
+    full = environ['FULL']
     samples_num = 11500
     epochs_num = 100
     if not full:
