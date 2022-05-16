@@ -47,7 +47,7 @@ $(artifactsdir)/tex.tar: $(artifactsdir)/ms.pdf ##		Generate tar file that conta
 		--user $(user_arg) \
 		--volume `pwd`:$(workdir)/ \
 		--workdir $(workdir)/ \
-		texlive/texlive /bin/bash -c 'tar cf $(artifactsdir)/tex.tar ms.bbl $(bibfile) `grep "^INPUT ./" $(artifactsdir)/ms.fls | uniq | cut -b 9-`'
+		texlive/texlive /bin/bash -c 'tar cf $(artifactsdir)/tex.tar ms.bbl $(bibfile) $(codefile) `grep "^INPUT ./" $(artifactsdir)/ms.fls | uniq | cut -b 9-`'
 	rm ms.bbl
 
 $(artifactsdir)/tex-lint: $(bibfile) $(codefile) ##	 	Lint $(codefile).
