@@ -4,11 +4,11 @@ Signal2Image Modules in Deep Neural Networks for EEG Classification:
 - https://pbizopoulos.github.io/signal2image-modules-in-deep-neural-networks-for-eeg-classification/
 
 Requirements:
-- POSIX-oriented operating system https://en.wikipedia.org/wiki/POSIX#POSIX-oriented_operating_systems
-- Git (Any version) https://git-scm.com/downloads
-- GNU Make (>= 3.79) https://www.gnu.org/software/make/
-- Docker (Any version or >= 19.03 for NVIDIA Container Toolkit) https://docs.docker.com/get-docker/
-- [Optional] NVIDIA Container Toolkit https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html
+- POSIX-oriented operating system
+- Git (Any version)
+- GNU Make (>= 3.79)
+- Docker (Any version or >= 19.03 for NVIDIA Container Toolkit)
+- [Optional] NVIDIA Container Toolkit
 
 Preparation:
 git clone https://github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification
