@@ -4,7 +4,7 @@ from onnx_tf.backend import prepare
 from os import environ
 from os.path import join
 from scipy.signal import spectrogram
-from shutil import rmtree
+from shutil import move, rmtree
 from tensorflowjs.converters import tf_saved_model_conversion_v2
 from torch import nn
 from torch.nn import functional as F
@@ -21,7 +21,7 @@ import torch
 
 class BasicBlock(nn.Module):
 
-    def __init__(self, inplanes, planes, stride=1, downsample=None):
+    def __init__(self, downsample, inplanes, planes, stride=1):
         super().__init__()
         self.conv1 = conv3x3(inplanes, planes, stride)
         self.bn1 = nn.BatchNorm1d(planes)
@@ -47,7 +47,7 @@ class BasicBlock(nn.Module):
 
 class Bottleneck(nn.Module):
 
-    def __init__(self, inplanes, planes, stride=1, downsample=None):
+    def __init__(self, downsample, inplanes, planes, stride=1):
         super().__init__()
         expansion = 4
         self.conv1 = conv1x1(inplanes, planes)
@@ -204,10 +204,10 @@ class ResNet(nn.Module):
         if stride != 1 or self.inplanes != planes * expansion:
             downsample = nn.Sequential(conv1x1(self.inplanes, planes * expansion, stride), nn.BatchNorm1d(planes * expansion))
         layers = []
-        layers.append(block(self.inplanes, planes, stride, downsample))
+        layers.append(block(downsample, self.inplanes, planes, stride))
         self.inplanes = planes * expansion
         for _ in range(1, blocks):
-            layers.append(block(self.inplanes, planes))
+            layers.append(block(None, self.inplanes, planes))
         return nn.Sequential(*layers)
 
     def forward(self, x):
@@ -502,10 +502,11 @@ def main():
             test_accuracy = 100 * corrects / (batch_size * len(test_dataloader))
             test_loss = test_loss_sum / (batch_size * len(test_dataloader))
             test_accuracy_array[model_module_name_index, model_base_name_index] = test_accuracy
-            if model_file_name in ['lenet-1D', 'alexnet-1D', 'resnet18-1D', 'resnet34-1D', 'resnet50-1D', 'resnet18-signal-as-image', 'resnet34-signal-as-image', 'resnet50-signal-as-image']:
+            if model_file_name == 'resnet34-1D':
                 save_tfjs_from_torch(artifacts_dir, training_dataset[0][0].unsqueeze(0), model, model_file_name)
-                if not full:
-                    rmtree(join(artifacts_dir, 'tfjs-models', model_file_name))
+                if full:
+                    rmtree(join('release', model_file_name))
+                    move(join(artifacts_dir, model_file_name), join('release', model_file_name))
             if not full and model_file_name != 'alexnet-cnn-one-layer':
                 os.remove(join(artifacts_dir, f'{model_file_name}.pt'))
     styler = pd.DataFrame(test_accuracy_array, index=['1D', '2D, signal as image', '2D, spectrogram', '2D, one layer CNN', '2D, two layer CNN'], columns=model_base_name_list).style
@@ -604,8 +605,8 @@ def resnet50(classes_num):
     return model
 
 
-def save_tfjs_from_torch(artifacts_dir, example_input, model, model_name):
-    model_file_path = join(artifacts_dir, 'tfjs-models', model_name)
+def save_tfjs_from_torch(artifacts_dir, example_input, model, model_file_name):
+    model_file_path = join(artifacts_dir, model_file_name)
     os.makedirs(model_file_path, exist_ok=True)
     torch.onnx.export(model.cpu(), example_input, join(model_file_path, 'model.onnx'), export_params=True, opset_version=11)
     model_onnx = onnx.load(join(model_file_path, 'model.onnx'))
