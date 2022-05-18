@@ -9,7 +9,7 @@ container_engine=docker # For podman first execute `printf 'unqualified-search-r
 user_arg=$(shell [ $(container_engine) = 'docker' ] && printf '%s' '`id -u`:`id -g`')
 workdir=/app
 
-$(artifactsdir)/ms.pdf: $(bibfile) $(codefile) .dockerignore .gitignore ## 		Generate pdf document.
+$(artifactsdir)/ms.pdf: $(bibfile) $(codefile) .dockerignore .gitignore ## Generate pdf document.
 	$(container_engine) container run \
 		--rm \
 		--user $(user_arg) \
@@ -17,7 +17,7 @@ $(artifactsdir)/ms.pdf: $(bibfile) $(codefile) .dockerignore .gitignore ## 		Gen
 		--workdir $(workdir)/ \
 		texlive/texlive latexmk -gg -pdf -outdir=$(artifactsdir)/ $(codefile)
 
-$(artifactsdir)/ms.%: $(bibfile) $(codefile) ## 			Generate document using pandoc (replace % with the output format).
+$(artifactsdir)/ms.%: $(bibfile) $(codefile) ## Generate document using pandoc (replace % with the output format).
 	$(container_engine) container run \
 		--rm \
 		--user $(user_arg) \
@@ -25,7 +25,7 @@ $(artifactsdir)/ms.%: $(bibfile) $(codefile) ## 			Generate document using pando
 		--workdir $(workdir)/ \
 		pandoc/latex $(codefile) -o $@
 
-$(artifactsdir)/ms-server.pdf: ##		Generate pdf document from server (SERVER_URL=https://arxiv.org/e-print/0000.00000 is required).
+$(artifactsdir)/ms-server.pdf: ## Generate pdf document from server (SERVER_URL=https://arxiv.org/e-print/0000.00000 is required).
 	mkdir -p $(artifactsdir)/
 	$(container_engine) container run \
 		--rm \
@@ -40,7 +40,7 @@ $(artifactsdir)/ms-server.pdf: ##		Generate pdf document from server (SERVER_URL
 	make $(artifactsdir)/ms.pdf
 	mv $(artifactsdir)/ms.pdf $(artifactsdir)/ms-server.pdf
 
-$(artifactsdir)/tex.tar: $(artifactsdir)/ms.pdf ##		Generate tar file that contains the tex code.
+$(artifactsdir)/tex.tar: $(artifactsdir)/ms.pdf ## Generate tar file that contains the tex code.
 	cp $(artifactsdir)/ms.bbl .
 	$(container_engine) container run \
 		--rm \
@@ -50,7 +50,7 @@ $(artifactsdir)/tex.tar: $(artifactsdir)/ms.pdf ##		Generate tar file that conta
 		texlive/texlive /bin/bash -c 'tar cf $(artifactsdir)/tex.tar ms.bbl $(bibfile) $(codefile) `grep "^INPUT ./" $(artifactsdir)/ms.fls | uniq | cut -b 9-`'
 	rm ms.bbl
 
-$(artifactsdir)/tex-lint: $(bibfile) $(codefile) ##	 	Lint $(codefile).
+$(artifactsdir)/tex-lint: $(bibfile) $(codefile) ## Lint $(codefile).
 	mkdir -p $(artifactsdir)/
 	$(container_engine) container run \
 		--rm \
@@ -62,10 +62,10 @@ $(artifactsdir)/tex-lint: $(bibfile) $(codefile) ##	 	Lint $(codefile).
 		lacheck $(codefile)'
 	touch $(artifactsdir)/tex-lint
 
-$(artifactsdir)/texlive-update: ## 	Update texlive container image.
+$(artifactsdir)/texlive-update: ## Update texlive container image.
 	$(container_engine) image pull texlive/texlive
 
-$(artifactsdir)/pandoc-update: ## 	Update pandoc container image.
+$(artifactsdir)/pandoc-update: ## Update pandoc container image.
 	$(container_engine) image pull pandoc/latex
 
 $(bibfile):
@@ -80,8 +80,8 @@ $(codefile):
 .gitignore:
 	printf '$(artifactsdir)/\n' > .gitignore
 
-clean: ## 				Remove artifacts/ directory.
+clean: ## Remove $(artifactsdir) directory.
 	rm -rf $(artifactsdir)/
 
-help: ## 				Show all commands.
-	@grep '##' $(MAKEFILE_LIST) | sed 's/\(\:.*\#\#\)//' | sed 's/\$$(artifactsdir)/$(artifactsdir)/' | sed 's/\$$(codefile)/$(codefile)/' | grep -v grep
+help: ## Show all commands.
+	@sed 's/\$$(artifactsdir)/$(artifactsdir)/g; s/\$$(codefile)/$(codefile)/g' $(MAKEFILE_LIST) | grep '##' | grep -v grep | awk 'BEGIN {FS = ":.* ## "}; {printf "%-30s# %s\n", $$1, $$2}'

@@ -10,7 +10,7 @@ gpus_arg=$(shell [ $(container_engine) = 'docker' ] && command -v nvidia-contain
 user_arg=$(shell [ $(container_engine) = 'docker' ] && printf '%s' '`id -u`:`id -g`')
 workdir=/app
 
-$(artifactsdir)/code-run: $(codefile) .dockerignore .gitignore Dockerfile requirements.txt ## 	Generate draft artifacts (FULL=1 for full).
+$(artifactsdir)/code-run: $(codefile) .dockerignore .gitignore Dockerfile requirements.txt ## Generate draft artifacts (FULL=1 for full).
 	mkdir -p $(artifactsdir)/
 	$(container_engine) container run \
 		$(debug_args) \
@@ -26,7 +26,7 @@ $(artifactsdir)/code-run: $(codefile) .dockerignore .gitignore Dockerfile requir
 		`$(container_engine) image build --quiet .` python3 $(codefile)
 	touch $(artifactsdir)/code-run
 
-$(artifactsdir)/code-format: $(codefile) ## 	Format $(codefile).
+$(artifactsdir)/code-format: $(codefile) ## Format $(codefile).
 	mkdir -p $(artifactsdir)/
 	$(container_engine) container run \
 		--env HOME=$(workdir)/$(artifactsdir) \
@@ -53,11 +53,11 @@ $(codefile):
 Dockerfile:
 	printf 'FROM python\nCOPY requirements.txt .\nRUN python3 -m pip install --no-cache-dir --upgrade pip && python3 -m pip install --no-cache-dir -r requirements.txt\n' > Dockerfile
 
-clean: ## 			Remove artifacts/ directory.
+clean: ## Remove $(artifactsdir) directory.
 	rm -rf $(artifactsdir)/
 
-help: ## 			Show all commands.
-	@grep '##' $(MAKEFILE_LIST) | sed 's/\(\:.*\#\#\)//' | sed 's/\$$(artifactsdir)/$(artifactsdir)/' | sed 's/\$$(codefile)/$(codefile)/' | grep -v grep
+help: ## Show all commands.
+	@sed 's/\$$(artifactsdir)/$(artifactsdir)/g; s/\$$(codefile)/$(codefile)/g' $(MAKEFILE_LIST) | grep '##' | grep -v grep | awk 'BEGIN {FS = ":.* ## "}; {printf "%-30s# %s\n", $$1, $$2}'
 
 requirements.txt:
 	touch requirements.txt
