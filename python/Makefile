@@ -34,12 +34,13 @@ $(artifactsdir)/code-format: $(codefile) ## Format $(codefile).
 		--user $(user_arg) \
 		--volume `pwd`:$(workdir)/ \
 		--workdir $(workdir)/ \
-		python /bin/bash -c '\
-		python3 -m pip install --no-cache-dir --upgrade pip && \
-		python3 -m pip install --no-cache-dir https://github.com/pbizopoulos/source_normalizer/archive/main.zip && \
-		$(artifactsdir)/.local/bin/source_normalizer $(codefile) > $(artifactsdir)/tmp.py && \
-		mv $(artifactsdir)/tmp.py $(codefile)'
+		`docker image build --quiet --tag code-format - <<< $$'FROM python\nRUN python3 -m pip install --no-cache-dir --upgrade pip https://github.com/pbizopoulos/source_normalizer/archive/main.zip'` /bin/bash -c 'source_normalizer $(codefile) > $(artifactsdir)/tmp.py && mv $(artifactsdir)/tmp.py $(codefile)'
 	touch $(artifactsdir)/code-format
+
+$(artifactsdir)/code-format-update: ## Update code-format.
+	docker image remove --force code-format
+	rm $(artifactsdir)/code-format
+	make $(artifactsdir)/code-format
 
 $(codefile):
 	printf "from os import environ\n\n\ndef main():\n    artifacts_dir = environ['ARTIFACTSDIR']\n    full = environ['FULL']\n\n\nif __name__ == '__main__':\n    main()\n" > $(codefile)
