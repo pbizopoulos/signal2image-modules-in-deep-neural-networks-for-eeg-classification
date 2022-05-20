@@ -4,43 +4,42 @@
 
 artifactsdir=artifacts
 codefile=main.py
-container_engine=docker # For podman first execute `printf 'unqualified-search-registries=["docker.io"]\n' > /etc/containers/registries.conf.d/docker.conf`
-debug_args=$(shell [ -t 0 ] && printf '%s' '--interactive --tty')
-gpus_arg=$(shell [ $(container_engine) = 'docker' ] && command -v nvidia-container-toolkit > /dev/null && printf '%s' '--gpus all')
-user_arg=$(shell [ $(container_engine) = 'docker' ] && printf '%s' '`id -u`:`id -g`')
-workdir=/app
+container_engine=docker # For podman first execute $(printf 'unqualified-search-registries=["docker.io"]\n' > /etc/containers/registries.conf.d/docker.conf)
+debug_args=$$([ -t 0 ] && printf '%s' '--interactive --tty')
+gpus_arg=$$([ $(container_engine) = 'docker' ] && command -v nvidia-container-toolkit > /dev/null && printf '%s' '--gpus all')
+user_arg=$$([ $(container_engine) = 'docker' ] && printf '%s' "--user $$(id -u):$$(id -g)")
+workdir=/work
 
 $(artifactsdir)/code-run: $(codefile) .dockerignore .gitignore Dockerfile requirements.txt ## Generate draft artifacts (FULL=1 for full).
 	mkdir -p $(artifactsdir)/
 	$(container_engine) container run \
 		$(debug_args) \
 		$(gpus_arg) \
+		$(user_arg) \
 		--detach-keys 'ctrl-^,ctrl-^' \
 		--env ARTIFACTSDIR=$(artifactsdir) \
 		--env FULL=$(FULL) \
 		--env HOME=$(workdir)/$(artifactsdir) \
 		--rm \
-		--user $(user_arg) \
-		--volume `pwd`:$(workdir)/ \
+		--volume $$(pwd):$(workdir)/ \
 		--workdir $(workdir)/ \
-		`$(container_engine) image build --quiet .` python3 $(codefile)
+		$$($(container_engine) image build --quiet .) python3 $(codefile)
 	touch $(artifactsdir)/code-run
 
 $(artifactsdir)/code-format: $(codefile) ## Format $(codefile).
 	mkdir -p $(artifactsdir)/
 	$(container_engine) container run \
+		$(user_arg) \
 		--env HOME=$(workdir)/$(artifactsdir) \
 		--rm \
-		--user $(user_arg) \
-		--volume `pwd`:$(workdir)/ \
+		--volume $$(pwd):$(workdir)/ \
 		--workdir $(workdir)/ \
-		`docker image build --quiet --tag code-format - <<< $$'FROM python\nRUN python3 -m pip install --no-cache-dir --upgrade pip https://github.com/pbizopoulos/source_normalizer/archive/main.zip'` /bin/bash -c 'source_normalizer $(codefile) > $(artifactsdir)/tmp.py && mv $(artifactsdir)/tmp.py $(codefile)'
+		python /bin/bash -c '\
+		python3 -m pip install --no-cache-dir --upgrade pip && \
+		python3 -m pip install --no-cache-dir https://github.com/pbizopoulos/source_normalizer/archive/main.zip && \
+		$(artifactsdir)/.local/bin/source_normalizer $(codefile) > $(artifactsdir)/tmp.py && \
+		mv $(artifactsdir)/tmp.py $(codefile)'
 	touch $(artifactsdir)/code-format
-
-$(artifactsdir)/code-format-update: ## Update code-format.
-	docker image remove --force code-format
-	rm $(artifactsdir)/code-format
-	make $(artifactsdir)/code-format
 
 $(codefile):
 	printf "from os import environ\n\n\ndef main():\n    artifacts_dir = environ['ARTIFACTSDIR']\n    full = environ['FULL']\n\n\nif __name__ == '__main__':\n    main()\n" > $(codefile)

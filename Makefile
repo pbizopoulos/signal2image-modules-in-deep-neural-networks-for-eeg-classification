@@ -5,32 +5,32 @@
 artifactsdir=artifacts
 bibfile=ms.bib
 codefile=ms.tex
-container_engine=docker # For podman first execute `printf 'unqualified-search-registries=["docker.io"]\n' > /etc/containers/registries.conf.d/docker.conf`
-user_arg=$(shell [ $(container_engine) = 'docker' ] && printf '%s' '`id -u`:`id -g`')
-workdir=/app
+container_engine=docker # For podman first execute $(printf 'unqualified-search-registries=["docker.io"]\n' > /etc/containers/registries.conf.d/docker.conf)
+user_arg=$$([ $(container_engine) = 'docker' ] && printf '%s' "--user $$(id -u):$$(id -g)")
+workdir=/work
 
 $(artifactsdir)/ms.pdf: $(bibfile) $(codefile) .dockerignore .gitignore ## Generate pdf document.
 	$(container_engine) container run \
+		$(user_arg) \
 		--rm \
-		--user $(user_arg) \
-		--volume `pwd`:$(workdir)/ \
+		--volume $$(pwd):$(workdir)/ \
 		--workdir $(workdir)/ \
 		texlive/texlive latexmk -gg -pdf -outdir=$(artifactsdir)/ $(codefile)
 
 $(artifactsdir)/ms.%: $(bibfile) $(codefile) ## Generate document using pandoc (replace % with the output format).
 	$(container_engine) container run \
+		$(user_arg) \
 		--rm \
-		--user $(user_arg) \
-		--volume `pwd`:$(workdir)/ \
+		--volume $$(pwd):$(workdir)/ \
 		--workdir $(workdir)/ \
 		pandoc/latex $(codefile) -o $@
 
 $(artifactsdir)/ms-server.pdf: ## Generate pdf document from server (SERVER_URL=https://arxiv.org/e-print/0000.00000 is required).
 	mkdir -p $(artifactsdir)/
 	$(container_engine) container run \
+		$(user_arg) \
 		--rm \
-		--user $(user_arg) \
-		--volume `pwd`:$(workdir)/ \
+		--volume $$(pwd):$(workdir)/ \
 		--workdir $(workdir)/ \
 		texlive/texlive /bin/bash -c '\
 		curl -L -o $(artifactsdir)/download.tar $(SERVER_URL) && \
@@ -43,19 +43,19 @@ $(artifactsdir)/ms-server.pdf: ## Generate pdf document from server (SERVER_URL=
 $(artifactsdir)/tex.tar: $(artifactsdir)/ms.pdf ## Generate tar file that contains the tex code.
 	cp $(artifactsdir)/ms.bbl .
 	$(container_engine) container run \
+		$(user_arg) \
 		--rm \
-		--user $(user_arg) \
-		--volume `pwd`:$(workdir)/ \
+		--volume $$(pwd):$(workdir)/ \
 		--workdir $(workdir)/ \
-		texlive/texlive /bin/bash -c 'tar cf $(artifactsdir)/tex.tar ms.bbl $(bibfile) $(codefile) `grep "^INPUT ./" $(artifactsdir)/ms.fls | uniq | cut -b 9-`'
+		texlive/texlive /bin/bash -c 'tar cf $(artifactsdir)/tex.tar ms.bbl $(bibfile) $(codefile) $$(grep "^INPUT ./" $(artifactsdir)/ms.fls | uniq | cut -b 9-)'
 	rm ms.bbl
 
 $(artifactsdir)/tex-lint: $(bibfile) $(codefile) ## Lint $(codefile).
 	mkdir -p $(artifactsdir)/
 	$(container_engine) container run \
+		$(user_arg) \
 		--rm \
-		--user $(user_arg) \
-		--volume `pwd`:$(workdir)/ \
+		--volume $$(pwd):$(workdir)/ \
 		--workdir $(workdir)/ \
 		texlive/texlive /bin/bash -c '\
 		chktex $(codefile) && \
