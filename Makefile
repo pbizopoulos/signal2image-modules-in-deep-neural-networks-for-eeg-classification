@@ -41,7 +41,7 @@ $(artifactsdir)/ms-server.pdf: ## Generate pdf document from server (SERVER_URL=
 	mv $(artifactsdir)/ms.pdf $(artifactsdir)/ms-server.pdf
 
 $(artifactsdir)/tex.tar: $(artifactsdir)/ms.pdf ## Generate tar file that contains the tex code.
-	cp $(artifactsdir)/ms.bbl .
+	touch $(artifactsdir)/ms.bbl && cp $(artifactsdir)/ms.bbl .
 	$(container_engine) container run \
 		$(user_arg) \
 		--rm \
@@ -72,7 +72,7 @@ $(bibfile):
 	touch $(bibfile)
 
 $(codefile):
-	printf "\documentclass{article}\n\\\begin{document}\nTitle\n\\\end{document}\n" > $(codefile)
+	printf "\\\documentclass{article}\n\n\\\begin{document}\nTitle\n\\\end{document}\n" > $(codefile)
 
 .dockerignore:
 	printf '*\n' > .dockerignore

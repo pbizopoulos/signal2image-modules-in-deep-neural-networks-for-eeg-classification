@@ -1,13 +1,13 @@
 .POSIX:
 
-.PHONY: $(artifactsdir)/code-requirements clean help
+.PHONY: clean help
 
 artifactsdir=artifacts
 codefile=main.py
 container_engine=docker # For podman first execute $(printf 'unqualified-search-registries=["docker.io"]\n' > /etc/containers/registries.conf.d/docker.conf)
-debug_args=$$([ -t 0 ] && printf '%s' '--interactive --tty')
-gpus_arg=$$([ $(container_engine) = 'docker' ] && command -v nvidia-container-toolkit > /dev/null && printf '%s' '--gpus all')
-user_arg=$$([ $(container_engine) = 'docker' ] && printf '%s' "--user $$(id -u):$$(id -g)")
+debug_args=$$(test -t 0 && printf '%s' '--interactive --tty')
+gpus_arg=$$(test $(container_engine) = 'docker' && command -v nvidia-container-toolkit > /dev/null && printf '%s' '--gpus all')
+user_arg=$$(test $(container_engine) = 'docker' && printf '%s' "--user $$(id -u):$$(id -g)")
 workdir=/work
 
 $(artifactsdir)/code-run: $(codefile) .dockerignore .gitignore Dockerfile requirements.txt ## Generate draft artifacts (FULL=1 for full).
@@ -42,7 +42,7 @@ $(artifactsdir)/code-format: $(codefile) ## Format $(codefile).
 	touch $(artifactsdir)/code-format
 
 $(codefile):
-	printf "from os import environ\n\n\ndef main():\n    artifacts_dir = environ['ARTIFACTSDIR']\n    full = environ['FULL']\n\n\nif __name__ == '__main__':\n    main()\n" > $(codefile)
+	printf "from os import environ\\n\\n\\ndef main():\\n    artifacts_dir = environ['ARTIFACTSDIR']\\n    full = environ['FULL']\\n\\n\\nif __name__ == '__main__':\\n    main()\\n" > $(codefile)
 
 .dockerignore:
 	printf '*\n!requirements.txt\n' > .dockerignore
