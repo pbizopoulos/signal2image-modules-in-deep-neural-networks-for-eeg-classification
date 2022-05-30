@@ -4,7 +4,7 @@ Signal2Image Modules in Deep Neural Networks for EEG Classification:
 - https://pbizopoulos.github.io/signal2image-modules-in-deep-neural-networks-for-eeg-classification/
 
 Requirements:
-- POSIX compliant shell (any of Bash, Dash, KornShell, Yash, Zsh)
+- POSIX compliant shell (ash, bash, dash, ksh, posh, yash or zsh)
 - Git (Any version)
 - Make (bmake or GNU Make)
 - Docker (Any version or >= 19.03 for NVIDIA Container Toolkit)
