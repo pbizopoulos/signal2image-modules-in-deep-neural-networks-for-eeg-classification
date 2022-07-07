@@ -1,0 +1,11 @@
+.block {
+	border-style: groove;
+	float: left;
+	height: 256px;
+	position: relative;
+	width: 256px;
+}
+
+#inputDiv:hover {
+	border-style: solid;
+}
