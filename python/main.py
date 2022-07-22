@@ -23,13 +23,40 @@ class Alexnet(nn.Module):
 
     def __init__(self, classes_num):
         super().__init__()
-        self.features = nn.Sequential(nn.Conv1d(1, 64, kernel_size=11, stride=4, padding=2), nn.ReLU(inplace=True), nn.MaxPool1d(kernel_size=3, stride=2), nn.Conv1d(64, 192, kernel_size=5, padding=2), nn.ReLU(inplace=True), nn.MaxPool1d(kernel_size=3, stride=2), nn.Conv1d(192, 384, kernel_size=3, padding=1), nn.ReLU(inplace=True), nn.Conv1d(384, 256, kernel_size=3, padding=1), nn.ReLU(inplace=True), nn.Conv1d(256, 256, kernel_size=3, padding=1), nn.ReLU(inplace=True), nn.MaxPool1d(kernel_size=3, stride=2))
-        self.classifier = nn.Sequential(nn.Dropout(), nn.Linear(256 * 4, 4096), nn.ReLU(inplace=True), nn.Dropout(), nn.Linear(4096, 4096), nn.ReLU(inplace=True), nn.Linear(4096, classes_num))
+        self.conv1 = nn.Conv1d(1, 64, kernel_size=11, stride=4, padding=2)
+        self.relu = nn.ReLU(inplace=True)
+        self.maxpool1d = nn.MaxPool1d(kernel_size=3, stride=2)
+        self.conv2 = nn.Conv1d(64, 192, kernel_size=5, padding=2)
+        self.conv3 = nn.Conv1d(192, 384, kernel_size=3, padding=1)
+        self.conv4 = nn.Conv1d(384, 256, kernel_size=3, padding=1)
+        self.conv5 = nn.Conv1d(256, 256, kernel_size=3, padding=1)
+        self.dropout = nn.Dropout()
+        self.linear1 = nn.Linear(256 * 4, 4096)
+        self.linear2 = nn.Linear(4096, 4096)
+        self.linear3 = nn.Linear(4096, classes_num)
 
     def forward(self, signal):
-        out = self.features(signal)
+        out = self.conv1(signal)
+        out = self.relu(out)
+        out = self.maxpool1d(out)
+        out = self.conv2(out)
+        out = self.relu(out)
+        out = self.maxpool1d(out)
+        out = self.conv3(out)
+        out = self.relu(out)
+        out = self.conv4(out)
+        out = self.relu(out)
+        out = self.conv5(out)
+        out = self.relu(out)
+        out = self.maxpool1d(out)
         out = out.view(out.size(0), 256 * 4)
-        out = self.classifier(out)
+        out = self.dropout(out)
+        out = self.linear1(out)
+        out = self.relu(out)
+        out = self.dropout(out)
+        out = self.linear2(out)
+        out = self.relu(out)
+        out = self.linear3(out)
         return out
 
 
@@ -335,7 +362,7 @@ class Transition(nn.Sequential):
 class UCIEpilepsy(Dataset):
 
     def __getitem__(self, index):
-        return (self.data[index], self.classes[index])
+        return (self.data[index], self.target[index])
 
     def __init__(self, artifacts_dir, samples_num, training_validation_test):
         data_file_path = join(artifacts_dir, 'data.csv')
@@ -351,17 +378,17 @@ class UCIEpilepsy(Dataset):
         last_validation_index = int(signals_all.shape[0] * 0.88)
         if training_validation_test == 'training':
             self.data = torch.tensor(signals_all.values[:last_training_index, :], dtype=torch.float)
-            self.classes = torch.tensor(classes_all[:last_training_index].values) - 1
+            self.target = torch.tensor(classes_all[:last_training_index].values) - 1
         elif training_validation_test == 'validation':
             self.data = torch.tensor(signals_all.values[last_training_index:last_validation_index, :], dtype=torch.float)
-            self.classes = torch.tensor(classes_all[last_training_index:last_validation_index].values) - 1
+            self.target = torch.tensor(classes_all[last_training_index:last_validation_index].values) - 1
         elif training_validation_test == 'test':
             self.data = torch.tensor(signals_all.values[last_validation_index:, :], dtype=torch.float)
-            self.classes = torch.tensor(classes_all[last_validation_index:].values) - 1
+            self.target = torch.tensor(classes_all[last_validation_index:].values) - 1
         self.data.unsqueeze_(1)
 
     def __len__(self):
-        return self.classes.shape[0]
+        return self.target.shape[0]
 
 
 class VGG(nn.Module):
@@ -434,17 +461,17 @@ def main():
     batch_size = 20
     signals_all_max = 2047
     signals_all_min = -1885
-    training_dataset = UCIEpilepsy(artifacts_dir, samples_num, 'training')
-    validation_dataset = UCIEpilepsy(artifacts_dir, samples_num, 'validation')
-    test_dataset = UCIEpilepsy(artifacts_dir, samples_num, 'test')
-    training_dataloader = DataLoader(dataset=training_dataset, batch_size=batch_size, shuffle=True)
-    validation_dataloader = DataLoader(dataset=validation_dataset, batch_size=batch_size)
-    test_dataloader = DataLoader(dataset=test_dataset, batch_size=batch_size)
-    criterion = nn.CrossEntropyLoss()
+    dataset_training = UCIEpilepsy(artifacts_dir, samples_num, 'training')
+    dataset_validation = UCIEpilepsy(artifacts_dir, samples_num, 'validation')
+    dataset_test = UCIEpilepsy(artifacts_dir, samples_num, 'test')
+    dataloader_training = DataLoader(dataset=dataset_training, batch_size=batch_size, shuffle=True)
+    validation_dataloader = DataLoader(dataset=dataset_validation, batch_size=batch_size)
+    dataloader_test = DataLoader(dataset=dataset_test, batch_size=batch_size)
+    cross_entropy_loss = nn.CrossEntropyLoss()
     model_base_name_list = ['lenet', 'alexnet', 'vgg11', 'vgg13', 'vgg16', 'vgg19', 'resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152', 'densenet121', 'densenet161', 'densenet169', 'densenet201']
     model_base_1d_list = [Lenet, Alexnet, vgg11, vgg13, vgg16, vgg19, resnet18, resnet34, resnet50, resnet101, resnet152, densenet121, densenet161, densenet169, densenet201]
     model_base_2d_list = [LeNet2D, models.alexnet, models.vgg11, models.vgg13, models.vgg16, models.vgg19, models.resnet18, models.resnet34, models.resnet50, models.resnet101, models.resnet152, models.densenet121, models.densenet161, models.densenet169, models.densenet201]
-    test_accuracy_array = np.zeros((5, 15))
+    accuracy_test_array = np.zeros((5, 15))
     for (model_base_name_index, model_base_name) in enumerate(model_base_name_list):
         for (model_module_name_index, model_module_name) in enumerate(['1D', 'signal-as-image', 'spectrogram', 'cnn-one-layer', 'cnn-two-layers']):
             model_file_name = f'{model_base_name}-{model_module_name}'
@@ -460,56 +487,62 @@ def main():
                 model = CNNTwoLayers(classes_num, model_base_2d_list[model_base_name_index](), model_file_name)
             model = model.to(device)
             optimizer = Adam(model.parameters())
-            best_validation_accuracy = -1
+            accuracy_validation_best = -1
             for epoch in range(epochs_num):
                 model.train()
-                for (signals, classes) in training_dataloader:
-                    signals = signals.to(device)
-                    classes = classes.to(device)
-                    outputs = model(signals)
-                    loss = criterion(outputs, classes)
+                for (data, target) in dataloader_training:
+                    data = data.to(device)
+                    target = target.to(device)
+                    output = model(data)
+                    loss = cross_entropy_loss(output, target)
                     optimizer.zero_grad()
                     loss.backward()
                     optimizer.step()
-                validation_loss_sum = 0
-                corrects = 0
+                loss_validation_sum = 0
+                predictions_correct_num = 0
+                predictions_num = 0
                 model.eval()
                 with torch.no_grad():
-                    for (signals, classes) in validation_dataloader:
-                        signals = signals.to(device)
-                        classes = classes.to(device)
-                        outputs = model(signals)
-                        loss = criterion(outputs, classes)
-                        corrects += sum(outputs.argmax(dim=1) == classes).item()
-                        validation_loss_sum += loss.item()
-                validation_accuracy = 100 * corrects / (batch_size * len(validation_dataloader))
-                validation_loss = validation_loss_sum / (batch_size * len(validation_dataloader))
-                if validation_accuracy > best_validation_accuracy:
-                    best_validation_accuracy = validation_accuracy
+                    for (data, target) in validation_dataloader:
+                        data = data.to(device)
+                        target = target.to(device)
+                        output = model(data)
+                        prediction = output.argmax(dim=1)
+                        predictions_correct_num += sum(prediction == target).item()
+                        predictions_num += output.shape[0]
+                        loss = cross_entropy_loss(output, target)
+                        loss_validation_sum += loss.item()
+                accuracy_validation = 100 * predictions_correct_num / predictions_num
+                loss_validation = loss_validation_sum / predictions_num
+                if accuracy_validation > accuracy_validation_best:
+                    accuracy_validation_best = accuracy_validation
                     torch.save(model.state_dict(), join(artifacts_dir, f'{model_file_name}.pt'))
             model.load_state_dict(torch.load(join(artifacts_dir, f'{model_file_name}.pt')))
+            loss_test_sum = 0
+            predictions_correct_num = 0
+            predictions_num = 0
             model.eval()
-            test_loss_sum = 0
-            corrects = 0
             with torch.no_grad():
-                for (signals, classes) in test_dataloader:
-                    signals = signals.to(device)
-                    classes = classes.to(device)
-                    outputs = model(signals)
-                    loss = criterion(outputs, classes)
-                    corrects += sum(outputs.argmax(dim=1) == classes).item()
-                    test_loss_sum += loss.item()
-            test_accuracy = 100 * corrects / (batch_size * len(test_dataloader))
-            test_loss = test_loss_sum / (batch_size * len(test_dataloader))
-            test_accuracy_array[model_module_name_index, model_base_name_index] = test_accuracy
+                for (data, target) in dataloader_test:
+                    data = data.to(device)
+                    target = target.to(device)
+                    output = model(data)
+                    prediction = output.argmax(dim=1)
+                    predictions_correct_num += sum(prediction == target).item()
+                    predictions_num += output.shape[0]
+                    loss = cross_entropy_loss(output, target)
+                    loss_test_sum += loss.item()
+            accuracy_test = 100 * predictions_correct_num / predictions_num
+            loss_test = loss_test_sum / predictions_num
+            accuracy_test_array[model_module_name_index, model_base_name_index] = accuracy_test
             if model_file_name == 'resnet34-1D':
-                save_tfjs_from_torch(artifacts_dir, training_dataset[0][0].unsqueeze(0), model, model_file_name)
+                save_tfjs_from_torch(artifacts_dir, dataset_training[0][0].unsqueeze(0), model, model_file_name)
                 if full:
                     rmtree(join('release', model_file_name))
                     move(join(artifacts_dir, model_file_name), join('release', model_file_name))
             if not full and model_file_name != 'alexnet-cnn-one-layer':
                 os.remove(join(artifacts_dir, f'{model_file_name}.pt'))
-    styler = pd.DataFrame(test_accuracy_array, index=['1D', '2D, signal as image', '2D, spectrogram', '2D, one layer CNN', '2D, two layer CNN'], columns=model_base_name_list).style
+    styler = pd.DataFrame(accuracy_test_array, index=['1D', '2D, signal as image', '2D, spectrogram', '2D, one layer CNN', '2D, two layer CNN'], columns=model_base_name_list).style
     styler.format(precision=1)
     styler.highlight_max(props='bfseries: ;')
     styler.to_latex(join(artifacts_dir, 'results.tex'), hrules=True)
