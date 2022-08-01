@@ -1,6 +1,6 @@
 matplotlib==3.5.2
 onnx-tf==1.10.0
 pandas==1.4.3
-scipy==1.8.1
+scipy==1.9.0
 tensorflow-probability==0.17.0
 tensorflowjs==3.18.0
