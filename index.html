@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta content="width=device-width, initial-scale=1" name="viewport">
+		<title>EEG signal classification</title>
+		<link href="data:," rel="icon">
+		<link href="https://pbizopoulos.github.io/style.css" rel="stylesheet">
+		<link href="style.css" rel="stylesheet">
+		<script defer src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+		<script defer src="https://d3js.org/d3.v7.min.js"></script>
+		<script defer src="script.js"></script>
+	</head>
+	<body>
+		<div class="div-header">
+			<nav>
+				<a href="https://pbizopoulos.github.io">Home page</a> / <b>EEG signal classification</b>
+			</nav>
+			<div class="div-source-code-link">
+				<a href="https://github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification">Source code</a>
+			</div>
+		</div>
+		<div>
+			<div class="block" id="inputControlDiv">
+				<div>NOT FOR MEDICAL USE. Choose a EEG csv file (.txt,.csv) and classify epilepsy using a DNN.</div>
+				<div>
+					<input accept=".txt,.csv" onchange="signalLoadView();" type="file">
+				</div>
+				<div id="modelDownloadFractionDiv">0%</div>
+				<div id="outputDiv"></div>
+			</div>
+			<div class="block" id="inputDiv"></div>
+		</div>
+	</body>
+</html>
