@@ -1,0 +1,15 @@
+.POSIX:
+
+.PHONY: all
+
+container_engine=docker # For podman first execute `printf 'unqualified-search-registries=["docker.io"]\n' > /etc/containers/registries.conf.d/docker.conf`
+work_dir=/app
+
+all:
+	$(container_engine) container run \
+		--detach-keys 'ctrl-^,ctrl-^' \
+		--publish 8000:8000 \
+		--rm \
+		--volume `pwd`:$(work_dir)/ \
+		--workdir $(work_dir)/ \
+		python /bin/bash -c 'python3 -m http.server --directory .'

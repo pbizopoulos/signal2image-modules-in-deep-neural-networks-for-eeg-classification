@@ -1,0 +1,6 @@
+.block {
+	border-style: solid;
+	float: left;
+	height: 256px;
+	width: 256px;
+}

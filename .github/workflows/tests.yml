@@ -1,0 +1,18 @@
+on: [push, pull_request]
+
+jobs:
+  make:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Set up Git repository
+        uses: actions/checkout@v3
+      - name: Test
+        run: |
+          make -C python/
+          make
+          cp artifacts/ms.pdf artifacts/ms-first-run.pdf
+          touch python/main.py
+          make -C python/
+          touch ms.tex
+          make
+          cmp artifacts/ms.pdf artifacts/ms-first-run.pdf
