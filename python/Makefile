@@ -25,7 +25,7 @@ $(artifacts_dir)/code-run: $(artifacts_dir) $(code_file_name) .dockerignore .git
 		$$($(container_engine) image build --quiet .) python3 $(code_file_name)
 	touch $(artifacts_dir)/code-run
 
-$(artifacts_dir)/code-format: $(artifacts_dir) $(code_file_name) ## Format $(code_file_name).
+$(artifacts_dir)/code-analyze: $(artifacts_dir) $(code_file_name) ## Analyze code.
 	$(container_engine) container run \
 		$(user_arg) \
 		--env HOME=$(work_dir)/$(artifacts_dir) \
@@ -37,13 +37,13 @@ $(artifacts_dir)/code-format: $(artifacts_dir) $(code_file_name) ## Format $(cod
 		python3 -m pip install --no-cache-dir https://github.com/pbizopoulos/source-code-simplifier/archive/main.zip && \
 		$(artifacts_dir)/.local/bin/source_code_simplifier $(code_file_name) > $(artifacts_dir)/tmp.py && \
 		mv $(artifacts_dir)/tmp.py $(code_file_name)'
-	touch $(artifacts_dir)/code-format
+	touch $(artifacts_dir)/code-analyze
 
-clean: ## Remove $(artifacts_dir) directory.
+clean: ## Remove dependent directories.
 	rm -rf $(artifacts_dir)/
 
 help: ## Show all commands.
-	@sed -n '/sed/d; s/\$$(artifacts_dir)/$(artifacts_dir)/g; s/\$$(code_file_name)/$(code_file_name)/g; /##/p' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.* ## "}; {printf "%-30s# %s\n", $$1, $$2}'
+	@sed -n '/sed/d; s/\$$(artifacts_dir)/$(artifacts_dir)/g; /##/p' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.* ## "}; {printf "%-30s# %s\n", $$1, $$2}'
 
 $(artifacts_dir):
 	mkdir $(artifacts_dir)

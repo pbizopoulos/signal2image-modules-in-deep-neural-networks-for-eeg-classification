@@ -49,7 +49,7 @@ $(artifacts_dir)/tex.tar: $(artifacts_dir)/ms.pdf ## Generate tar file that cont
 		texlive/texlive /bin/bash -c 'tar cf $(artifacts_dir)/tex.tar ms.bbl $(bib_file_name) $(code_file_name) $$(grep "^INPUT ./" $(artifacts_dir)/ms.fls | uniq | cut -b 9-)'
 	rm ms.bbl
 
-$(artifacts_dir)/tex-lint: $(artifacts_dir) $(bib_file_name) $(code_file_name) ## Lint $(code_file_name).
+$(artifacts_dir)/code-analyze: $(artifacts_dir) $(bib_file_name) $(code_file_name) ## Analyze code.
 	$(container_engine) container run \
 		$(user_arg) \
 		--rm \
@@ -58,7 +58,7 @@ $(artifacts_dir)/tex-lint: $(artifacts_dir) $(bib_file_name) $(code_file_name) #
 		texlive/texlive /bin/bash -c '\
 		chktex $(code_file_name) && \
 		lacheck $(code_file_name)'
-	touch $(artifacts_dir)/tex-lint
+	touch $(artifacts_dir)/code-analyze
 
 $(artifacts_dir)/texlive-update: ## Update texlive container image.
 	$(container_engine) image pull texlive/texlive
@@ -66,11 +66,11 @@ $(artifacts_dir)/texlive-update: ## Update texlive container image.
 $(artifacts_dir)/pandoc-update: ## Update pandoc container image.
 	$(container_engine) image pull pandoc/latex
 
-clean: ## Remove $(artifacts_dir) directory.
+clean: ## Remove dependent directories.
 	rm -rf $(artifacts_dir)/
 
 help: ## Show all commands.
-	@sed -n '/sed/d; s/\$$(artifacts_dir)/$(artifacts_dir)/g; s/\$$(code_file_name)/$(code_file_name)/g; /##/p' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.* ## "}; {printf "%-30s# %s\n", $$1, $$2}'
+	@sed -n '/sed/d; s/\$$(artifacts_dir)/$(artifacts_dir)/g; /##/p' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.* ## "}; {printf "%-30s# %s\n", $$1, $$2}'
 
 $(artifacts_dir):
 	mkdir $(artifacts_dir)
