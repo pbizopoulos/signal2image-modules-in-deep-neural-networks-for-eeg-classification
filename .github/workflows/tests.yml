@@ -13,6 +13,6 @@ jobs:
           make check -f Makefile.html
       - name: Test binary reproducibility
         run: |
-          make -C python/ && make && cp artifacts/ms.pdf artifacts/ms-first-run.pdf
+          make -C python/ && make && cp bin/ms.pdf bin/ms-first-run.pdf
           touch python/main.py ms.tex
-          make -C python/ && make && cmp artifacts/ms.pdf artifacts/ms-first-run.pdf
+          make -C python/ && make && cmp bin/ms.pdf bin/ms-first-run.pdf
