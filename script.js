@@ -4,7 +4,7 @@ const canvasHeight = 256;
 const canvasWidth = 256;
 const classNames = ['Open', 'Closed', 'Healthy', 'Tumor', 'Epilepsy'];
 const inputDiv = document.getElementById('inputDiv');
-const inputFileName = 'python/release/eeg-classification-example-data.txt';
+const inputFileName = 'python/dist/eeg-classification-example-data.txt';
 const signalFileReader = new FileReader();
 let csvDataset;
 let csvDatasetMax;
@@ -39,7 +39,7 @@ function drawSignal(text) {
 
 async function loadModel(predictFunction) {
 	const loadModelFunction = tf.loadGraphModel;
-	model = await loadModelFunction('python/release/resnet34-1D/model.json', {
+	model = await loadModelFunction('python/dist/resnet34-1D/model.json', {
 		onProgress: function (fraction) {
 			document.getElementById('modelDownloadFractionDiv').textContent = `Downloading model, please wait ${Math.round(100*fraction)}%.`;
 			if (fraction == 1) {

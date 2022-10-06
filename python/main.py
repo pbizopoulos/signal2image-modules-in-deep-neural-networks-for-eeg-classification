@@ -364,8 +364,8 @@ class UCIEpilepsy(Dataset):
     def __getitem__(self, index):
         return (self.data[index], self.target[index])
 
-    def __init__(self, artifacts_dir, samples_num, training_validation_test):
-        data_file_path = join(artifacts_dir, 'data.csv')
+    def __init__(self, samples_num, training_validation_test):
+        data_file_path = join('bin', 'data.csv')
         if not os.path.isfile(data_file_path):
             with open(data_file_path, 'wb') as file:
                 response = requests.get('https://web.archive.org/web/20200318000445/http://archive.ics.uci.edu/ml/machine-learning-databases/00388/data.csv')
@@ -445,7 +445,6 @@ def densenet201(classes_num):
 
 
 def main():
-    artifacts_dir = environ['ARTIFACTS_DIR']
     full = environ['FULL']
     samples_num = 11500
     epochs_num = 100
@@ -461,9 +460,9 @@ def main():
     batch_size = 20
     signals_all_max = 2047
     signals_all_min = -1885
-    dataset_training = UCIEpilepsy(artifacts_dir, samples_num, 'training')
-    dataset_validation = UCIEpilepsy(artifacts_dir, samples_num, 'validation')
-    dataset_test = UCIEpilepsy(artifacts_dir, samples_num, 'test')
+    dataset_training = UCIEpilepsy(samples_num, 'training')
+    dataset_validation = UCIEpilepsy(samples_num, 'validation')
+    dataset_test = UCIEpilepsy(samples_num, 'test')
     dataloader_training = DataLoader(dataset=dataset_training, batch_size=batch_size, shuffle=True)
     validation_dataloader = DataLoader(dataset=dataset_validation, batch_size=batch_size)
     dataloader_test = DataLoader(dataset=dataset_test, batch_size=batch_size)
@@ -516,8 +515,8 @@ def main():
                 loss_validation = loss_validation_sum / predictions_num
                 if accuracy_validation > accuracy_validation_best:
                     accuracy_validation_best = accuracy_validation
-                    torch.save(model.state_dict(), join(artifacts_dir, f'{model_file_name}.pt'))
-            model.load_state_dict(torch.load(join(artifacts_dir, f'{model_file_name}.pt')))
+                    torch.save(model.state_dict(), join('bin', f'{model_file_name}.pt'))
+            model.load_state_dict(torch.load(join('bin', f'{model_file_name}.pt')))
             loss_test_sum = 0
             predictions_correct_num = 0
             predictions_num = 0
@@ -536,17 +535,17 @@ def main():
             loss_test = loss_test_sum / predictions_num
             accuracy_test_array[model_module_name_index, model_base_name_index] = accuracy_test
             if model_file_name == 'resnet34-1D':
-                save_tfjs_from_torch(artifacts_dir, dataset_training[0][0].unsqueeze(0), model, model_file_name)
+                save_tfjs_from_torch(dataset_training[0][0].unsqueeze(0), model, model_file_name)
                 if full:
-                    rmtree(join('release', model_file_name))
-                    move(join(artifacts_dir, model_file_name), join('release', model_file_name))
+                    rmtree(join('dist', model_file_name))
+                    move(join('bin', model_file_name), join('dist', model_file_name))
             if not full and model_file_name != 'alexnet-cnn-one-layer':
-                os.remove(join(artifacts_dir, f'{model_file_name}.pt'))
+                os.remove(join('bin', f'{model_file_name}.pt'))
     styler = pd.DataFrame(accuracy_test_array, index=['1D', '2D, signal as image', '2D, spectrogram', '2D, one layer CNN', '2D, two layer CNN'], columns=model_base_name_list).style
     styler.format(precision=1)
     styler.highlight_max(props='bfseries: ;')
-    styler.to_latex(join(artifacts_dir, 'results.tex'), hrules=True)
-    dataset = pd.read_csv(join(artifacts_dir, 'data.csv'))
+    styler.to_latex(join('bin', 'results.tex'), hrules=True)
+    dataset = pd.read_csv(join('bin', 'data.csv'))
     signals_all = dataset.drop(columns=['Unnamed: 0', 'y'])
     classes_all = dataset['y']
     signals_all = torch.tensor(signals_all.values, dtype=torch.float)
@@ -559,7 +558,7 @@ def main():
         plt.axis('off')
         plt.xlim([0, signals_all.shape[-1] - 1])
         plt.ylim([-1000, 1000])
-        plt.savefig(join(artifacts_dir, f'signal-{class_name}.png'))
+        plt.savefig(join('bin', f'signal-{class_name}.png'))
         plt.close()
         signals_all_min = -1000
         signals_all_max = 1000
@@ -570,15 +569,15 @@ def main():
         for index in range(signals_all.shape[-1]):
             data[signals_all.shape[-1] - 1 - signal[index], index] = 255
         plt.figure()
-        plt.imsave(join(artifacts_dir, f'signal-as-image-{class_name}.png'), data, cmap='gray')
+        plt.imsave(join('bin', f'signal-as-image-{class_name}.png'), data, cmap='gray')
         plt.close()
         (f_array, t_array, Sxx) = spectrogram(signals_all[signal_index], fs=signals_all.shape[-1], noverlap=4, nperseg=8, nfft=64, mode='magnitude')
         data = np.array(Image.fromarray(Sxx[0]).resize((signals_all.shape[-1], signals_all.shape[-1]), resample=1))
         plt.figure()
-        plt.imsave(join(artifacts_dir, f'spectrogram-{class_name}.png'), data, cmap='gray')
+        plt.imsave(join('bin', f'spectrogram-{class_name}.png'), data, cmap='gray')
         plt.close()
         model = CNNOneLayer(classes_num, models.alexnet(), 'alexnet-cnn-one-layer')
-        model.load_state_dict(torch.load(join(artifacts_dir, 'alexnet-cnn-one-layer.pt')))
+        model.load_state_dict(torch.load(join('bin', 'alexnet-cnn-one-layer.pt')))
         signal = signals_all[signal_index].unsqueeze(0)
         hook = Hook()
         model.conv.register_forward_hook(hook)
@@ -586,7 +585,7 @@ def main():
         data = hook.outputs[0][0, 0].cpu().detach().numpy()
         data = np.array(Image.fromarray(data).resize((signals_all.shape[-1], signals_all.shape[-1]), resample=1))
         plt.figure()
-        plt.imsave(join(artifacts_dir, f'cnn-{class_name}.png'), data, cmap='gray')
+        plt.imsave(join('bin', f'cnn-{class_name}.png'), data, cmap='gray')
         plt.close()
 
 
@@ -638,8 +637,8 @@ def resnet50(classes_num):
     return model
 
 
-def save_tfjs_from_torch(artifacts_dir, example_input, model, model_file_name):
-    model_file_path = join(artifacts_dir, model_file_name)
+def save_tfjs_from_torch(example_input, model, model_file_name):
+    model_file_path = join('bin', model_file_name)
     os.makedirs(model_file_path, exist_ok=True)
     torch.onnx.export(model.cpu(), example_input, join(model_file_path, 'model.onnx'), export_params=True, opset_version=11)
     model_onnx = onnx.load(join(model_file_path, 'model.onnx'))

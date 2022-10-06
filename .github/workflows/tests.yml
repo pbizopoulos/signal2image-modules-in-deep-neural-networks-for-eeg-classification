@@ -6,13 +6,13 @@ jobs:
     steps:
       - name: Set up Git repository
         uses: actions/checkout@v3
-      - name: Test
+      - name: Check code
         run: |
-          make -C python/
-          make
-          cp artifacts/ms.pdf artifacts/ms-first-run.pdf
-          touch python/main.py
-          make -C python/
-          touch ms.tex
-          make
-          cmp artifacts/ms.pdf artifacts/ms-first-run.pdf
+          make check -C python/
+          make check
+          make check -f Makefile.html
+      - name: Test binary reproducibility
+        run: |
+          make -C python/ && make && cp artifacts/ms.pdf artifacts/ms-first-run.pdf
+          touch python/main.py ms.tex
+          make -C python/ && make && cmp artifacts/ms.pdf artifacts/ms-first-run.pdf
