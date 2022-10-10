@@ -17,4 +17,4 @@ sudo systemctl start docker
 # Usage
 make help -C python/		# Show help for python.
 make help			# Show help for tex.
-make help -f Makefile.html	# Show help for html.
+make help -f Makefile.browser	# Show help for browser.
