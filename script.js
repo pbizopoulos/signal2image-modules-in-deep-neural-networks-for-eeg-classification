@@ -6,6 +6,7 @@ const classNames = ['Open', 'Closed', 'Healthy', 'Tumor', 'Epilepsy'];
 const inputDiv = document.getElementById('inputDiv');
 const inputFileName = 'python/dist/eeg-classification-example-data.txt';
 const signalFileReader = new FileReader();
+const signalInputFile = document.getElementById('signalInputFile');
 let csvDataset;
 let csvDatasetMax;
 let csvDatasetMin;
@@ -67,21 +68,21 @@ async function predictView() {
 	document.getElementById('outputDiv').textContent = '';
 	for (let i = 0; i < classProbabilities[0].length; i++) {
 		let elementDiv = document.createElement('div');
-		elementDiv.textContent = `${classNames[i]}: ${(classProbabilities[0][i]).toFixed(2)}%`
+		elementDiv.textContent = `${classNames[i]}: ${(classProbabilities[0][i]).toFixed(2)}%`;
 		document.getElementById('outputDiv').append(elementDiv);
-	}
-}
-
-function signalLoadView() {
-	const files = event.currentTarget.files;
-	if (files[0]) {
-		signalFileReader.readAsText(files[0]);
 	}
 }
 
 signalFileReader.onload = function() {
 	drawSignal(signalFileReader.result);
 	predictView();
+};
+
+signalInputFile.onchange = function() {
+	const files = event.currentTarget.files;
+	if (files[0]) {
+		signalFileReader.readAsText(files[0]);
+	}
 };
 
 const inputSvg = d3.select('#inputDiv')
@@ -96,8 +97,8 @@ d3.select('#inputDiv')
 		.on('start', (event) => {
 			event.on('drag', () => {
 				const buffer = tf.buffer(csvDataset.shape, csvDataset.dtype, csvDataset.dataSync());
-				const x = window.event.clientX - inputDiv.getBoundingClientRect().x
-				const y = window.event.clientY - inputDiv.getBoundingClientRect().y
+				const x = window.event.clientX - inputDiv.getBoundingClientRect().x;
+				const y = window.event.clientY - inputDiv.getBoundingClientRect().y;
 				buffer.set(csvDatasetMax - csvDatasetMax*y/canvasHeight, Math.round(csvDataset.size*x/canvasWidth));
 				tf.dispose(csvDataset);
 				csvDataset = buffer.toTensor();
@@ -112,5 +113,5 @@ fetch(inputFileName)
 	.then((text) => {
 		drawSignal(text);
 		predictView();
-	})
+	});
 loadModel(predictView);
