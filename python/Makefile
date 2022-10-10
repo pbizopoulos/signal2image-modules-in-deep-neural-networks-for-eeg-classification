@@ -2,21 +2,25 @@
 
 .PHONY: all check clean help
 
-container_engine=docker # For podman first execute $(printf 'unqualified-search-registries=["docker.io"]\n' > /etc/containers/registries.conf.d/docker.conf)
-debug_args=$$(test -t 0 && printf '%s' '--interactive --tty')
-gpus_arg=$$(test $(container_engine) = 'docker' && command -v nvidia-container-toolkit > /dev/null && printf '%s' '--gpus all')
-user_arg=$$(test $(container_engine) = 'docker' && printf '%s' "--user $$(id -u):$$(id -g)")
-work_dir=/work
+container_engine = docker # For podman first execute $(printf 'unqualified-search-registries=["docker.io"]\n' > /etc/containers/registries.conf.d/docker.conf)
+debug = 1
+debug_args = $$(test -t 0 && printf '%s' '--interactive --tty')
+gpus_arg = $$(test $(container_engine) = 'docker' && command -v nvidia-container-toolkit > /dev/null && printf '%s' '--gpus all')
+user_arg = $$(test $(container_engine) = 'docker' && printf '%s' "--user $$(id -u):$$(id -g)")
+work_dir = /work
 
-all: bin/all ## Build binaries.
+all: bin/all
 
-check: bin/check ## Check code.
+check: bin/check
 
-clean: ## Remove binaries.
+clean:
 	rm -rf bin/
 
-help: ## Show help.
-	@sed -n '/sed/d; /##/p' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.* ## "}; {printf "make %-10s# %s\n", $$1, $$2}'
+help:
+	@printf 'make all 	# Build binaries (debug=0 for disabling debug).\n'
+	@printf 'make check 	# Check code.\n'
+	@printf 'make clean 	# Remove binaries.\n'
+	@printf 'make help 	# Show help.\n'
 
 .dockerignore:
 	printf '*\n!requirements.txt\n' > .dockerignore
@@ -33,8 +37,8 @@ bin/all: .dockerignore .gitignore bin Dockerfile main.py requirements.txt
 		$(gpus_arg) \
 		$(user_arg) \
 		--detach-keys 'ctrl-^,ctrl-^' \
-		--env FULL=$(FULL) \
 		--env HOME=$(work_dir)/bin \
+		--env debug=$(debug) \
 		--rm \
 		--volume $$(pwd):$(work_dir)/ \
 		--workdir $(work_dir)/ \
@@ -59,7 +63,7 @@ Dockerfile:
 	printf 'FROM python\nCOPY requirements.txt .\nRUN python3 -m pip install --no-cache-dir --upgrade pip && python3 -m pip install --no-cache-dir -r requirements.txt\n' > Dockerfile
 
 main.py:
-	printf "from os import environ\\n\\n\\ndef main():\\n    full = environ['FULL']\\n\\n\\nif __name__ == '__main__':\\n    main()\\n" > main.py
+	printf "from os import environ\\n\\n\\ndef main():\\n    debug = environ['debug']\\n\\n\\nif __name__ == '__main__':\\n    main()\\n" > main.py
 
 requirements.txt:
 	touch requirements.txt

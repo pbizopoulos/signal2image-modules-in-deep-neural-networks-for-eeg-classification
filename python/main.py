@@ -445,10 +445,9 @@ def densenet201(classes_num):
 
 
 def main():
-    full = environ['FULL']
     samples_num = 11500
     epochs_num = 100
-    if not full:
+    if environ['debug']:
         samples_num = 10
         epochs_num = 1
     np.random.seed(0)
@@ -536,10 +535,10 @@ def main():
             accuracy_test_array[model_module_name_index, model_base_name_index] = accuracy_test
             if model_file_name == 'resnet34-1D':
                 save_tfjs_from_torch(dataset_training[0][0].unsqueeze(0), model, model_file_name)
-                if full:
+                if not environ['debug']:
                     rmtree(join('dist', model_file_name))
                     move(join('bin', model_file_name), join('dist', model_file_name))
-            if not full and model_file_name != 'alexnet-cnn-one-layer':
+            if environ['debug'] and model_file_name != 'alexnet-cnn-one-layer':
                 os.remove(join('bin', f'{model_file_name}.pt'))
     styler = pd.DataFrame(accuracy_test_array, index=['1D', '2D, signal as image', '2D, spectrogram', '2D, one layer CNN', '2D, two layer CNN'], columns=model_base_name_list).style
     styler.format(precision=1)

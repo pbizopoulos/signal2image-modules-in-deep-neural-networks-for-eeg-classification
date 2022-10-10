@@ -6,12 +6,12 @@ jobs:
     steps:
       - name: Set up Git repository
         uses: actions/checkout@v3
-      - name: Check code
+      - name: Check code.
         run: |
           make check -C python/
           make check
           make check -f Makefile.html
-      - name: Test binary reproducibility
+      - name: Test binaries reproducibility.
         run: |
           make -C python/ && make && cp bin/ms.pdf bin/ms-first-run.pdf
           touch python/main.py ms.tex
