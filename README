@@ -15,6 +15,6 @@ cd signal2image-modules-in-deep-neural-networks-for-eeg-classification/
 sudo systemctl start docker
 
 # Usage
-make help -C python/		# Show help for python.
-make help			# Show help for tex.
-make help -f Makefile.browser	# Show help for browser.
+make help -C docs/	# Show help for browser.
+make help -C python/	# Show help for python.
+make help		# Show help for tex.

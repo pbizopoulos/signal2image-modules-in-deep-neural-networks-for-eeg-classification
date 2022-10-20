@@ -8,8 +8,8 @@ jobs:
         uses: actions/checkout@v3
       - name: Check code and build binaries for browser.
         run: |
-          make -f Makefile.browser check
-          make -f Makefile.browser
+          make -C docs/ check
+          make -C docs/
       - name: Check code and build binaries for python.
         run: |
           make -C python/ check
