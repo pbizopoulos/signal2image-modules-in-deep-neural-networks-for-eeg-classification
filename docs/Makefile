@@ -3,15 +3,19 @@
 .PHONY: all check clean help
 
 container_engine = docker # For podman first execute `printf 'unqualified-search-registries=["docker.io"]\n' > /etc/containers/registries.conf.d/docker.conf`
-css_target = $$(test -s style.css && printf '%s' 'bin/check-css')
+css_file_name = style.css
+css_target = $$(test -s $(css_file_name) && printf '%s' 'bin/check-css')
 debug = 1
 debug_args = $$(test -t 0 && printf '%s' '--interactive --tty')
-js_target = $$(test -s script.js && printf '%s' 'bin/check-js')
+html_file_name = index.html
+html_target = $$(test -s $(html_file_name) && printf '%s' 'bin/check-html')
+js_file_name = script.js
+js_target = $$(test -s $(js_file_name) && printf '%s' 'bin/check-js')
 npx_timeout_command = $$(test $(debug) = 1 && printf '%s' '& sleep 1; kill $$!')
 user_arg = $$(test $(container_engine) = 'docker' && printf '%s' "--user $$(id -u):$$(id -g)")
 work_dir = /work
 
-all: .dockerignore .gitignore bin/cert.pem index.html
+all: .dockerignore .gitignore bin/cert.pem
 	$(container_engine) container run \
 		$(debug_args) \
 		$(user_arg) \
@@ -52,9 +56,9 @@ bin/cert.pem: bin
 		alpine/openssl req -newkey rsa:2048 -subj "/C=../ST=../L=.../O=.../OU=.../CN=.../emailAddress=..." -new -nodes -x509 -days 3650 -keyout bin/key.pem -out bin/cert.pem
 
 bin/check: .dockerignore .gitignore bin
-	make -f $(MAKEFILE_LIST) bin/check-html $(css_target) $(js_target)
+	$(MAKE) $(css_target) $(html_target) $(js_target)
 
-bin/check-css: .dockerignore .gitignore bin style.css
+bin/check-css: .dockerignore .gitignore bin $(css_file_name)
 	$(container_engine) container run \
 		$(debug_args) \
 		$(user_arg) \
@@ -63,10 +67,10 @@ bin/check-css: .dockerignore .gitignore bin style.css
 		--rm \
 		--volume $$(pwd):$(work_dir)/ \
 		--workdir $(work_dir)/ \
-		node npx --yes css-validator --profile css3svg style.css
+		node npx --yes css-validator --profile css3svg $(css_file_name)
 	touch bin/check-css
 
-bin/check-html: .dockerignore .gitignore bin index.html
+bin/check-html: .dockerignore .gitignore bin $(html_file_name)
 	$(container_engine) container run \
 		$(debug_args) \
 		$(user_arg) \
@@ -75,10 +79,10 @@ bin/check-html: .dockerignore .gitignore bin index.html
 		--rm \
 		--volume $$(pwd):$(work_dir)/ \
 		--workdir $(work_dir)/ \
-		node npx --yes html-validate index.html
+		node npx --yes html-validate $(html_file_name)
 	touch bin/check-html
 
-bin/check-js: .dockerignore .gitignore bin bin/eslintrc.js script.js
+bin/check-js: .dockerignore .gitignore bin bin/eslintrc.js $(js_file_name)
 	$(container_engine) container run \
 		$(debug_args) \
 		$(user_arg) \
@@ -87,11 +91,8 @@ bin/check-js: .dockerignore .gitignore bin bin/eslintrc.js script.js
 		--rm \
 		--volume $$(pwd):$(work_dir)/ \
 		--workdir $(work_dir)/ \
-		node npx --yes eslint --fix --config bin/eslintrc.js script.js
+		node npx --yes eslint --fix --config bin/eslintrc.js $(js_file_name)
 	touch bin/check-js
 
 bin/eslintrc.js: bin
 	echo 'module.exports = { "env": { "browser": true, "es2021": true }, "extends": "eslint:recommended", "overrides": [ ], "parserOptions": { "ecmaVersion": "latest" }, "rules": { "indent": [ "error", "tab" ], "linebreak-style": [ "error", "unix" ], "quotes": [ "error", "single" ], "semi": [ "error", "always" ], "no-undef": 0 } }' > bin/eslintrc.js
-
-index.html:
-	touch index.html
