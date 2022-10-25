@@ -3,11 +3,12 @@
 const canvasHeight = 256;
 const canvasWidth = 256;
 const classNames = ['Open', 'Closed', 'Healthy', 'Tumor', 'Epilepsy'];
-const inputDiv = document.getElementById('inputDiv');
-const inputFileName = 'https://raw.githubusercontent.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/main/python/dist/eeg-classification-example-data.txt'
-
+const inputDiv = document.getElementById('input-div');
+const inputFileName = 'https://raw.githubusercontent.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/main/python/dist/eeg-classification-example-data.txt';
+const modelDownloadFractionDiv = document.getElementById('model-download-fraction-div');
+const outputDiv = document.getElementById('output-div');
 const signalFileReader = new FileReader();
-const signalInputFile = document.getElementById('signalInputFile');
+const signalInputFile = document.getElementById('signal-input-file');
 let csvDataset;
 let csvDatasetMax;
 let csvDatasetMin;
@@ -15,7 +16,7 @@ let line;
 let model;
 
 function disableUI(argument) {
-	const nodes = document.getElementById('inputControlDiv').getElementsByTagName('*');
+	const nodes = document.getElementById('input-control-div').getElementsByTagName('*');
 	for(let i = 0; i < nodes.length; i++){
 		nodes[i].disabled = argument;
 	}
@@ -35,7 +36,7 @@ function drawSignal(text) {
 	line = d3.line()
 		.x((d,i) => x(i))
 		.y(d => y(d));
-	d3.select('#pathInput')
+	d3.select('#path-input')
 		.attr('d', line(csvDataset.arraySync()));
 }
 
@@ -43,9 +44,9 @@ async function loadModel(predictFunction) {
 	const loadModelFunction = tf.loadGraphModel;
 	model = await loadModelFunction('https://raw.githubusercontent.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/main/python/dist/resnet34-1D/model.json', {
 		onProgress: function (fraction) {
-			document.getElementById('modelDownloadFractionDiv').textContent = `Downloading model, please wait ${Math.round(100*fraction)}%.`;
+			modelDownloadFractionDiv.textContent = `Downloading model, please wait ${Math.round(100*fraction)}%.`;
 			if (fraction == 1) {
-				document.getElementById('modelDownloadFractionDiv').textContent = 'Model downloaded.';
+				modelDownloadFractionDiv.textContent = 'Model downloaded.';
 			}
 			disableUI(true);
 		}
@@ -66,11 +67,11 @@ async function predictView() {
 	csvDatasetTmp = csvDatasetTmp.reshape([1, 1, model.inputs[0].shape[2]]);
 	const modelOutput = await model.executeAsync(csvDatasetTmp);
 	const classProbabilities = modelOutput.softmax().mul(100).arraySync();
-	document.getElementById('outputDiv').textContent = '';
+	outputDiv.textContent = '';
 	for (let i = 0; i < classProbabilities[0].length; i++) {
 		let elementDiv = document.createElement('div');
 		elementDiv.textContent = `${classNames[i]}: ${(classProbabilities[0][i]).toFixed(2)}%`;
-		document.getElementById('outputDiv').append(elementDiv);
+		outputDiv.append(elementDiv);
 	}
 }
 
@@ -86,14 +87,14 @@ signalInputFile.onchange = function() {
 	}
 };
 
-const inputSvg = d3.select('#inputDiv')
+const inputSvg = d3.select('#input-div')
 	.append('svg')
 	.attr('viewBox', [0, 0, canvasWidth, canvasHeight]);
 inputSvg.append('path')
-	.attr('id', 'pathInput')
+	.attr('id', 'path-input')
 	.style('fill', 'none')
 	.style('stroke', 'blue');
-d3.select('#inputDiv')
+d3.select('#input-div')
 	.call(d3.drag()
 		.on('start', (event) => {
 			event.on('drag', () => {
@@ -103,7 +104,7 @@ d3.select('#inputDiv')
 				buffer.set(csvDatasetMax - csvDatasetMax*y/canvasHeight, Math.round(csvDataset.size*x/canvasWidth));
 				tf.dispose(csvDataset);
 				csvDataset = buffer.toTensor();
-				d3.select('#pathInput')
+				d3.select('#path-input')
 					.attr('d', line(csvDataset.arraySync()));
 				predictView();
 			});
