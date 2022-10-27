@@ -2,10 +2,11 @@
 
 .PHONY: all check clean help
 
-container_engine = docker # For podman first execute $(printf 'unqualified-search-registries=["docker.io"]\n' > /etc/containers/registries.conf.d/docker.conf)
+container_engine = docker
 debug = 1
 debug_args = $$(test -t 0 && printf '%s' '--interactive --tty')
 gpus_arg = $$(test $(container_engine) = 'docker' && command -v nvidia-container-toolkit > /dev/null && printf '%s' '--gpus all')
+python_file_name = main.py
 user_arg = $$(test $(container_engine) = 'docker' && printf '%s' "--user $$(id -u):$$(id -g)")
 work_dir = /work
 
@@ -22,6 +23,9 @@ help:
 	@printf 'make clean 	# Remove binaries.\n'
 	@printf 'make help 	# Show help.\n'
 
+$(python_file_name):
+	printf "from os import environ\\n\\n\\ndef main():\\n    debug = environ['debug']\\n\\n\\nif __name__ == '__main__':\\n    main()\\n" > $(python_file_name)
+
 .dockerignore:
 	printf '*\n!requirements.txt\n' > .dockerignore
 
@@ -31,7 +35,7 @@ help:
 bin:
 	mkdir bin
 
-bin/all: .dockerignore .gitignore bin Dockerfile main.py requirements.txt
+bin/all: $(python_file_name) .dockerignore .gitignore bin Dockerfile requirements.txt
 	$(container_engine) container run \
 		$(debug_args) \
 		$(gpus_arg) \
@@ -42,10 +46,10 @@ bin/all: .dockerignore .gitignore bin Dockerfile main.py requirements.txt
 		--rm \
 		--volume $$(pwd):$(work_dir)/ \
 		--workdir $(work_dir)/ \
-		$$($(container_engine) image build --quiet .) python3 main.py
+		$$($(container_engine) image build --quiet .) python3 $(python_file_name)
 	touch bin/all
 
-bin/check: bin main.py
+bin/check: $(python_file_name) bin
 	$(container_engine) container run \
 		$(user_arg) \
 		--env HOME=$(work_dir)/bin \
@@ -55,15 +59,12 @@ bin/check: bin main.py
 		python /bin/bash -c '\
 		python3 -m pip install --no-cache-dir --upgrade pip && \
 		python3 -m pip install --no-cache-dir https://github.com/pbizopoulos/source-code-simplifier/archive/main.zip && \
-		bin/.local/bin/source_code_simplifier main.py > bin/tmp.py && \
-		mv bin/tmp.py main.py'
+		bin/.local/bin/source_code_simplifier $(python_file_name) > bin/tmp.py && \
+		mv bin/tmp.py $(python_file_name)'
 	touch bin/check
 
 Dockerfile:
 	printf 'FROM python\nCOPY requirements.txt .\nRUN python3 -m pip install --no-cache-dir --upgrade pip && python3 -m pip install --no-cache-dir -r requirements.txt\n' > Dockerfile
-
-main.py:
-	printf "from os import environ\\n\\n\\ndef main():\\n    debug = environ['debug']\\n\\n\\nif __name__ == '__main__':\\n    main()\\n" > main.py
 
 requirements.txt:
 	touch requirements.txt

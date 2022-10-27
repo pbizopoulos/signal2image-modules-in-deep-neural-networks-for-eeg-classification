@@ -2,7 +2,7 @@
 
 .PHONY: all check clean help
 
-container_engine = docker # For podman first execute `printf 'unqualified-search-registries=["docker.io"]\n' > /etc/containers/registries.conf.d/docker.conf`
+container_engine = docker
 css_file_name = style.css
 css_target = $$(test -s $(css_file_name) && printf '%s' 'bin/check-css')
 debug = 1
@@ -70,7 +70,7 @@ bin/check-css: .dockerignore .gitignore bin $(css_file_name)
 		node npx --yes css-validator --profile css3svg $(css_file_name)
 	touch bin/check-css
 
-bin/check-html: .dockerignore .gitignore bin $(html_file_name)
+bin/check-html: $(html_file_name) .dockerignore .gitignore bin
 	$(container_engine) container run \
 		$(debug_args) \
 		$(user_arg) \
@@ -82,7 +82,7 @@ bin/check-html: .dockerignore .gitignore bin $(html_file_name)
 		node npx --yes html-validate $(html_file_name)
 	touch bin/check-html
 
-bin/check-js: .dockerignore .gitignore bin bin/eslintrc.js $(js_file_name)
+bin/check-js: $(js_file_name) .dockerignore .gitignore bin bin/eslintrc.js
 	$(container_engine) container run \
 		$(debug_args) \
 		$(user_arg) \
