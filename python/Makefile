@@ -42,6 +42,7 @@ bin/all: $(python_file_name) .dockerignore .gitignore bin Dockerfile requirement
 		$(user_arg) \
 		--detach-keys 'ctrl-^,ctrl-^' \
 		--env HOME=$(work_dir)/bin \
+		--env PYTHONDONTWRITEBYTECODE=1 \
 		--env debug=$(debug) \
 		--rm \
 		--volume $$(pwd):$(work_dir)/ \

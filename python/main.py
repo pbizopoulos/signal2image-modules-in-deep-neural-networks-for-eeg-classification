@@ -638,7 +638,9 @@ def resnet50(classes_num):
 
 def save_tfjs_from_torch(example_input, model, model_file_name):
     model_file_path = join('bin', model_file_name)
-    os.makedirs(model_file_path, exist_ok=True)
+    if os.path.exists(model_file_path):
+        rmtree(model_file_path)
+    os.makedirs(model_file_path)
     torch.onnx.export(model.cpu(), example_input, join(model_file_path, 'model.onnx'), export_params=True, opset_version=11)
     model_onnx = onnx.load(join(model_file_path, 'model.onnx'))
     model_tf = prepare(model_onnx)
