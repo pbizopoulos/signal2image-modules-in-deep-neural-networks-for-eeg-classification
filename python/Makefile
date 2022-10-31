@@ -2,8 +2,9 @@
 
 .PHONY: all check clean help
 
+DEBUG = 1
+
 container_engine = docker
-debug = 1
 debug_args = $$(test -t 0 && printf '%s' '--interactive --tty')
 gpus_arg = $$(test $(container_engine) = 'docker' && command -v nvidia-container-toolkit > /dev/null && printf '%s' '--gpus all')
 python_file_name = main.py
@@ -18,13 +19,13 @@ clean:
 	rm -rf bin/
 
 help:
-	@printf 'make all 	# Build binaries (debug=0 for disabling debug).\n'
-	@printf 'make check 	# Check code.\n'
-	@printf 'make clean 	# Remove binaries.\n'
-	@printf 'make help 	# Show help.\n'
+	@printf 'make all	# Build binaries (DEBUG=0 for disabling debug).\n'
+	@printf 'make check	# Check code.\n'
+	@printf 'make clean	# Remove binaries.\n'
+	@printf 'make help	# Show help.\n'
 
 $(python_file_name):
-	printf "from os import environ\\n\\n\\ndef main():\\n    debug = environ['debug']\\n\\n\\nif __name__ == '__main__':\\n    main()\\n" > $(python_file_name)
+	printf "from os import environ\\n\\n\\ndef main():\\n    debug = environ['DEBUG']\\n\\n\\nif __name__ == '__main__':\\n    main()\\n" > $(python_file_name)
 
 .dockerignore:
 	printf '*\n!requirements.txt\n' > .dockerignore
@@ -41,9 +42,9 @@ bin/all: $(python_file_name) .dockerignore .gitignore bin Dockerfile requirement
 		$(gpus_arg) \
 		$(user_arg) \
 		--detach-keys 'ctrl-^,ctrl-^' \
+		--env DEBUG=$(DEBUG) \
 		--env HOME=$(work_dir)/bin \
 		--env PYTHONDONTWRITEBYTECODE=1 \
-		--env debug=$(debug) \
 		--rm \
 		--volume $$(pwd):$(work_dir)/ \
 		--workdir $(work_dir)/ \

@@ -2,16 +2,17 @@
 
 .PHONY: all check clean help
 
+DEBUG = 1
+
 container_engine = docker
 css_file_name = style.css
 css_target = $$(test -s $(css_file_name) && printf '%s' 'bin/check-css')
-debug = 1
 debug_args = $$(test -t 0 && printf '%s' '--interactive --tty')
 html_file_name = index.html
 html_target = $$(test -s $(html_file_name) && printf '%s' 'bin/check-html')
 js_file_name = script.js
 js_target = $$(test -s $(js_file_name) && printf '%s' 'bin/check-js')
-npx_timeout_command = $$(test $(debug) = 1 && printf '%s' '& sleep 1; kill $$!')
+npx_timeout_command = $$(test $(DEBUG) = 1 && printf '%s' '& sleep 1; kill $$!')
 user_arg = $$(test $(container_engine) = 'docker' && printf '%s' "--user $$(id -u):$$(id -g)")
 work_dir = /work
 
@@ -33,10 +34,10 @@ clean:
 	rm -rf bin/
 
 help:
-	@printf 'make all 	# Run server (debug=0 for disabling debug).\n'
-	@printf 'make check 	# Check code.\n'
-	@printf 'make clean 	# Remove binaries.\n'
-	@printf 'make help 	# Show help.\n'
+	@printf 'make all	# Run server (DEBUG=0 for disabling debug).\n'
+	@printf 'make check	# Check code.\n'
+	@printf 'make clean	# Remove binaries.\n'
+	@printf 'make help	# Show help.\n'
 
 .dockerignore:
 	printf '*\n' > .dockerignore
