@@ -535,7 +535,7 @@ def main():
             accuracy_test_array[model_module_name_index, model_base_name_index] = accuracy_test
             if model_file_name == 'resnet34-1D':
                 save_tfjs_from_torch(dataset_training[0][0].unsqueeze(0), model, model_file_name)
-                if environ['DEBUG'] != 1:
+                if environ['DEBUG'] != '1':
                     rmtree(join('dist', model_file_name))
                     move(join('bin', model_file_name), join('dist', model_file_name))
             if environ['DEBUG'] == '1' and model_file_name != 'alexnet-cnn-one-layer':
