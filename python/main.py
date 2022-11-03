@@ -185,7 +185,7 @@ class DenseNet(nn.Module):
         bn_size = 4
         self.features = nn.Sequential(nn.Conv1d(1, init_features_num, kernel_size=7, stride=2, padding=3, bias=False), nn.BatchNorm1d(init_features_num), nn.ReLU(inplace=True), nn.MaxPool1d(kernel_size=3, stride=2, padding=1))
         features_num = init_features_num
-        for (index, layers_num) in enumerate(block_config):
+        for index, layers_num in enumerate(block_config):
             block = DenseBlock(bn_size=bn_size, growth_rate=growth_rate, input_features_num=features_num, layers_num=layers_num)
             self.features.add_module('denseblock%d' % (index + 1), block)
             features_num = features_num + layers_num * growth_rate
@@ -326,7 +326,7 @@ class SignalAsImage(nn.Module):
         signal = signal.shape[-1] * signal / (self.signals_all_max - self.signals_all_min)
         signal = signal.floor().long()
         out = torch.zeros(signal.shape[0], 1, signal.shape[-1], signal.shape[-1]).to(signal.device)
-        for (index, element) in enumerate(signal):
+        for index, element in enumerate(signal):
             out[index, 0, signal.shape[-1] - 1 - signal[index, 0, :], range(signal.shape[-1])] = 255
         out = torch.cat((out, out, out), 1)
         out = self.model_base(out)
@@ -341,8 +341,8 @@ class Spectrogram(nn.Module):
 
     def forward(self, signal):
         out = torch.zeros(signal.shape[0], 1, signal.shape[-1], signal.shape[-1]).to(signal.device)
-        for (index, signal) in enumerate(signal):
-            (f_array, t_array, Sxx) = spectrogram(signal.cpu(), fs=signal.shape[-1], noverlap=4, nperseg=8, nfft=64, mode='magnitude')
+        for index, signal in enumerate(signal):
+            f_array, t_array, Sxx = spectrogram(signal.cpu(), fs=signal.shape[-1], noverlap=4, nperseg=8, nfft=64, mode='magnitude')
             out[index, 0] = functional.interpolate(torch.tensor(Sxx).unsqueeze(0), signal.shape[-1], mode='bilinear')
         out = torch.cat((out, out, out), 1)
         out = self.model_base(out)
@@ -470,8 +470,8 @@ def main():
     model_base_1d_list = [Lenet, Alexnet, vgg11, vgg13, vgg16, vgg19, resnet18, resnet34, resnet50, resnet101, resnet152, densenet121, densenet161, densenet169, densenet201]
     model_base_2d_list = [LeNet2D, models.alexnet, models.vgg11, models.vgg13, models.vgg16, models.vgg19, models.resnet18, models.resnet34, models.resnet50, models.resnet101, models.resnet152, models.densenet121, models.densenet161, models.densenet169, models.densenet201]
     accuracy_test_array = np.zeros((5, 15))
-    for (model_base_name_index, model_base_name) in enumerate(model_base_name_list):
-        for (model_module_name_index, model_module_name) in enumerate(['1D', 'signal-as-image', 'spectrogram', 'cnn-one-layer', 'cnn-two-layers']):
+    for model_base_name_index, model_base_name in enumerate(model_base_name_list):
+        for model_module_name_index, model_module_name in enumerate(['1D', 'signal-as-image', 'spectrogram', 'cnn-one-layer', 'cnn-two-layers']):
             model_file_name = f'{model_base_name}-{model_module_name}'
             if model_module_name == '1D':
                 model = model_base_1d_list[model_base_name_index](classes_num)
@@ -488,7 +488,7 @@ def main():
             accuracy_validation_best = -1
             for epoch in range(epochs_num):
                 model.train()
-                for (data, target) in dataloader_training:
+                for data, target in dataloader_training:
                     data = data.to(device)
                     target = target.to(device)
                     output = model(data)
@@ -501,7 +501,7 @@ def main():
                 predictions_num = 0
                 model.eval()
                 with torch.no_grad():
-                    for (data, target) in validation_dataloader:
+                    for data, target in validation_dataloader:
                         data = data.to(device)
                         target = target.to(device)
                         output = model(data)
@@ -521,7 +521,7 @@ def main():
             predictions_num = 0
             model.eval()
             with torch.no_grad():
-                for (data, target) in dataloader_test:
+                for data, target in dataloader_test:
                     data = data.to(device)
                     target = target.to(device)
                     output = model(data)
@@ -550,7 +550,7 @@ def main():
     signals_all = torch.tensor(signals_all.values, dtype=torch.float)
     classes_all = torch.tensor(classes_all.values) - 1
     class_name_list = ['eyes-open', 'eyes-closed', 'healthy-area', 'tumor-area', 'epilepsy']
-    for (class_index, class_name) in enumerate(class_name_list):
+    for class_index, class_name in enumerate(class_name_list):
         signal_index = (classes_all == class_index).nonzero()[-1]
         plt.figure()
         plt.plot(signals_all[signal_index].squeeze(), linewidth=4, color='k')
@@ -570,7 +570,7 @@ def main():
         plt.figure()
         plt.imsave(join('bin', f'signal-as-image-{class_name}.png'), data, cmap='gray')
         plt.close()
-        (f_array, t_array, Sxx) = spectrogram(signals_all[signal_index], fs=signals_all.shape[-1], noverlap=4, nperseg=8, nfft=64, mode='magnitude')
+        f_array, t_array, Sxx = spectrogram(signals_all[signal_index], fs=signals_all.shape[-1], noverlap=4, nperseg=8, nfft=64, mode='magnitude')
         data = np.array(Image.fromarray(Sxx[0]).resize((signals_all.shape[-1], signals_all.shape[-1]), resample=1))
         plt.figure()
         plt.imsave(join('bin', f'spectrogram-{class_name}.png'), data, cmap='gray')

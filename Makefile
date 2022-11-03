@@ -2,6 +2,7 @@
 
 .PHONY: all check clean help
 
+aux_file_name = ms.aux
 bib_file_name = ms.bib
 bib_target = $$(test -s $(bib_file_name) && printf 'bin/check-bib')
 tex_file_name = ms.tex
@@ -55,7 +56,19 @@ bin/check-bib: $(bib_file_name) .dockerignore .gitignore bin/all
 		--volume $$(pwd):$(work_dir)/ \
 		--workdir $(work_dir)/ \
 		texlive/texlive /bin/bash -c '\
-		checkcites bin/ms.aux'
+		checkcites bin/$(aux_file_name)'
+	docker container run \
+		--env HOME=$(work_dir)/bin \
+		--rm \
+		--user $$(id -u):$$(id -g) \
+		--volume $$(pwd):$(work_dir)/ \
+		--workdir $(work_dir)/ \
+		python /bin/bash -c '\
+		python3 -m pip install --no-cache-dir --upgrade pip && \
+		python3 -m pip install --no-cache-dir betterbib && \
+		cd bin/ && \
+		.local/bin/betterbib update --in-place --sort-by-bibkey --tab-indent ../$(bib_file_name) && \
+		sed --in-place 1,3d ../$(bib_file_name)'
 	touch bin/check-bib
 
 bin/check-tex: $(tex_file_name) .dockerignore .gitignore bin
