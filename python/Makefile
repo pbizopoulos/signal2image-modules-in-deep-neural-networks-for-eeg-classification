@@ -4,11 +4,9 @@
 
 DEBUG = 1
 
-container_engine = docker
 debug_args = $$(test -t 0 && printf '%s' '--interactive --tty')
-gpus_arg = $$(test $(container_engine) = 'docker' && command -v nvidia-container-toolkit > /dev/null && printf '%s' '--gpus all')
+gpus_arg = $$(command -v nvidia-container-toolkit > /dev/null && printf '%s' '--gpus all')
 python_file_name = main.py
-user_arg = $$(test $(container_engine) = 'docker' && printf '%s' "--user $$(id -u):$$(id -g)")
 work_dir = /work
 
 all: bin/all
@@ -37,25 +35,25 @@ bin:
 	mkdir bin
 
 bin/all: $(python_file_name) .dockerignore .gitignore bin Dockerfile requirements.txt
-	$(container_engine) container run \
+	docker container run \
 		$(debug_args) \
 		$(gpus_arg) \
-		$(user_arg) \
 		--detach-keys 'ctrl-^,ctrl-^' \
 		--env DEBUG=$(DEBUG) \
 		--env HOME=$(work_dir)/bin \
 		--env PYTHONDONTWRITEBYTECODE=1 \
 		--rm \
+		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):$(work_dir)/ \
 		--workdir $(work_dir)/ \
-		$$($(container_engine) image build --quiet .) python3 $(python_file_name)
+		$$(docker image build --quiet .) python3 $(python_file_name)
 	touch bin/all
 
 bin/check: $(python_file_name) bin
-	$(container_engine) container run \
-		$(user_arg) \
+	docker container run \
 		--env HOME=$(work_dir)/bin \
 		--rm \
+		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):$(work_dir)/ \
 		--workdir $(work_dir)/ \
 		python /bin/bash -c '\
