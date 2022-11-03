@@ -4,26 +4,23 @@
 
 DEBUG = 1
 
-container_engine = docker
 css_file_name = style.css
-css_target = $$(test -s $(css_file_name) && printf '%s' 'bin/check-css')
+css_target = $$(test -s $(css_file_name) && printf 'bin/check-css')
 debug_args = $$(test -t 0 && printf '%s' '--interactive --tty')
 html_file_name = index.html
-html_target = $$(test -s $(html_file_name) && printf '%s' 'bin/check-html')
+html_target = $$(test -s $(html_file_name) && printf 'bin/check-html')
 js_file_name = script.js
-js_target = $$(test -s $(js_file_name) && printf '%s' 'bin/check-js')
-npx_timeout_command = $$(test $(DEBUG) = 1 && printf '%s' '& sleep 1; kill $$!')
-user_arg = $$(test $(container_engine) = 'docker' && printf '%s' "--user $$(id -u):$$(id -g)")
+js_target = $$(test -s $(js_file_name) && printf 'bin/check-js')
+npx_timeout_command = $$(test $(DEBUG) = 1 && printf '& sleep 1; kill $$!')
 work_dir = /work
 
 all: .dockerignore .gitignore bin/cert.pem
-	$(container_engine) container run \
+	docker container run \
 		$(debug_args) \
-		$(user_arg) \
 		--env HOME=$(work_dir)/bin \
-		--env NODE_PATH=$(work_dir)/bin \
 		--publish 8080:8080 \
 		--rm \
+		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):$(work_dir)/ \
 		--workdir $(work_dir)/ \
 		node /bin/bash -c "npx --yes http-server --cert bin/cert.pem --key bin/key.pem --ssl $(npx_timeout_command)"
@@ -49,9 +46,9 @@ bin:
 	mkdir bin
 
 bin/cert.pem: bin
-	$(container_engine) container run \
-		$(user_arg) \
+	docker container run \
 		--rm \
+		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):$(work_dir)/ \
 		--workdir $(work_dir)/ \
 		alpine/openssl req -newkey rsa:2048 -subj "/C=../ST=../L=.../O=.../OU=.../CN=.../emailAddress=..." -new -nodes -x509 -days 3650 -keyout bin/key.pem -out bin/cert.pem
@@ -60,36 +57,33 @@ bin/check: .dockerignore .gitignore bin
 	$(MAKE) $(css_target) $(html_target) $(js_target)
 
 bin/check-css: .dockerignore .gitignore bin $(css_file_name)
-	$(container_engine) container run \
+	docker container run \
 		$(debug_args) \
-		$(user_arg) \
 		--env HOME=$(work_dir)/bin \
-		--env NODE_PATH=$(work_dir)/bin \
 		--rm \
+		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):$(work_dir)/ \
 		--workdir $(work_dir)/ \
 		node npx --yes css-validator --profile css3svg $(css_file_name)
 	touch bin/check-css
 
 bin/check-html: $(html_file_name) .dockerignore .gitignore bin
-	$(container_engine) container run \
+	docker container run \
 		$(debug_args) \
-		$(user_arg) \
 		--env HOME=$(work_dir)/bin \
-		--env NODE_PATH=$(work_dir)/bin \
 		--rm \
+		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):$(work_dir)/ \
 		--workdir $(work_dir)/ \
 		node npx --yes html-validate $(html_file_name)
 	touch bin/check-html
 
 bin/check-js: $(js_file_name) .dockerignore .gitignore bin bin/eslintrc.js
-	$(container_engine) container run \
+	docker container run \
 		$(debug_args) \
-		$(user_arg) \
 		--env HOME=$(work_dir)/bin \
-		--env NODE_PATH=$(work_dir)/bin \
 		--rm \
+		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):$(work_dir)/ \
 		--workdir $(work_dir)/ \
 		node npx --yes eslint --fix --config bin/eslintrc.js $(js_file_name)
