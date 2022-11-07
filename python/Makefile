@@ -26,7 +26,7 @@ $(python_file_name):
 	printf "from os import environ\\n\\n\\ndef main():\\n    debug = environ['DEBUG']\\n\\n\\nif __name__ == '__main__':\\n    main()\\n" > $(python_file_name)
 
 .dockerignore:
-	printf '*\n!requirements.txt\n' > .dockerignore
+	printf '*\n!pyproject.toml\n' > .dockerignore
 
 .gitignore:
 	printf 'bin/\n' > .gitignore
@@ -34,7 +34,7 @@ $(python_file_name):
 bin:
 	mkdir bin
 
-bin/all: $(python_file_name) .dockerignore .gitignore bin Dockerfile requirements.txt
+bin/all: $(python_file_name) .dockerignore .gitignore bin Dockerfile pyproject.toml
 	docker container run \
 		$(debug_args) \
 		$(gpus_arg) \
@@ -64,7 +64,7 @@ bin/check: $(python_file_name) bin
 	touch bin/check
 
 Dockerfile:
-	printf 'FROM python\nCOPY requirements.txt .\nRUN python3 -m pip install --no-cache-dir --upgrade pip && python3 -m pip install --no-cache-dir -r requirements.txt\n' > Dockerfile
+	printf 'FROM python\nWORKDIR $(work_dir)\nCOPY pyproject.toml .\nRUN python3 -m pip install --no-cache-dir --upgrade pip && python3 -m pip install --no-cache-dir .\n' > Dockerfile
 
-requirements.txt:
-	touch requirements.txt
+pyproject.toml:
+	printf '[project]\nname = "None"\nversion = "0"\ndependencies = []\n' > pyproject.toml

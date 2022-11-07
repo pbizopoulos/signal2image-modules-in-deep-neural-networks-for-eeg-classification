@@ -1,0 +1,12 @@
+[project]
+name = "None"
+version = "0"
+dependencies = [
+	"Jinja2==3.1.2",
+	"matplotlib==3.6.1",
+	"onnx-tf==1.10.0",
+	"pandas==1.5.1",
+	"scipy==1.9.3",
+	"tensorflow-probability==0.18.0",
+	"tensorflowjs==4.0.0",
+]
