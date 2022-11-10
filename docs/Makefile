@@ -65,6 +65,14 @@ bin/check-css: .dockerignore .gitignore bin $(css_file_name)
 		--volume $$(pwd):$(work_dir)/ \
 		--workdir $(work_dir)/ \
 		node npx --yes css-validator --profile css3svg $(css_file_name)
+	docker container run \
+		$(debug_args) \
+		--env HOME=$(work_dir)/bin \
+		--rm \
+		--user $$(id -u):$$(id -g) \
+		--volume $$(pwd):$(work_dir)/ \
+		--workdir $(work_dir)/ \
+		node npx --yes js-beautify --end-with-newline --indent-with-tabs --newline-between-rules --no-preserve-newlines --type css --replace $(css_file_name)
 	touch bin/check-css
 
 bin/check-html: $(html_file_name) .dockerignore .gitignore bin
@@ -76,6 +84,14 @@ bin/check-html: $(html_file_name) .dockerignore .gitignore bin
 		--volume $$(pwd):$(work_dir)/ \
 		--workdir $(work_dir)/ \
 		node npx --yes html-validate $(html_file_name)
+	docker container run \
+		$(debug_args) \
+		--env HOME=$(work_dir)/bin \
+		--rm \
+		--user $$(id -u):$$(id -g) \
+		--volume $$(pwd):$(work_dir)/ \
+		--workdir $(work_dir)/ \
+		node npx --yes js-beautify --end-with-newline --indent-inner-html --indent-with-tabs --no-preserve-newlines --type html --replace $(html_file_name)
 	touch bin/check-html
 
 bin/check-js: $(js_file_name) .dockerignore .gitignore bin bin/eslintrc.js
@@ -87,6 +103,14 @@ bin/check-js: $(js_file_name) .dockerignore .gitignore bin bin/eslintrc.js
 		--volume $$(pwd):$(work_dir)/ \
 		--workdir $(work_dir)/ \
 		node npx --yes eslint --fix --config bin/eslintrc.js $(js_file_name)
+	docker container run \
+		$(debug_args) \
+		--env HOME=$(work_dir)/bin \
+		--rm \
+		--user $$(id -u):$$(id -g) \
+		--volume $$(pwd):$(work_dir)/ \
+		--workdir $(work_dir)/ \
+		node npx --yes js-beautify --end-with-newline --indent-with-tabs --no-preserve-newlines --type js --replace $(js_file_name)
 	touch bin/check-js
 
 bin/eslintrc.js: bin
