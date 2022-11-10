@@ -4,7 +4,8 @@ const canvasWidth = 256;
 const classNames = ['Open', 'Closed', 'Healthy', 'Tumor', 'Epilepsy'];
 const inputDiv = document.getElementById('input-div');
 const inputFileName = 'https://raw.githubusercontent.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/main/python/dist/eeg-classification-example-data.txt';
-const modelDownloadFractionDiv = document.getElementById('model-download-fraction-div');
+const modelDownloadDiv = document.getElementById('model-download-div');
+const modelDownloadProgress = document.getElementById('model-download-progress');
 const outputDiv = document.getElementById('output-div');
 const signalFileReader = new FileReader();
 const signalInputFile = document.getElementById('signal-input-file');
@@ -35,9 +36,9 @@ async function loadModel(predictFunction) {
 	const loadModelFunction = tf.loadGraphModel;
 	model = await loadModelFunction('https://raw.githubusercontent.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/main/python/dist/resnet34-1D/model.json', {
 		onProgress: function(fraction) {
-			modelDownloadFractionDiv.textContent = `Downloading model, please wait ${Math.round(100*fraction)}%.`;
+			modelDownloadProgress.value = fraction;
 			if (fraction == 1) {
-				modelDownloadFractionDiv.textContent = 'Model downloaded.';
+				modelDownloadDiv.style.display = 'none';
 			}
 			disableUI(true);
 		}

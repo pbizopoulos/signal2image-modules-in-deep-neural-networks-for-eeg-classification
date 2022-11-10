@@ -22,7 +22,10 @@
 				<div>
 					<input accept=".txt,.csv" id="signal-input-file" type="file">
 				</div>
-				<div id="model-download-fraction-div">0%</div>
+				<div id="model-download-div">
+					<label for="model-download-progress">Model download progress:</label>
+					<progress id="model-download-progress" max="1" name="model-download-progress" value="0"></progress>
+				</div>
 				<div id="output-div"></div>
 			</div>
 			<div class="block" id="input-div"></div>
