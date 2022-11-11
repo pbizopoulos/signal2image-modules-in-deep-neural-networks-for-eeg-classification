@@ -14,6 +14,6 @@ git clone https://github.com/pbizopoulos/signal2image-modules-in-deep-neural-net
 cd signal2image-modules-in-deep-neural-networks-for-eeg-classification/
 
 # Usage
-make -C docs/ help	# Show help for browser.
-make -C python/ help	# Show help for python.
+cd docs/ && make help	# Show help for browser.
+cd python/ && make help	# Show help for python.
 make help		# Show help for tex.
