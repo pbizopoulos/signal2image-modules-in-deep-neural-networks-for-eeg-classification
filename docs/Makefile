@@ -72,7 +72,7 @@ bin/check-css: .dockerignore .gitignore bin $(css_file_name)
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):$(work_dir)/ \
 		--workdir $(work_dir)/ \
-		node npx --yes js-beautify --end-with-newline --indent-with-tabs --newline-between-rules --no-preserve-newlines --type css --replace $(css_file_name)
+		node npx --yes js-beautify --end-with-newline --indent-with-tabs --newline-between-rules --no-preserve-newlines --replace --type css $(css_file_name)
 	touch bin/check-css
 
 bin/check-html: $(html_file_name) .dockerignore .gitignore bin
@@ -102,7 +102,7 @@ bin/check-js: $(js_file_name) .dockerignore .gitignore bin bin/eslintrc.js
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):$(work_dir)/ \
 		--workdir $(work_dir)/ \
-		node npx --yes eslint --fix --config bin/eslintrc.js $(js_file_name)
+		node npx --yes eslint --config bin/eslintrc.js --fix $(js_file_name)
 	docker container run \
 		$(debug_args) \
 		--env HOME=$(work_dir)/bin \
