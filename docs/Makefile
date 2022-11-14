@@ -23,7 +23,7 @@ all: .dockerignore .gitignore bin/cert.pem
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):$(work_dir)/ \
 		--workdir $(work_dir)/ \
-		node /bin/bash -c "npx --yes http-server --cert bin/cert.pem --key bin/key.pem --ssl $(npx_timeout_command)"
+		node /bin/sh -c "npx --yes http-server --cert bin/cert.pem --key bin/key.pem --ssl $(npx_timeout_command)"
 
 check: bin/check
 

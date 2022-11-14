@@ -56,7 +56,7 @@ bin/check: $(python_file_name) bin
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):$(work_dir)/ \
 		--workdir $(work_dir)/ \
-		python /bin/bash -c '\
+		python /bin/sh -c '\
 		python3 -m pip install --no-cache-dir --upgrade pip && \
 		python3 -m pip install --no-cache-dir https://github.com/pbizopoulos/source-code-simplifier/archive/main.zip && \
 		bin/.local/bin/source_code_simplifier $(python_file_name)'

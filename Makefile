@@ -55,7 +55,7 @@ bin/check-bib: $(bib_file_name) .dockerignore .gitignore bin/all
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):$(work_dir)/ \
 		--workdir $(work_dir)/ \
-		texlive/texlive /bin/bash -c '\
+		texlive/texlive /bin/sh -c '\
 		checkcites bin/$(aux_file_name)'
 	docker container run \
 		--env HOME=$(work_dir)/bin \
@@ -63,7 +63,7 @@ bin/check-bib: $(bib_file_name) .dockerignore .gitignore bin/all
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):$(work_dir)/ \
 		--workdir $(work_dir)/ \
-		python /bin/bash -c '\
+		python /bin/sh -c '\
 		python3 -m pip install --no-cache-dir --upgrade pip && \
 		python3 -m pip install --no-cache-dir betterbib && \
 		cd bin/ && \
@@ -77,7 +77,7 @@ bin/check-tex: $(tex_file_name) .dockerignore .gitignore bin
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):$(work_dir)/ \
 		--workdir $(work_dir)/ \
-		texlive/texlive /bin/bash -c '\
+		texlive/texlive /bin/sh -c '\
 		chktex $(tex_file_name) && \
 		lacheck $(tex_file_name)'
 	touch bin/check-tex
