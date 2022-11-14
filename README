@@ -9,11 +9,8 @@ Make
 Docker (>= 19.03 for NVIDIA Container Toolkit)
 NVIDIA Container Toolkit (Optional)
 
-# Preparation
+# Build
 git clone https://github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification
 cd signal2image-modules-in-deep-neural-networks-for-eeg-classification/
-
-# Usage
-cd docs/ && make help	# Show help for browser.
-cd python/ && make help	# Show help for python.
-make help		# Show help for tex.
+cd python/ && make DEBUG=0 && cd .. && make DEBUG=0
+cd docs/ && make DEBUG=0 && cd ..			# Build web application.
