@@ -44,6 +44,14 @@ bin/all: $(bib_file_name) $(tex_file_name) .dockerignore .gitignore bin
 		--volume $$(pwd):$(work_dir)/ \
 		--workdir $(work_dir)/ \
 		texlive/texlive latexmk -gg -pdf -outdir=bin/ $(tex_file_name)
+	touch bin/ms.bbl && cp bin/ms.bbl .
+	docker container run \
+		--rm \
+		--user $$(id -u):$$(id -g) \
+		--volume $$(pwd):$(work_dir)/ \
+		--workdir $(work_dir)/ \
+		texlive/texlive /bin/sh -c 'tar cf bin/tex.tar ms.bbl $(bib_file_name) $(tex_file_name) $$(grep "^INPUT ./" bin/ms.fls | uniq | cut -b 9-)'
+	rm ms.bbl
 	touch bin/all
 
 bin/check: .dockerignore .gitignore bin
