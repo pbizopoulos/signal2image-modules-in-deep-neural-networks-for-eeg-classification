@@ -6,23 +6,22 @@ DEBUG = 1
 
 css_file_name = style.css
 css_target = $$(test -s $(css_file_name) && printf 'bin/check-css')
-debug_args = $$(test -t 0 && printf '%s' '--interactive --tty')
 html_file_name = index.html
 html_target = $$(test -s $(html_file_name) && printf 'bin/check-html')
+interactive_tty_arg = $$(test -t 0 && printf '%s' '--interactive --tty')
 js_file_name = script.js
 js_target = $$(test -s $(js_file_name) && printf 'bin/check-js')
 npx_timeout_command = $$(test $(DEBUG) = 1 && printf '& sleep 1; kill $$!')
-work_dir = /work
 
 all: .dockerignore .gitignore bin/cert.pem
 	docker container run \
-		$(debug_args) \
-		--env HOME=$(work_dir)/bin \
+		$(interactive_tty_arg) \
+		--env HOME=/work/bin \
 		--publish 8080:8080 \
 		--rm \
 		--user $$(id -u):$$(id -g) \
-		--volume $$(pwd):$(work_dir)/ \
-		--workdir $(work_dir)/ \
+		--volume $$(pwd):/work/ \
+		--workdir /work/ \
 		node /bin/sh -c "npx --yes http-server --cert bin/cert.pem --key bin/key.pem --ssl $(npx_timeout_command)"
 
 check: bin/check
@@ -43,8 +42,8 @@ bin/cert.pem: bin
 	docker container run \
 		--rm \
 		--user $$(id -u):$$(id -g) \
-		--volume $$(pwd):$(work_dir)/ \
-		--workdir $(work_dir)/ \
+		--volume $$(pwd):/work/ \
+		--workdir /work/ \
 		alpine/openssl req -newkey rsa:2048 -subj "/C=../ST=../L=.../O=.../OU=.../CN=.../emailAddress=..." -new -nodes -x509 -days 3650 -keyout bin/key.pem -out bin/cert.pem
 
 bin/check: .dockerignore .gitignore bin
@@ -52,58 +51,58 @@ bin/check: .dockerignore .gitignore bin
 
 bin/check-css: .dockerignore .gitignore bin $(css_file_name)
 	docker container run \
-		$(debug_args) \
-		--env HOME=$(work_dir)/bin \
+		$(interactive_tty_arg) \
+		--env HOME=/work/bin \
 		--rm \
 		--user $$(id -u):$$(id -g) \
-		--volume $$(pwd):$(work_dir)/ \
-		--workdir $(work_dir)/ \
+		--volume $$(pwd):/work/ \
+		--workdir /work/ \
 		node npx --yes css-validator --profile css3svg $(css_file_name)
 	docker container run \
-		$(debug_args) \
-		--env HOME=$(work_dir)/bin \
+		$(interactive_tty_arg) \
+		--env HOME=/work/bin \
 		--rm \
 		--user $$(id -u):$$(id -g) \
-		--volume $$(pwd):$(work_dir)/ \
-		--workdir $(work_dir)/ \
+		--volume $$(pwd):/work/ \
+		--workdir /work/ \
 		node npx --yes js-beautify --end-with-newline --indent-with-tabs --newline-between-rules --no-preserve-newlines --replace --type css $(css_file_name)
 	touch bin/check-css
 
 bin/check-html: $(html_file_name) .dockerignore .gitignore bin
 	docker container run \
-		$(debug_args) \
-		--env HOME=$(work_dir)/bin \
+		$(interactive_tty_arg) \
+		--env HOME=/work/bin \
 		--rm \
 		--user $$(id -u):$$(id -g) \
-		--volume $$(pwd):$(work_dir)/ \
-		--workdir $(work_dir)/ \
+		--volume $$(pwd):/work/ \
+		--workdir /work/ \
 		node npx --yes html-validate $(html_file_name)
 	docker container run \
-		$(debug_args) \
-		--env HOME=$(work_dir)/bin \
+		$(interactive_tty_arg) \
+		--env HOME=/work/bin \
 		--rm \
 		--user $$(id -u):$$(id -g) \
-		--volume $$(pwd):$(work_dir)/ \
-		--workdir $(work_dir)/ \
+		--volume $$(pwd):/work/ \
+		--workdir /work/ \
 		node npx --yes js-beautify --end-with-newline --indent-inner-html --indent-with-tabs --no-preserve-newlines --type html --replace $(html_file_name)
 	touch bin/check-html
 
 bin/check-js: $(js_file_name) .dockerignore .gitignore bin bin/eslintrc.js
 	docker container run \
-		$(debug_args) \
-		--env HOME=$(work_dir)/bin \
+		$(interactive_tty_arg) \
+		--env HOME=/work/bin \
 		--rm \
 		--user $$(id -u):$$(id -g) \
-		--volume $$(pwd):$(work_dir)/ \
-		--workdir $(work_dir)/ \
+		--volume $$(pwd):/work/ \
+		--workdir /work/ \
 		node npx --yes eslint --config bin/eslintrc.js --fix $(js_file_name)
 	docker container run \
-		$(debug_args) \
-		--env HOME=$(work_dir)/bin \
+		$(interactive_tty_arg) \
+		--env HOME=/work/bin \
 		--rm \
 		--user $$(id -u):$$(id -g) \
-		--volume $$(pwd):$(work_dir)/ \
-		--workdir $(work_dir)/ \
+		--volume $$(pwd):/work/ \
+		--workdir /work/ \
 		node npx --yes js-beautify --end-with-newline --indent-with-tabs --no-preserve-newlines --type js --replace $(js_file_name)
 	touch bin/check-js
 
