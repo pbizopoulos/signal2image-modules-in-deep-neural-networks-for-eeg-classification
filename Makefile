@@ -1,6 +1,6 @@
 .POSIX:
 
-.PHONY: all check clean help
+.PHONY: all check clean
 
 aux_file_name = ms.aux
 bib_file_name = ms.bib
@@ -15,12 +15,6 @@ check: bin/check
 
 clean:
 	rm -rf bin/
-
-help:
-	@printf 'make all	# Build binaries.\n'
-	@printf 'make check	# Check code.\n'
-	@printf 'make clean	# Remove binaries.\n'
-	@printf 'make help	# Show help.\n'
 
 $(bib_file_name):
 	touch $(bib_file_name)

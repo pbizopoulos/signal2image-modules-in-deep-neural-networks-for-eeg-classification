@@ -1,6 +1,6 @@
 .POSIX:
 
-.PHONY: all check clean help
+.PHONY: all check clean
 
 DEBUG = 1
 
@@ -29,12 +29,6 @@ check: bin/check
 
 clean:
 	rm -rf bin/
-
-help:
-	@printf 'make all	# Run server (DEBUG=0 for disabling debug).\n'
-	@printf 'make check	# Check code.\n'
-	@printf 'make clean	# Remove binaries.\n'
-	@printf 'make help	# Show help.\n'
 
 .dockerignore:
 	printf '*\n' > .dockerignore

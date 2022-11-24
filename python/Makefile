@@ -1,6 +1,6 @@
 .POSIX:
 
-.PHONY: all check clean help
+.PHONY: all check clean
 
 DEBUG = 1
 
@@ -15,12 +15,6 @@ check: bin/check
 
 clean:
 	rm -rf bin/
-
-help:
-	@printf 'make all	# Build binaries (DEBUG=0 for disabling debug).\n'
-	@printf 'make check	# Check code.\n'
-	@printf 'make clean	# Remove binaries.\n'
-	@printf 'make help	# Show help.\n'
 
 $(python_file_name):
 	printf "from os import environ\\n\\n\\ndef main():\\n    debug = environ['DEBUG']\\n\\n\\nif __name__ == '__main__':\\n    main()\\n" > $(python_file_name)
