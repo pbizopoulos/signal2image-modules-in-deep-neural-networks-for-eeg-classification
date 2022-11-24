@@ -50,13 +50,13 @@ bin/check: $(python_file_name) bin
 		--volume $$(pwd):/work/ \
 		--workdir /work/ \
 		python /bin/sh -c '\
-		python3 -m pip install --no-cache-dir --upgrade pip && \
-		python3 -m pip install --no-cache-dir https://github.com/pbizopoulos/source-code-simplifier/archive/main.zip && \
+		python3 -m pip install --upgrade pip && \
+		python3 -m pip install https://github.com/pbizopoulos/source-code-simplifier/archive/main.zip && \
 		bin/.local/bin/source_code_simplifier $(python_file_name)'
 	touch bin/check
 
 Dockerfile:
-	printf 'FROM python\nWORKDIR /work\nCOPY pyproject.toml .\nRUN python3 -m pip install --no-cache-dir --upgrade pip && python3 -m pip install --no-cache-dir .\n' > Dockerfile
+	printf 'FROM python\nENV PIP_NO_CACHE_DIR=1\nWORKDIR /work\nCOPY pyproject.toml .\nRUN python3 -m pip install --upgrade pip && python3 -m pip install .\n' > Dockerfile
 
 pyproject.toml:
 	printf '[project]\nname = "UNKNOWN"\nversion = "0.0.0"\ndependencies = []\n' > pyproject.toml

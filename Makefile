@@ -59,10 +59,9 @@ bin/check-bib: $(bib_file_name) .dockerignore .gitignore bin/all
 		--volume $$(pwd):/work/ \
 		--workdir /work/ \
 		python /bin/sh -c '\
-		python3 -m pip install --no-cache-dir --upgrade pip && \
-		python3 -m pip install --no-cache-dir betterbib rebiber && \
+		python3 -m pip install --upgrade pip && \
+		python3 -m pip install betterbib rebiber && \
 		cd bin/ && \
-		.local/bin/rebiber -u && \
 		.local/bin/rebiber -i ../$(bib_file_name) && \
 		.local/bin/betterbib update --in-place --sort-by-bibkey --tab-indent ../$(bib_file_name) && \
 		sed --in-place 1,3d ../$(bib_file_name)'
