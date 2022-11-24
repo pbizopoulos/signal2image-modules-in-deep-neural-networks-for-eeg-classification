@@ -31,19 +31,13 @@ bin:
 	mkdir bin
 
 bin/all: $(bib_file_name) $(tex_file_name) .dockerignore .gitignore bin
-	docker container run \
-		--rm \
-		--user $$(id -u):$$(id -g) \
-		--volume $$(pwd):/work/ \
-		--workdir /work/ \
-		texlive/texlive latexmk -gg -pdf -outdir=bin/ $(tex_file_name)
 	touch bin/ms.bbl && cp bin/ms.bbl .
 	docker container run \
 		--rm \
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/work/ \
 		--workdir /work/ \
-		texlive/texlive /bin/sh -c 'tar cf bin/tex.tar ms.bbl $(bib_file_name) $(tex_file_name) $$(grep "^INPUT ./" bin/ms.fls | uniq | cut -b 9-)'
+		texlive/texlive /bin/sh -c 'latexmk -gg -pdf -outdir=bin/ $(tex_file_name) && tar cf bin/tex.tar ms.bbl $(bib_file_name) $(tex_file_name) $$(grep "^INPUT ./" bin/ms.fls | uniq | cut -b 9-)'
 	rm ms.bbl
 	touch bin/all
 
