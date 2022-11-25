@@ -8,5 +8,5 @@ dependencies = [
 	"pandas==1.5.1",
 	"scipy==1.9.3",
 	"tensorflow-probability==0.18.0",
-	"tensorflowjs==4.0.0",
+	"tensorflowjs==4.1.0",
 ]
