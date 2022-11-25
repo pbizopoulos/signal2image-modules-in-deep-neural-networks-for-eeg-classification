@@ -13,7 +13,7 @@ js_file_name = script.js
 js_target = $$(test -s $(js_file_name) && printf 'bin/check-js')
 npx_timeout_command = $$(test $(DEBUG) = 1 && printf '& sleep 1; kill $$!')
 
-all: .dockerignore .gitignore bin/cert.pem
+all: .dockerignore bin/cert.pem Dockerfile
 	docker container run \
 		$(interactive_tty_arg) \
 		--env HOME=/work/bin \
@@ -22,7 +22,7 @@ all: .dockerignore .gitignore bin/cert.pem
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/work/ \
 		--workdir /work/ \
-		node /bin/sh -c "npx --yes http-server --cert bin/cert.pem --key bin/key.pem --ssl $(npx_timeout_command)"
+		$$(docker image build --quiet .) /bin/sh -c "npx --yes http-server --cert bin/cert.pem --key bin/key.pem --ssl $(npx_timeout_command)"
 
 check: bin/check
 
@@ -38,7 +38,7 @@ clean:
 bin:
 	mkdir bin
 
-bin/cert.pem: bin
+bin/cert.pem: .gitignore bin
 	docker container run \
 		--rm \
 		--user $$(id -u):$$(id -g) \
@@ -46,10 +46,10 @@ bin/cert.pem: bin
 		--workdir /work/ \
 		alpine/openssl req -newkey rsa:2048 -subj "/C=../ST=../L=.../O=.../OU=.../CN=.../emailAddress=..." -new -nodes -x509 -days 3650 -keyout bin/key.pem -out bin/cert.pem
 
-bin/check: .dockerignore .gitignore bin
+bin/check:
 	$(MAKE) $(css_target) $(html_target) $(js_target)
 
-bin/check-css: .dockerignore .gitignore bin $(css_file_name)
+bin/check-css: $(css_file_name) .dockerignore .gitignore bin
 	docker container run \
 		$(interactive_tty_arg) \
 		--env HOME=/work/bin \
@@ -57,15 +57,9 @@ bin/check-css: .dockerignore .gitignore bin $(css_file_name)
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/work/ \
 		--workdir /work/ \
-		node npx --yes css-validator --profile css3svg $(css_file_name)
-	docker container run \
-		$(interactive_tty_arg) \
-		--env HOME=/work/bin \
-		--rm \
-		--user $$(id -u):$$(id -g) \
-		--volume $$(pwd):/work/ \
-		--workdir /work/ \
-		node npx --yes js-beautify --end-with-newline --indent-with-tabs --newline-between-rules --no-preserve-newlines --replace --type css $(css_file_name)
+		$$(docker image build --quiet .) /bin/sh -c '\
+		npx --yes css-validator --profile css3svg $(css_file_name) && \
+		npx --yes js-beautify --end-with-newline --indent-with-tabs --newline-between-rules --no-preserve-newlines --replace --type css $(css_file_name)'
 	touch bin/check-css
 
 bin/check-html: $(html_file_name) .dockerignore .gitignore bin
@@ -76,15 +70,9 @@ bin/check-html: $(html_file_name) .dockerignore .gitignore bin
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/work/ \
 		--workdir /work/ \
-		node npx --yes html-validate $(html_file_name)
-	docker container run \
-		$(interactive_tty_arg) \
-		--env HOME=/work/bin \
-		--rm \
-		--user $$(id -u):$$(id -g) \
-		--volume $$(pwd):/work/ \
-		--workdir /work/ \
-		node npx --yes js-beautify --end-with-newline --indent-inner-html --indent-with-tabs --no-preserve-newlines --type html --replace $(html_file_name)
+		$$(docker image build --quiet .) /bin/sh -c '\
+		npx --yes html-validate $(html_file_name) && \
+		npx --yes js-beautify --end-with-newline --indent-inner-html --indent-with-tabs --no-preserve-newlines --type html --replace $(html_file_name)'
 	touch bin/check-html
 
 bin/check-js: $(js_file_name) .dockerignore .gitignore bin bin/eslintrc.js
@@ -95,16 +83,13 @@ bin/check-js: $(js_file_name) .dockerignore .gitignore bin bin/eslintrc.js
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/work/ \
 		--workdir /work/ \
-		node npx --yes eslint --config bin/eslintrc.js --fix $(js_file_name)
-	docker container run \
-		$(interactive_tty_arg) \
-		--env HOME=/work/bin \
-		--rm \
-		--user $$(id -u):$$(id -g) \
-		--volume $$(pwd):/work/ \
-		--workdir /work/ \
-		node npx --yes js-beautify --end-with-newline --indent-with-tabs --no-preserve-newlines --type js --replace $(js_file_name)
+		$$(docker image build --quiet .) /bin/sh -c '\
+		npx --yes eslint --config bin/eslintrc.js --fix $(js_file_name) && \
+		npx --yes js-beautify --end-with-newline --indent-with-tabs --no-preserve-newlines --type js --replace $(js_file_name)'
 	touch bin/check-js
 
 bin/eslintrc.js: bin
 	echo 'module.exports = { "env": { "browser": true, "es2021": true }, "extends": "eslint:recommended", "overrides": [ ], "parserOptions": { "ecmaVersion": "latest" }, "rules": { "indent": [ "error", "tab" ], "linebreak-style": [ "error", "unix" ], "quotes": [ "error", "single" ], "semi": [ "error", "always" ], "no-undef": 0 } }' > bin/eslintrc.js
+
+Dockerfile:
+	printf 'FROM node\n' > Dockerfile
