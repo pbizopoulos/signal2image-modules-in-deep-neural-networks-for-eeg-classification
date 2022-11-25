@@ -37,7 +37,9 @@ bin/all: $(bib_file_name) $(tex_file_name) .dockerignore .gitignore bin
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/work/ \
 		--workdir /work/ \
-		texlive/texlive /bin/sh -c 'latexmk -gg -pdf -outdir=bin/ $(tex_file_name) && tar cf bin/tex.tar ms.bbl $(bib_file_name) $(tex_file_name) $$(grep "^INPUT ./" bin/ms.fls | uniq | cut -b 9-)'
+		$$(docker image build --quiet .) /bin/sh -c '\
+		latexmk -gg -pdf -outdir=bin/ $(tex_file_name) && \
+		tar cf bin/tex.tar ms.bbl $(bib_file_name) $(tex_file_name) $$(grep "^INPUT ./" bin/ms.fls | uniq | cut -b 9-)'
 	rm ms.bbl
 	touch bin/all
 
@@ -50,7 +52,7 @@ bin/check-bib: $(bib_file_name) .dockerignore .gitignore bin/all
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/work/ \
 		--workdir /work/ \
-		texlive/texlive /bin/sh -c '\
+		$$(docker image build --quiet .) /bin/sh -c '\
 		checkcites bin/$(aux_file_name)'
 	docker container run \
 		--env HOME=/work/bin \
@@ -73,7 +75,10 @@ bin/check-tex: $(tex_file_name) .dockerignore .gitignore bin
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/work/ \
 		--workdir /work/ \
-		texlive/texlive /bin/sh -c '\
+		$$(docker image build --quiet .) /bin/sh -c '\
 		chktex $(tex_file_name) && \
 		lacheck $(tex_file_name)'
 	touch bin/check-tex
+
+Dockerfile:
+	printf 'FROM texlive/texlive\n' > Dockerfile
