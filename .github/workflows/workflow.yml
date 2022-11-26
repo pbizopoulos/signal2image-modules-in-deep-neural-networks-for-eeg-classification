@@ -11,10 +11,3 @@ jobs:
           cd docs/ && make check all && cd ..
           cd python/ && make check all && cd ..
           make check all
-      - name: Test binaries reproducibility
-        run: |
-          cp bin/ms.pdf bin/ms-first-run.pdf
-          touch python/main.py ms.tex
-          cd python/ && make && cd ..
-          make
-          cmp bin/ms.pdf bin/ms-first-run.pdf
