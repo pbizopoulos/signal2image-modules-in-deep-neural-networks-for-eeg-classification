@@ -11,7 +11,6 @@ from torch.nn import functional
 from torch.optim import Adam
 from torch.utils.data import DataLoader, Dataset
 from torchvision import models
-import hashlib
 import numpy as np
 import onnx
 import os
@@ -587,9 +586,6 @@ def main():
         plt.figure()
         plt.imsave(join('bin', f'cnn-{class_name}.png'), data, cmap='gray')
         plt.close()
-    if environ['DEBUG'] == '1':
-        with open(join('bin', 'cnn-tumor-area.png'), 'rb') as file:
-            assert hashlib.sha256(file.read()).hexdigest() == '8c9ff3fc80b16079bfdee1c2525ace1df53cf25732924fd25f428234f4246370'
 
 
 def make_layers(cfg):
