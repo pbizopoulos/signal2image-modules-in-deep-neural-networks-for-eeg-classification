@@ -1,7 +1,7 @@
 'use strict';
 const canvasHeight = 256;
 const canvasWidth = 256;
-const classNames = ['Open', 'Closed', 'Healthy', 'Tumor', 'Epilepsy'];
+const classNameArray = ['Open', 'Closed', 'Healthy', 'Tumor', 'Epilepsy'];
 const inputDiv = document.getElementById('input-div');
 const inputFileName = 'https://raw.githubusercontent.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/main/python/dist/eeg-classification-example-data.txt';
 const modelDownloadDiv = document.getElementById('model-download-div');
@@ -14,13 +14,6 @@ let csvDatasetMax;
 let csvDatasetMin;
 let line;
 let model;
-
-function disableUI(argument) {
-	const nodes = document.getElementById('input-control-div').getElementsByTagName('*');
-	for (let i = 0; i < nodes.length; i++) {
-		nodes[i].disabled = argument;
-	}
-}
 
 function drawSignal(text) {
 	const array = text.match(/\d+(?:\.\d+)?/g).map(Number);
@@ -40,11 +33,9 @@ async function loadModel(predictFunction) {
 			if (fraction == 1) {
 				modelDownloadDiv.style.display = 'none';
 			}
-			disableUI(true);
 		}
 	});
 	predictFunction();
-	disableUI(false);
 }
 async function predictView() {
 	if (csvDataset === undefined) {
@@ -57,11 +48,11 @@ async function predictView() {
 	csvDatasetTmp = tf.image.resizeBilinear(csvDatasetTmp, [1, model.inputs[0].shape[2]]);
 	csvDatasetTmp = csvDatasetTmp.reshape([1, 1, model.inputs[0].shape[2]]);
 	const modelOutput = await model.executeAsync(csvDatasetTmp);
-	const classProbabilities = modelOutput.softmax().mul(100).arraySync();
+	const classProbabilityArray = modelOutput.softmax().mul(100).arraySync()[0];
 	outputDiv.textContent = '';
-	for (let i = 0; i < classProbabilities[0].length; i++) {
+	for (let i = 0; i < classProbabilityArray.length; i++) {
 		let elementDiv = document.createElement('div');
-		elementDiv.textContent = `${classNames[i]}: ${(classProbabilities[0][i]).toFixed(2)}%`;
+		elementDiv.textContent = `${classNameArray[i]}: ${(classProbabilityArray[i]).toFixed(2)}%`;
 		outputDiv.append(elementDiv);
 	}
 }

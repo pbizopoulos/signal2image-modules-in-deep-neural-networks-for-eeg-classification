@@ -3,10 +3,11 @@
 .PHONY: all check clean
 
 aux_file_name = ms.aux
+bbl_file_name = ms.bbl
 bib_file_name = ms.bib
 bib_target = $$(test -s $(bib_file_name) && printf 'bin/check-bib')
+fls_file_name = ms.fls
 tex_file_name = ms.tex
-tex_target = $$(test -s $(tex_file_name) && printf 'bin/check-tex')
 
 all: bin/all
 
@@ -30,8 +31,8 @@ $(tex_file_name):
 bin:
 	mkdir bin
 
-bin/all: $(bib_file_name) $(tex_file_name) .dockerignore .gitignore bin
-	touch bin/ms.bbl && cp bin/ms.bbl .
+bin/all: $(bib_file_name) $(tex_file_name) .dockerignore .gitignore bin Dockerfile
+	touch bin/$(bbl_file_name) && cp bin/$(bbl_file_name) .
 	docker container run \
 		--rm \
 		--user $$(id -u):$$(id -g) \
@@ -39,12 +40,12 @@ bin/all: $(bib_file_name) $(tex_file_name) .dockerignore .gitignore bin
 		--workdir /work/ \
 		$$(docker image build --quiet .) /bin/sh -c '\
 		latexmk -gg -pdf -outdir=bin/ $(tex_file_name) && \
-		tar cf bin/tex.tar ms.bbl $(bib_file_name) $(tex_file_name) $$(grep "^INPUT ./" bin/ms.fls | uniq | cut -b 9-)'
-	rm ms.bbl
+		tar cf bin/tex.tar $(bbl_file_name) $(bib_file_name) $(tex_file_name) $$(grep "^INPUT ./" bin/$(fls_file_name) | uniq | cut -b 9-)'
+	rm $(bbl_file_name)
 	touch bin/all
 
 bin/check: .dockerignore .gitignore bin
-	$(MAKE) $(bib_target) $(tex_target)
+	$(MAKE) $(bib_target) bin/check-tex
 
 bin/check-bib: $(bib_file_name) .dockerignore .gitignore bin/all
 	docker container run \
@@ -60,13 +61,18 @@ bin/check-bib: $(bib_file_name) .dockerignore .gitignore bin/all
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/work/ \
 		--workdir /work/ \
-		python /bin/sh -c '\
+		python /bin/sh -c "\
 		python3 -m pip install --upgrade pip && \
-		python3 -m pip install betterbib rebiber && \
-		cd bin/ && \
-		.local/bin/rebiber -i ../$(bib_file_name) && \
-		.local/bin/betterbib update --in-place --sort-by-bibkey --tab-indent ../$(bib_file_name) && \
-		sed --in-place 1,3d ../$(bib_file_name)'
+		python3 -m pip install rebiber && \
+		bin/.local/bin/rebiber --input_bib $(bib_file_name) --sort True"
+	docker container run \
+		$(interactive_tty_arg) \
+		--env HOME=/work/bin \
+		--rm \
+		--user $$(id -u):$$(id -g) \
+		--volume $$(pwd):/work/ \
+		--workdir /work/ \
+		node npm exec --yes -- git+https://github.com/FlamingTempura/bibtex-tidy.git --curly --tab --no-align --blank-lines --duplicates=key --sort-fields $(bib_file_name)
 	touch bin/check-bib
 
 bin/check-tex: $(tex_file_name) .dockerignore .gitignore bin
