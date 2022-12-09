@@ -41,7 +41,7 @@ bin:
 bin/check:
 	$(MAKE) $(css_target) $(html_target) $(js_target)
 
-bin/check-css: $(css_file_name) .dockerignore .gitignore bin bin/.stylelintrc.json
+bin/check-css: $(css_file_name) .dockerignore .gitignore bin bin/.stylelintrc.json Dockerfile
 	docker container run \
 		$(interactive_tty_arg) \
 		--env HOME=/work/bin \
@@ -58,7 +58,7 @@ bin/check-css: $(css_file_name) .dockerignore .gitignore bin bin/.stylelintrc.js
 		npx --yes css-validator --profile css3svg $(css_file_name)'
 	touch bin/check-css
 
-bin/check-html: $(html_file_name) .dockerignore .gitignore bin
+bin/check-html: $(html_file_name) .dockerignore .gitignore bin Dockerfile
 	docker container run \
 		$(interactive_tty_arg) \
 		--env HOME=/work/bin \
@@ -71,7 +71,7 @@ bin/check-html: $(html_file_name) .dockerignore .gitignore bin
 		npx --yes html-validate $(html_file_name)'
 	touch bin/check-html
 
-bin/check-js: $(js_file_name) .dockerignore .gitignore bin bin/eslintrc.js
+bin/check-js: $(js_file_name) .dockerignore .gitignore bin bin/eslintrc.js Dockerfile
 	docker container run \
 		$(interactive_tty_arg) \
 		--env HOME=/work/bin \
