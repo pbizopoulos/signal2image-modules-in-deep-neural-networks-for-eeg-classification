@@ -12,6 +12,10 @@ updates:
     directory: '/'
     schedule:
       interval: 'monthly'
+  - package-ecosystem: 'npm'
+    directory: '/docs/'
+    schedule:
+      interval: 'monthly'
   - package-ecosystem: 'pip'
     directory: '/python/'
     schedule:
