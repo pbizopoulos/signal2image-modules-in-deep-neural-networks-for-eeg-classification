@@ -53,6 +53,7 @@ bin/check-css: $(css_file_name) .dockerignore .gitignore bin bin/.stylelintrc.js
 		npx --yes js-beautify --end-with-newline --indent-with-tabs --newline-between-rules --no-preserve-newlines --replace --type css $(css_file_name) && \
 		cd bin/ && \
 		npm install stylelint-config-standard && \
+		npm install stylelint-order && \
 		npm exec stylelint --fix ../$(css_file_name) && \
 		cd .. && \
 		npx --yes css-validator --profile css3svg $(css_file_name)'
@@ -88,7 +89,7 @@ bin/eslintrc.js: bin
 	printf 'module.exports = { "env": { "browser": true, "es2021": true }, "extends": "eslint:recommended", "overrides": [ ], "parserOptions": { "ecmaVersion": "latest" }, "rules": { "indent": [ "error", "tab" ], "linebreak-style": [ "error", "unix" ], "quotes": [ "error", "single" ], "semi": [ "error", "always" ], "no-undef": 0 } }\n' > bin/eslintrc.js
 
 bin/.stylelintrc.json: bin
-	printf '{ "extends": "stylelint-config-standard", "rules": { "indentation": "tab" } }\n' > bin/.stylelintrc.json
+	printf '{ "extends": "stylelint-config-standard", "plugins": [ "stylelint-order" ], "rules": { "indentation": "tab", "order/properties-alphabetical-order": true } }\n' > bin/.stylelintrc.json
 
 Dockerfile:
 	printf 'FROM node\n' > Dockerfile
