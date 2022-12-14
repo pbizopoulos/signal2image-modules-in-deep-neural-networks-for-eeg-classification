@@ -28,10 +28,13 @@ $(tex_file_name):
 .gitignore:
 	printf 'bin/\n' > .gitignore
 
+Dockerfile:
+	printf 'FROM texlive/texlive\n' > Dockerfile
+
 bin:
 	mkdir bin
 
-bin/all: $(bib_file_name) $(tex_file_name) .dockerignore .gitignore bin Dockerfile
+bin/all: $(bib_file_name) $(tex_file_name) .dockerignore .gitignore Dockerfile bin
 	touch bin/$(bbl_file_name) && cp bin/$(bbl_file_name) .
 	docker container run \
 		--rm \
@@ -44,7 +47,7 @@ bin/all: $(bib_file_name) $(tex_file_name) .dockerignore .gitignore bin Dockerfi
 	rm $(bbl_file_name)
 	touch bin/all
 
-bin/check: .dockerignore .gitignore bin
+bin/check:
 	$(MAKE) $(bib_target) bin/check-tex
 
 bin/check-bib: $(bib_file_name) .dockerignore .gitignore bin/all
@@ -53,8 +56,7 @@ bin/check-bib: $(bib_file_name) .dockerignore .gitignore bin/all
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/work/ \
 		--workdir /work/ \
-		$$(docker image build --quiet .) /bin/sh -c '\
-		checkcites bin/$(aux_file_name)'
+		$$(docker image build --quiet .) checkcites bin/$(aux_file_name)
 	docker container run \
 		--env HOME=/work/bin \
 		--rm \
@@ -75,7 +77,7 @@ bin/check-bib: $(bib_file_name) .dockerignore .gitignore bin/all
 		node npm exec --yes -- git+https://github.com/FlamingTempura/bibtex-tidy.git --curly --tab --no-align --blank-lines --duplicates=key --sort-fields $(bib_file_name)
 	touch bin/check-bib
 
-bin/check-tex: $(tex_file_name) .dockerignore .gitignore bin
+bin/check-tex: $(tex_file_name) .dockerignore .gitignore Dockerfile bin
 	docker container run \
 		--rm \
 		--user $$(id -u):$$(id -g) \
@@ -85,6 +87,3 @@ bin/check-tex: $(tex_file_name) .dockerignore .gitignore bin
 		chktex $(tex_file_name) && \
 		lacheck $(tex_file_name)'
 	touch bin/check-tex
-
-Dockerfile:
-	printf 'FROM texlive/texlive\n' > Dockerfile

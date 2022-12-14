@@ -24,10 +24,13 @@ $(python_file_name):
 .gitignore:
 	printf 'bin/\n' > .gitignore
 
+Dockerfile:
+	printf 'FROM python\nENV PIP_NO_CACHE_DIR=1\nWORKDIR /work\nCOPY pyproject.toml .\nRUN python3 -m pip install --upgrade pip && python3 -m pip install .\n' > Dockerfile
+
 bin:
 	mkdir bin
 
-bin/all: $(python_file_name) .dockerignore .gitignore bin Dockerfile pyproject.toml
+bin/all: $(python_file_name) .dockerignore .gitignore Dockerfile bin pyproject.toml
 	docker container run \
 		$(gpus_all_arg) \
 		$(interactive_tty_arg) \
@@ -54,9 +57,6 @@ bin/check: $(python_file_name) bin
 		python3 -m pip install https://github.com/pbizopoulos/source-code-simplifier/archive/main.zip && \
 		bin/.local/bin/source_code_simplifier $(python_file_name)'
 	touch bin/check
-
-Dockerfile:
-	printf 'FROM python\nENV PIP_NO_CACHE_DIR=1\nWORKDIR /work\nCOPY pyproject.toml .\nRUN python3 -m pip install --upgrade pip && python3 -m pip install .\n' > Dockerfile
 
 pyproject.toml:
 	printf '[project]\nname = "UNKNOWN"\nversion = "0.0.0"\ndependencies = []\n' > pyproject.toml
