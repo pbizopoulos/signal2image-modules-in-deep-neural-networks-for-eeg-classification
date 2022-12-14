@@ -23,7 +23,8 @@ all: $(html_file_name) .dockerignore Dockerfile package.json
 		--workdir /work/ \
 		$$(docker image build --quiet .) /bin/sh -c "serve $(timeout_command)"
 
-check: bin/check
+check:
+	$(MAKE) $(css_target) $(html_target) $(js_target)
 
 clean:
 	rm -rf bin/
@@ -37,30 +38,28 @@ $(html_file_name):
 .gitignore:
 	printf 'bin/\n' > .gitignore
 
+Dockerfile:
+	printf 'FROM node\nRUN apt-get update && apt-get install -y jq\nCOPY package.json .\nRUN jq -r ".devDependencies | to_entries | map_values( .key + \"@\" + .value ) | join(\"\\n\")" package.json | xargs -n 1 npm install --global\n' > Dockerfile
+
 bin:
 	mkdir bin
 
-bin/check:
-	$(MAKE) $(css_target) $(html_target) $(js_target)
-
-bin/check-css: $(css_file_name) .dockerignore .gitignore bin bin/.stylelintrc.json Dockerfile package.json
+bin/check-css: $(css_file_name) .dockerignore .gitignore Dockerfile bin bin/stylelintrc.json package.json
 	docker container run \
 		$(interactive_tty_arg) \
 		--rm \
-		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/work/ \
 		--workdir /work/ \
 		$$(docker image build --quiet .) /bin/sh -c '\
 		js-beautify --end-with-newline --indent-with-tabs --newline-between-rules --no-preserve-newlines --replace --type css $(css_file_name) && \
-		stylelint --config bin/.stylelintrc.json --fix $(css_file_name) && \
+		stylelint --config bin/stylelintrc.json --fix $(css_file_name) && \
 		css-validator --profile css3svg $(css_file_name)'
 	touch bin/check-css
 
-bin/check-html: $(html_file_name) .dockerignore .gitignore bin Dockerfile package.json
+bin/check-html: $(html_file_name) .dockerignore .gitignore Dockerfile bin package.json
 	docker container run \
 		$(interactive_tty_arg) \
 		--rm \
-		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/work/ \
 		--workdir /work/ \
 		$$(docker image build --quiet .) /bin/sh -c '\
@@ -68,11 +67,10 @@ bin/check-html: $(html_file_name) .dockerignore .gitignore bin Dockerfile packag
 		html-validate $(html_file_name)'
 	touch bin/check-html
 
-bin/check-js: $(js_file_name) .dockerignore .gitignore bin bin/eslintrc.js Dockerfile package.json
+bin/check-js: $(js_file_name) .dockerignore .gitignore Dockerfile bin bin/eslintrc.js package.json
 	docker container run \
 		$(interactive_tty_arg) \
 		--rm \
-		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/work/ \
 		--workdir /work/ \
 		$$(docker image build --quiet .) /bin/sh -c '\
@@ -83,11 +81,8 @@ bin/check-js: $(js_file_name) .dockerignore .gitignore bin bin/eslintrc.js Docke
 bin/eslintrc.js: bin
 	printf 'module.exports = { "env": { "browser": true, "es2021": true }, "extends": "eslint:recommended", "overrides": [ ], "parserOptions": { "ecmaVersion": "latest" }, "rules": { "indent": [ "error", "tab" ], "linebreak-style": [ "error", "unix" ], "quotes": [ "error", "single" ], "semi": [ "error", "always" ], "no-undef": 0 } }\n' > bin/eslintrc.js
 
-bin/.stylelintrc.json: bin
-	printf '{ "extends": "stylelint-config-standard", "plugins": [ "stylelint-order" ], "rules": { "indentation": "tab", "order/properties-alphabetical-order": true } }\n' > bin/.stylelintrc.json
-
-Dockerfile:
-	printf 'FROM node\nRUN apt-get update && apt-get install -y jq\nCOPY package.json .\nRUN jq -r ".devDependencies | to_entries | map_values( .key + \"@\" + .value ) | join(\"\\n\")" package.json | xargs -n 1 npm install --global\n' > Dockerfile
+bin/stylelintrc.json: bin
+	printf '{ "extends": "stylelint-config-standard", "plugins": [ "stylelint-order" ], "rules": { "indentation": "tab", "order/properties-alphabetical-order": true } }\n' > bin/stylelintrc.json
 
 package.json:
 	printf '{ "devDependencies": { "css-validator": "latest", "eslint": "latest", "html-validate": "latest", "js-beautify": "latest", "serve": "latest", "stylelint": "latest", "stylelint-config-standard": "latest", "stylelint-order": "latest" } }' > package.json
