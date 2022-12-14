@@ -39,7 +39,7 @@ $(html_file_name):
 	printf 'bin/\n' > .gitignore
 
 Dockerfile:
-	printf 'FROM node\nRUN apt-get update && apt-get install -y jq\nCOPY package.json .\nRUN jq -r ".devDependencies | to_entries | map_values( .key + \"@\" + .value ) | join(\"\\n\")" package.json | xargs -n 1 npm install --global\n' > Dockerfile
+	printf 'FROM node\nRUN apt-get update && apt-get install -y jq\nCOPY package.json .\nRUN npm install --global $$(jq --raw-output ".devDependencies | to_entries | map_values( .key + \"@\" + .value ) | join(\" \")" package.json)\n' > Dockerfile
 
 bin:
 	mkdir bin
