@@ -52,9 +52,7 @@ bin/check-css: $(css_file_name) .dockerignore .gitignore bin bin/.stylelintrc.js
 		--workdir /work/ \
 		$$(docker image build --quiet .) /bin/sh -c '\
 		js-beautify --end-with-newline --indent-with-tabs --newline-between-rules --no-preserve-newlines --replace --type css $(css_file_name) && \
-		cd bin/ && \
-		stylelint --fix ../$(css_file_name) && \
-		cd .. && \
+		stylelint --config bin/.stylelintrc.json --fix $(css_file_name) && \
 		css-validator --profile css3svg $(css_file_name)'
 	touch bin/check-css
 
