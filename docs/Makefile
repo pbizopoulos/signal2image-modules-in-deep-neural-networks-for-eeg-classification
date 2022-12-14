@@ -89,7 +89,7 @@ bin/.stylelintrc.json: bin
 	printf '{ "extends": "stylelint-config-standard", "plugins": [ "stylelint-order" ], "rules": { "indentation": "tab", "order/properties-alphabetical-order": true } }\n' > bin/.stylelintrc.json
 
 Dockerfile:
-	printf 'FROM node\nCOPY package.json .\nRUN apt-get update && apt-get install -y jq\nRUN jq -r ".devDependencies | to_entries | map_values( .key + \"@\" + .value ) | join(\"\\n\")" package.json | xargs -n 1 npm install --global\n' > Dockerfile
+	printf 'FROM node\nRUN apt-get update && apt-get install -y jq\nCOPY package.json .\nRUN jq -r ".devDependencies | to_entries | map_values( .key + \"@\" + .value ) | join(\"\\n\")" package.json | xargs -n 1 npm install --global\n' > Dockerfile
 
 package.json:
 	printf '{ "devDependencies": { "css-validator": "latest", "eslint": "latest", "html-validate": "latest", "js-beautify": "latest", "serve": "latest", "stylelint": "latest", "stylelint-config-standard": "latest", "stylelint-order": "latest" } }' > package.json
