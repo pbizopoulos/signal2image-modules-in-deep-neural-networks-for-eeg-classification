@@ -11,7 +11,6 @@ html_target = $$(test -s $(html_file_name) && printf 'bin/check-html')
 interactive_tty_arg = $$(test -t 0 && printf '%s' '--interactive --tty')
 js_file_name = script.js
 js_target = $$(test -s $(js_file_name) && printf 'bin/check-js')
-timeout_command = $$(test $(DEBUG) = 1 && printf '& sleep 1; kill $$!')
 
 all: $(html_file_name) .dockerignore Dockerfile package.json
 	docker container run \
@@ -21,7 +20,7 @@ all: $(html_file_name) .dockerignore Dockerfile package.json
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/work/ \
 		--workdir /work/ \
-		$$(docker image build --quiet .) /bin/sh -c "serve $(timeout_command)"
+		$$(docker image build --quiet .) /bin/sh -c "serve $$(test $(DEBUG) = 1 && printf '& sleep 1; kill $$!')"
 
 check:
 	$(MAKE) $(css_target) $(html_target) $(js_target)
@@ -72,8 +71,7 @@ bin/check-js: $(js_file_name) .dockerignore .gitignore Dockerfile bin bin/eslint
 		--rm \
 		--volume $$(pwd):/work/ \
 		--workdir /work/ \
-		$$(docker image build --quiet .) /bin/sh -c '\
-		eslint --config bin/eslintrc.js --fix $(js_file_name)'
+		$$(docker image build --quiet .) eslint --config bin/eslintrc.js --fix $(js_file_name)
 	touch bin/check-js
 
 bin/eslintrc.js: bin
