@@ -51,7 +51,6 @@ bin/check-css: $(css_file_name) .dockerignore .gitignore Dockerfile bin bin/styl
 		--volume $$(pwd):/work/ \
 		--workdir /work/ \
 		$$(docker image build --quiet .) /bin/sh -c '\
-		js-beautify --end-with-newline --indent-with-tabs --newline-between-rules --no-preserve-newlines --replace --type css $(css_file_name) && \
 		stylelint --config bin/stylelintrc.json --fix $(css_file_name) && \
 		css-validator --profile css3svg $(css_file_name)'
 	touch bin/check-css
@@ -74,12 +73,11 @@ bin/check-js: $(js_file_name) .dockerignore .gitignore Dockerfile bin bin/eslint
 		--volume $$(pwd):/work/ \
 		--workdir /work/ \
 		$$(docker image build --quiet .) /bin/sh -c '\
-		eslint --config bin/eslintrc.js --fix $(js_file_name) && \
-		js-beautify --end-with-newline --indent-with-tabs --no-preserve-newlines --type js --replace $(js_file_name)'
+		eslint --config bin/eslintrc.js --fix $(js_file_name)'
 	touch bin/check-js
 
 bin/eslintrc.js: bin
-	printf 'module.exports = { "env": { "browser": true, "es2021": true }, "extends": "eslint:recommended", "overrides": [ ], "parserOptions": { "ecmaVersion": "latest" }, "rules": { "indent": [ "error", "tab" ], "linebreak-style": [ "error", "unix" ], "quotes": [ "error", "single" ], "semi": [ "error", "always" ], "no-undef": 0 } }\n' > bin/eslintrc.js
+	printf 'module.exports = { "env": { "browser": true, "es2021": true }, "extends": "eslint:recommended", "overrides": [ ], "parserOptions": { "ecmaVersion": "latest" }, "rules": { "indent": [ "error", "tab", { "SwitchCase": 1 } ], "linebreak-style": [ "error", "unix" ], "no-multiple-empty-lines": [ "error", { "max": 1 } ], "padding-line-between-statements": [ "error", { blankLine: "always", prev: "*", next: "function" }, { blankLine: "always", prev: "function", next: "*" } ], "quotes": [ "error", "single" ], "semi": [ "error", "always" ], "sort-keys": "error", "no-undef": 0 } }\n' > bin/eslintrc.js
 
 bin/stylelintrc.json: bin
 	printf '{ "extends": "stylelint-config-standard", "plugins": [ "stylelint-order" ], "rules": { "indentation": "tab", "order/properties-alphabetical-order": true } }\n' > bin/stylelintrc.json

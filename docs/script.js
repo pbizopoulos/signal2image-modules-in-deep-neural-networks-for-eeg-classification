@@ -25,6 +25,7 @@ function drawSignal(text) {
 	line = d3.line().x((d, i) => x(i)).y(d => y(d));
 	d3.select('#path-input').attr('d', line(csvDataset.arraySync()));
 }
+
 async function loadModel(predictFunction) {
 	const loadModelFunction = tf.loadGraphModel;
 	model = await loadModelFunction('https://raw.githubusercontent.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/main/python/dist/resnet34-1D/model.json', {
@@ -37,6 +38,7 @@ async function loadModel(predictFunction) {
 	});
 	predictFunction();
 }
+
 async function predictView() {
 	if (csvDataset === undefined) {
 		return;
@@ -56,6 +58,7 @@ async function predictView() {
 		outputDiv.append(elementDiv);
 	}
 }
+
 signalFileReader.onload = function() {
 	drawSignal(signalFileReader.result);
 	predictView();
