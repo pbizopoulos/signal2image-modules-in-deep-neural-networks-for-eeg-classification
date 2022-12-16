@@ -11,7 +11,8 @@ tex_file_name = ms.tex
 
 all: bin/all
 
-check: bin/check
+check:
+	$(MAKE) $(bib_target) bin/check-tex
 
 clean:
 	rm -rf bin/
@@ -47,10 +48,7 @@ bin/all: $(bib_file_name) $(tex_file_name) .dockerignore .gitignore Dockerfile b
 	rm $(bbl_file_name)
 	touch bin/all
 
-bin/check:
-	$(MAKE) $(bib_target) bin/check-tex
-
-bin/check-bib: $(bib_file_name) .dockerignore .gitignore bin/all
+bin/check-bib: bin/all
 	docker container run \
 		--rm \
 		--user $$(id -u):$$(id -g) \
@@ -68,7 +66,6 @@ bin/check-bib: $(bib_file_name) .dockerignore .gitignore bin/all
 		python3 -m pip install rebiber && \
 		bin/.local/bin/rebiber --input_bib $(bib_file_name) --sort True"
 	docker container run \
-		$(interactive_tty_arg) \
 		--env HOME=/work/bin \
 		--rm \
 		--user $$(id -u):$$(id -g) \
@@ -77,7 +74,7 @@ bin/check-bib: $(bib_file_name) .dockerignore .gitignore bin/all
 		node npm exec --yes -- git+https://github.com/FlamingTempura/bibtex-tidy.git --curly --tab --no-align --blank-lines --duplicates=key --sort-fields $(bib_file_name)
 	touch bin/check-bib
 
-bin/check-tex: $(tex_file_name) .dockerignore .gitignore Dockerfile bin
+bin/check-tex: $(tex_file_name) .dockerignore Dockerfile
 	docker container run \
 		--rm \
 		--user $$(id -u):$$(id -g) \
