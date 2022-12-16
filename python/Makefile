@@ -6,6 +6,7 @@ DEBUG = 1
 
 gpus_all_arg = $$(command -v nvidia-container-toolkit > /dev/null && printf '%s' '--gpus all')
 interactive_tty_arg = $$(test -t 0 && printf '%s' '--interactive --tty')
+make_all_docker_cmd = python3 $(python_file_name)
 python_file_name = main.py
 
 all: bin/all
@@ -42,7 +43,7 @@ bin/all: $(python_file_name) .dockerignore .gitignore Dockerfile bin pyproject.t
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/work/ \
 		--workdir /work/ \
-		$$(docker image build --quiet .) python3 $(python_file_name)
+		$$(docker image build --quiet .) $(make_all_docker_cmd)
 	touch bin/all
 
 bin/check: $(python_file_name) bin

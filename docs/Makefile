@@ -9,18 +9,20 @@ css_target = $$(test -s $(css_file_name) && printf 'bin/check-css')
 html_file_name = index.html
 html_target = $$(test -s $(html_file_name) && printf 'bin/check-html')
 interactive_tty_arg = $$(test -t 0 && printf '%s' '--interactive --tty')
+make_all_docker_cmd = /bin/sh -c "serve $$(test $(DEBUG) = 1 && printf '& sleep 1; kill $$!')"
 js_file_name = script.js
 js_target = $$(test -s $(js_file_name) && printf 'bin/check-js')
 
 all: $(html_file_name) .dockerignore Dockerfile package.json
 	docker container run \
 		$(interactive_tty_arg) \
+		--detach-keys 'ctrl-^,ctrl-^' \
 		--publish 3000:3000 \
 		--rm \
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/work/ \
 		--workdir /work/ \
-		$$(docker image build --quiet .) /bin/sh -c "serve $$(test $(DEBUG) = 1 && printf '& sleep 1; kill $$!')"
+		$$(docker image build --quiet .) $(make_all_docker_cmd)
 
 check:
 	$(MAKE) $(css_target) $(html_target) $(js_target)

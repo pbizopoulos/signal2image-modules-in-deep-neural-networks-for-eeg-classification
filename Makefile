@@ -7,6 +7,8 @@ bbl_file_name = ms.bbl
 bib_file_name = ms.bib
 bib_target = $$(test -s $(bib_file_name) && printf 'bin/check-bib')
 fls_file_name = ms.fls
+interactive_tty_arg = $$(test -t 0 && printf '%s' '--interactive --tty')
+make_all_docker_cmd = /bin/sh -c 'latexmk -gg -pdf -outdir=bin/ $(tex_file_name) && tar cf bin/tex.tar $(bbl_file_name) $(bib_file_name) $(tex_file_name) $$(grep "^INPUT ./" bin/$(fls_file_name) | uniq | cut -b 9-)'
 tex_file_name = ms.tex
 
 all: bin/all
@@ -38,13 +40,13 @@ bin:
 bin/all: $(bib_file_name) $(tex_file_name) .dockerignore .gitignore Dockerfile bin
 	touch bin/$(bbl_file_name) && cp bin/$(bbl_file_name) .
 	docker container run \
+		$(interactive_tty_arg) \
+		--detach-keys 'ctrl-^,ctrl-^' \
 		--rm \
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/work/ \
 		--workdir /work/ \
-		$$(docker image build --quiet .) /bin/sh -c '\
-		latexmk -gg -pdf -outdir=bin/ $(tex_file_name) && \
-		tar cf bin/tex.tar $(bbl_file_name) $(bib_file_name) $(tex_file_name) $$(grep "^INPUT ./" bin/$(fls_file_name) | uniq | cut -b 9-)'
+		$$(docker image build --quiet .) $(make_all_docker_cmd)
 	rm $(bbl_file_name)
 	touch bin/all
 
