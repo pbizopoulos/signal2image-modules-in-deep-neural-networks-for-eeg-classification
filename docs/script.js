@@ -14,6 +14,8 @@ let csvDatasetMax;
 let csvDatasetMin;
 let line;
 let model;
+signalFileReader.onload = signalFileReaderOnLoad;
+signalInputFile.onchange = signalInputFileOnChange;
 
 function drawSignal(text) {
 	const array = text.match(/\d+(?:\.\d+)?/g).map(Number);
@@ -59,16 +61,18 @@ async function predictView() {
 	}
 }
 
-signalFileReader.onload = function() {
+function signalFileReaderOnLoad() {
 	drawSignal(signalFileReader.result);
 	predictView();
-};
-signalInputFile.onchange = function() {
+}
+
+function signalInputFileOnChange() {
 	const files = event.currentTarget.files;
 	if (files[0]) {
 		signalFileReader.readAsText(files[0]);
 	}
-};
+}
+
 const inputSvg = d3.select('#input-div').append('svg').attr('viewBox', [0, 0, canvasWidth, canvasHeight]);
 inputSvg.append('path').attr('id', 'path-input').style('fill', 'none').style('stroke', 'blue');
 d3.select('#input-div').call(d3.drag().on('start', (event) => {
