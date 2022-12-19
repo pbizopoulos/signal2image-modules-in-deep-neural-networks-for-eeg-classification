@@ -9,11 +9,11 @@ css_target = $$(test -s $(css_file_name) && printf 'bin/check-css')
 html_file_name = index.html
 html_target = $$(test -s $(html_file_name) && printf 'bin/check-html')
 interactive_tty_arg = $$(test -t 0 && printf '%s' '--interactive --tty')
-make_all_docker_cmd = /bin/sh -c "serve $$(test $(DEBUG) = 1 && printf '& sleep 1; kill $$!')"
+make_all_docker_cmd = /bin/sh -c "serve --ssl-cert bin/cert.pem --ssl-key bin/key.pem $$(test $(DEBUG) = 1 && printf '& sleep 1; kill $$!')"
 js_file_name = script.js
 js_target = $$(test -s $(js_file_name) && printf 'bin/check-js')
 
-all: $(html_file_name) .dockerignore Dockerfile package.json
+all: $(html_file_name) .dockerignore Dockerfile bin/cert.pem package.json
 	docker container run \
 		$(interactive_tty_arg) \
 		--detach-keys 'ctrl-^,ctrl-^' \
@@ -44,6 +44,14 @@ Dockerfile:
 
 bin:
 	mkdir bin
+
+bin/cert.pem: .dockerignore .gitignore bin
+	docker container run \
+		--rm \
+		--user $$(id -u):$$(id -g) \
+		--volume $$(pwd):/work/ \
+		--workdir /work/ \
+		alpine/openssl req -subj "/C=.." -nodes -x509 -keyout bin/key.pem -out bin/cert.pem
 
 bin/check-css: $(css_file_name) .dockerignore .gitignore Dockerfile bin bin/stylelintrc.json package.json
 	docker container run \
