@@ -75,20 +75,19 @@ bin/check-html: $(html_file_name) .dockerignore .gitignore Dockerfile bin packag
 		html-validate $(html_file_name)'
 	touch bin/check-html
 
-bin/check-js: $(js_file_name) .dockerignore .gitignore Dockerfile bin bin/eslintrc.js package.json
+bin/check-js: $(js_file_name) .dockerignore .gitignore Dockerfile bin package.json
 	docker container run \
 		$(interactive_tty_arg) \
 		--rm \
 		--volume $$(pwd):/work/ \
 		--workdir /work/ \
-		$$(docker image build --quiet .) eslint --config bin/eslintrc.js --fix $(js_file_name)
+		$$(docker image build --quiet .) /bin/sh -c '\
+		rome check --apply-suggested $(js_file_name) && \
+		rome format --line-width 320 --quote-style single --write $(js_file_name)'
 	touch bin/check-js
-
-bin/eslintrc.js: bin
-	printf 'module.exports = { "env": { "browser": true, "es2021": true }, "extends": "eslint:recommended", "overrides": [ ], "parserOptions": { "ecmaVersion": "latest" }, "rules": { "indent": [ "error", "tab", { "SwitchCase": 1 } ], "linebreak-style": [ "error", "unix" ], "no-multiple-empty-lines": [ "error", { "max": 1 } ], "padding-line-between-statements": [ "error", { blankLine: "always", prev: "*", next: "function" }, { blankLine: "always", prev: "function", next: "*" } ], "quotes": [ "error", "single" ], "semi": [ "error", "always" ], "sort-keys": "error", "no-undef": 0 } }\n' > bin/eslintrc.js
 
 bin/stylelintrc.json: bin
 	printf '{ "extends": "stylelint-config-standard", "plugins": [ "stylelint-order" ], "rules": { "indentation": "tab", "order/properties-alphabetical-order": true } }\n' > bin/stylelintrc.json
 
 package.json:
-	printf '{ "devDependencies": { "css-validator": "latest", "eslint": "latest", "html-validate": "latest", "js-beautify": "latest", "serve": "latest", "stylelint": "latest", "stylelint-config-standard": "latest", "stylelint-order": "latest" } }' > package.json
+	printf '{ "devDependencies": { "css-validator": "latest", "html-validate": "latest", "js-beautify": "latest", "rome": "latest", "serve": "latest", "stylelint": "latest", "stylelint-config-standard": "latest", "stylelint-order": "latest" } }' > package.json
