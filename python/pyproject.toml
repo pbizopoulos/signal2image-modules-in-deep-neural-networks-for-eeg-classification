@@ -10,3 +10,11 @@ dependencies = [
 	"tensorflow-probability==0.19.0",
 	"tensorflowjs==4.1.0",
 ]
+
+[project.optional-dependencies]
+dev = ["ruff==0.0.191"]
+
+[tool.ruff]
+select = ["A", "C", "E", "ERA", "F", "I", "ICN", "N", "PD", "RET", "SIM", "T20", "TID", "UP", "W"]
+ignore = ["C901", "E501", "PD013"]
+fix = true

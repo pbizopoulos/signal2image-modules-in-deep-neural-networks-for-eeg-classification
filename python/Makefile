@@ -17,7 +17,7 @@ clean:
 	rm -rf bin/
 
 $(python_file_name):
-	printf "from os import environ\\n\\n\\ndef main():\\n    debug = environ['DEBUG']\\n\\n\\nif __name__ == '__main__':\\n    main()\\n" > $(python_file_name)
+	printf '' > $(python_file_name)
 
 .dockerignore:
 	printf '*\n!pyproject.toml\n' > .dockerignore
@@ -26,7 +26,7 @@ $(python_file_name):
 	printf 'bin/\n' > .gitignore
 
 Dockerfile:
-	printf 'FROM python\nENV PIP_NO_CACHE_DIR=1\nWORKDIR /work\nCOPY pyproject.toml .\nRUN python3 -m pip install --upgrade pip && python3 -m pip install .\n' > Dockerfile
+	printf 'FROM python\nENV PIP_NO_CACHE_DIR=1\nWORKDIR /work\nCOPY pyproject.toml .\nRUN python3 -m pip install --upgrade pip && python3 -m pip install .[dev]\n' > Dockerfile
 
 bin:
 	mkdir bin
@@ -46,18 +46,15 @@ bin/all: $(python_file_name) .dockerignore .gitignore Dockerfile bin pyproject.t
 		$$(docker image build --quiet .) $(make_all_docker_cmd)
 	touch bin/all
 
-bin/check: $(python_file_name) bin
+bin/check: $(python_file_name) .dockerignore .gitignore Dockerfile bin pyproject.toml
 	docker container run \
 		--env HOME=/work/bin \
 		--rm \
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/work/ \
 		--workdir /work/ \
-		python /bin/sh -c '\
-		python3 -m pip install --upgrade pip && \
-		python3 -m pip install https://github.com/pbizopoulos/source-code-simplifier/archive/main.zip && \
-		bin/.local/bin/source_code_simplifier $(python_file_name)'
+		$$(docker image build --quiet .) ruff --no-cache $(python_file_name)
 	touch bin/check
 
 pyproject.toml:
-	printf '[project]\nname = "UNKNOWN"\nversion = "0.0.0"\ndependencies = []\n' > pyproject.toml
+	printf '[project]\nname = "UNKNOWN"\nversion = "0.0.0"\ndependencies = []\n\n[project.optional-dependencies]\ndev = ["ruff==0.0.189"]\n\n[tool.ruff]\nselect = ["A", "C", "E", "ERA", "F", "I", "ICN", "N", "PD", "RET", "SIM", "T20", "TID", "UP", "W"]\nignore = ["C901", "E501", "PD013"]\n' > pyproject.toml
