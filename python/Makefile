@@ -4,8 +4,8 @@
 
 DEBUG = 1
 
-gpus_all_arg = $$(command -v nvidia-container-toolkit > /dev/null && printf '%s' '--gpus all')
-interactive_tty_arg = $$(test -t 0 && printf '%s' '--interactive --tty')
+gpus_all_docker_arg = $$(command -v nvidia-container-toolkit > /dev/null && printf '%s' '--gpus all')
+interactive_tty_docker_arg = $$(test -t 0 && printf '%s' '--interactive --tty')
 make_all_docker_cmd = python3 $(python_file_name)
 python_file_name = main.py
 
@@ -33,8 +33,8 @@ bin:
 
 bin/all: $(python_file_name) .dockerignore .gitignore Dockerfile bin pyproject.toml
 	docker container run \
-		$(gpus_all_arg) \
-		$(interactive_tty_arg) \
+		$(gpus_all_docker_arg) \
+		$(interactive_tty_docker_arg) \
 		--detach-keys 'ctrl-^,ctrl-^' \
 		--env DEBUG=$(DEBUG) \
 		--env HOME=/work/bin \

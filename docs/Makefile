@@ -8,14 +8,14 @@ css_file_name = style.css
 css_target = $$(test -s $(css_file_name) && printf 'bin/check-css')
 html_file_name = index.html
 html_target = $$(test -s $(html_file_name) && printf 'bin/check-html')
-interactive_tty_arg = $$(test -t 0 && printf '%s' '--interactive --tty')
+interactive_tty_docker_arg = $$(test -t 0 && printf '%s' '--interactive --tty')
 make_all_docker_cmd = /bin/sh -c "serve --ssl-cert bin/cert.pem --ssl-key bin/key.pem $$(test $(DEBUG) = 1 && printf '& sleep 1; kill $$!')"
 js_file_name = script.js
 js_target = $$(test -s $(js_file_name) && printf 'bin/check-js')
 
 all: $(html_file_name) .dockerignore Dockerfile bin/cert.pem package.json
 	docker container run \
-		$(interactive_tty_arg) \
+		$(interactive_tty_docker_arg) \
 		--detach-keys 'ctrl-^,ctrl-^' \
 		--publish 3000:3000 \
 		--rm \
@@ -55,7 +55,7 @@ bin/cert.pem: .dockerignore .gitignore bin
 
 bin/check-css: $(css_file_name) .dockerignore .gitignore Dockerfile bin bin/stylelintrc.json package.json
 	docker container run \
-		$(interactive_tty_arg) \
+		$(interactive_tty_docker_arg) \
 		--rm \
 		--volume $$(pwd):/work/ \
 		--workdir /work/ \
@@ -66,7 +66,7 @@ bin/check-css: $(css_file_name) .dockerignore .gitignore Dockerfile bin bin/styl
 
 bin/check-html: $(html_file_name) .dockerignore .gitignore Dockerfile bin package.json
 	docker container run \
-		$(interactive_tty_arg) \
+		$(interactive_tty_docker_arg) \
 		--rm \
 		--volume $$(pwd):/work/ \
 		--workdir /work/ \
@@ -77,7 +77,7 @@ bin/check-html: $(html_file_name) .dockerignore .gitignore Dockerfile bin packag
 
 bin/check-js: $(js_file_name) .dockerignore .gitignore Dockerfile bin package.json
 	docker container run \
-		$(interactive_tty_arg) \
+		$(interactive_tty_docker_arg) \
 		--rm \
 		--volume $$(pwd):/work/ \
 		--workdir /work/ \
