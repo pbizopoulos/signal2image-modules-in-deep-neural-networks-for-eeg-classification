@@ -1,4 +1,4 @@
-FROM node:19.2.0
+FROM node:19.3.0
 RUN apt-get update && apt-get install -y jq
 COPY package.json .
 RUN npm install --global $(jq --raw-output ".devDependencies | to_entries | map_values( .key + \"@\" + .value ) | join(\" \")" package.json)
