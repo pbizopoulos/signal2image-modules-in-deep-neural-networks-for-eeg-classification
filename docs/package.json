@@ -1,7 +1,7 @@
 {
 	"devDependencies": {
 		"css-validator": "0.11.0",
-		"html-validate": "7.10.1",
+		"html-validate": "7.12.0",
 		"js-beautify": "1.14.7",
 		"rome": "11.0.0",
 		"serve": "14.1.2",
