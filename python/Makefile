@@ -57,4 +57,4 @@ bin/check: $(python_file_name) .dockerignore .gitignore Dockerfile bin pyproject
 	touch bin/check
 
 pyproject.toml:
-	printf '[project]\nname = "UNKNOWN"\nversion = "0.0.0"\ndependencies = []\n\n[project.optional-dependencies]\ndev = ["ruff==0.0.189"]\n\n[tool.ruff]\nselect = ["A", "C", "E", "ERA", "F", "I", "ICN", "N", "PD", "RET", "SIM", "T20", "TID", "UP", "W"]\nignore = ["C901", "E501", "PD013"]\n' > pyproject.toml
+	printf '[project]\nname = "UNKNOWN"\nversion = "0.0.0"\ndependencies = []\n\n[project.optional-dependencies]\ndev = ["ruff"]\n\n[tool.ruff]\nselect = ["A", "C", "E", "ERA", "F", "I", "ICN", "N", "PD", "RET", "SIM", "T20", "TID", "UP", "W"]\nignore = ["C901", "E501", "PD013"]\nfix = true\n' > pyproject.toml
