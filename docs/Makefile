@@ -90,4 +90,4 @@ bin/stylelintrc.json: bin
 	printf '{ "extends": "stylelint-config-standard", "plugins": [ "stylelint-order" ], "rules": { "indentation": "tab", "order/properties-alphabetical-order": true } }\n' > bin/stylelintrc.json
 
 package.json:
-	printf '{ "devDependencies": { "css-validator": "latest", "html-validate": "latest", "js-beautify": "latest", "rome": "latest", "serve": "latest", "stylelint": "latest", "stylelint-config-standard": "latest", "stylelint-order": "latest" } }' > package.json
+	printf '{\n\t"devDependencies": {\n\t\t"css-validator": "latest",\n\t\t"html-validate": "latest",\n\t\t"js-beautify": "latest",\n\t\t"rome": "latest",\n\t\t"serve": "latest",\n\t\t"stylelint": "latest",\n\t\t"stylelint-config-standard": "latest",\n\t\t"stylelint-order": "latest"\n\t}\n}\n' > package.json

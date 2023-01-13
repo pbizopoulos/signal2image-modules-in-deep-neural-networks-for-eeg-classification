@@ -318,7 +318,7 @@ class SignalAsImage(nn.Module):
         signal = signal.shape[-1] * signal / (self.signals_all_max - self.signals_all_min)
         signal = signal.floor().long()
         out = torch.zeros(signal.shape[0], 1, signal.shape[-1], signal.shape[-1]).to(signal.device)
-        for index, element in enumerate(signal):
+        for index, _element in enumerate(signal):
             out[index, 0, signal.shape[-1] - 1 - signal[index, 0, :], range(signal.shape[-1])] = 255
         out = torch.cat((out, out, out), 1)
         out = self.model_base(out)
@@ -333,9 +333,9 @@ class Spectrogram(nn.Module):
 
     def forward(self, signal):
         out = torch.zeros(signal.shape[0], 1, signal.shape[-1], signal.shape[-1]).to(signal.device)
-        for index, signal in enumerate(signal):
-            f_array, t_array, spectrogram_array = spectrogram(signal.cpu(), fs=signal.shape[-1], noverlap=4, nperseg=8, nfft=64, mode='magnitude')
-            out[index, 0] = functional.interpolate(torch.tensor(spectrogram_array).unsqueeze(0), signal.shape[-1], mode='bilinear')
+        for index, signal_element in enumerate(signal):
+            f_array, t_array, spectrogram_array = spectrogram(signal_element.cpu(), fs=signal_element.shape[-1], noverlap=4, nperseg=8, nfft=64, mode='magnitude')
+            out[index, 0] = functional.interpolate(torch.tensor(spectrogram_array).unsqueeze(0), signal_element.shape[-1], mode='bilinear')
         out = torch.cat((out, out, out), 1)
         out = self.model_base(out)
         return out
@@ -360,7 +360,7 @@ class UCIEpilepsy(Dataset):
         data_file_path = join('bin', 'data.csv')
         if not os.path.isfile(data_file_path):
             with open(data_file_path, 'wb') as file:
-                response = requests.get('https://web.archive.org/web/20200318000445/http://archive.ics.uci.edu/ml/machine-learning-databases/00388/data.csv')
+                response = requests.get('https://web.archive.org/web/20200318000445/http://archive.ics.uci.edu/ml/machine-learning-databases/00388/data.csv', timeout=5)
                 file.write(response.content)
         dataset = pd.read_csv(data_file_path)
         dataset = dataset[:samples_num]
@@ -473,7 +473,7 @@ def main():
             model = model.to(device)
             optimizer = Adam(model.parameters())
             accuracy_validation_best = -1
-            for epoch in range(epochs_num):
+            for _ in range(epochs_num):
                 model.train()
                 for data, target in dataloader_training:
                     data = data.to(device)
