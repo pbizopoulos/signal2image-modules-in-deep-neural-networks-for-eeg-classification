@@ -1,6 +1,6 @@
 import os
 from os import environ
-from os.path import join
+from os.path import isfile, join
 from shutil import move, rmtree
 
 import numpy as np
@@ -358,9 +358,9 @@ class UCIEpilepsy(Dataset):
 
     def __init__(self, samples_num, training_validation_test):
         data_file_path = join('bin', 'data.csv')
-        if not os.path.isfile(data_file_path):
+        if not isfile(data_file_path):
             with open(data_file_path, 'wb') as file:
-                response = requests.get('https://web.archive.org/web/20200318000445/http://archive.ics.uci.edu/ml/machine-learning-databases/00388/data.csv', timeout=5)
+                response = requests.get('https://web.archive.org/web/20200318000445/http://archive.ics.uci.edu/ml/machine-learning-databases/00388/data.csv', timeout=60)
                 file.write(response.content)
         dataset = pd.read_csv(data_file_path)
         dataset = dataset[:samples_num]
