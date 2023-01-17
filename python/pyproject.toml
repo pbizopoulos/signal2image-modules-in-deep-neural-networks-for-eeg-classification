@@ -12,12 +12,13 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["ruff==0.0.220"]
+dev = ["ruff==0.0.224"]
 
 [tool.ruff]
 select = ["A", "B", "BLE", "C", "C4", "E", "EM", "ERA", "F", "I", "ICN", "ISC", "N", "PD", "PGH", "PIE", "PLC", "PLE", "PLR", "PLW", "Q", "RET", "RUF", "S", "SIM", "T10", "T20", "TID", "UP", "W"]
-ignore = ["B905", "C901", "E501", "PD013", "S101"]
+ignore = ["B905", "C901", "E501", "PD013", "PLR2004", "S101"]
 fix = true
+cache-dir = "bin/ruff"
 
 [tool.ruff.flake8-quotes]
 inline-quotes = "single"

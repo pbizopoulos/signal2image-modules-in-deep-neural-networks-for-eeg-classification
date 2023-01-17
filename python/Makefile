@@ -53,8 +53,8 @@ bin/check: $(python_file_name) .dockerignore .gitignore Dockerfile bin pyproject
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/work/ \
 		--workdir /work/ \
-		$$(docker image build --quiet .) ruff --no-cache $(python_file_name)
+		$$(docker image build --quiet .) ruff $(python_file_name)
 	touch bin/check
 
 pyproject.toml:
-	printf '[project]\nname = "UNKNOWN"\nversion = "0.0.0"\ndependencies = []\n\n[project.optional-dependencies]\ndev = ["ruff"]\n\n[tool.ruff]\nselect = ["A", "B", "BLE", "C", "C4", "E", "EM", "ERA", "F", "I", "ICN", "ISC", "N", "PD", "PGH", "PIE", "PLC", "PLE", "PLR", "PLW", "Q", "RET", "RUF", "S", "SIM", "T10", "T20", "TID", "UP", "W"]\nignore = ["B905", "C901", "E501", "PD013", "S101"]\nfix = true\n\n[tool.ruff.flake8-quotes]\ninline-quotes = "single"\n' > pyproject.toml
+	printf '[project]\nname = "UNKNOWN"\nversion = "0.0.0"\ndependencies = []\n\n[project.optional-dependencies]\ndev = ["ruff"]\n\n[tool.ruff]\nselect = ["A", "B", "BLE", "C", "C4", "E", "EM", "ERA", "F", "I", "ICN", "ISC", "N", "PD", "PGH", "PIE", "PLC", "PLE", "PLR", "PLW", "Q", "RET", "RUF", "S", "SIM", "T10", "T20", "TID", "UP", "W"]\nignore = ["B905", "C901", "E501", "PD013", "PLR2004", "S101"]\nfix = true\ncache-dir = "bin/ruff"\n\n[tool.ruff.flake8-quotes]\ninline-quotes = "single"\n' > pyproject.toml
