@@ -1,6 +1,6 @@
 import os
 from os import environ
-from os.path import isfile, join
+from os.path import exists, isfile, join
 from shutil import move, rmtree
 
 import numpy as np
@@ -618,7 +618,7 @@ def resnet50(classes_num):
 
 def save_tfjs_from_torch(example_input, model, model_file_name):
     model_file_path = join('bin', model_file_name)
-    if os.path.exists(model_file_path):
+    if exists(model_file_path):
         rmtree(model_file_path)
     os.makedirs(model_file_path)
     torch.onnx.export(model.cpu(), example_input, join(model_file_path, 'model.onnx'), export_params=True, opset_version=11)
