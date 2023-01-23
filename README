@@ -9,7 +9,7 @@ Git
 Docker (>= 19.03 for NVIDIA Container Toolkit)
 NVIDIA Container Toolkit (Optional)
 
-# Check and build code
+# Download, check and build
 git clone https://github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification
 cd signal2image-modules-in-deep-neural-networks-for-eeg-classification/
 cd docs/ && make check all && cd ..
