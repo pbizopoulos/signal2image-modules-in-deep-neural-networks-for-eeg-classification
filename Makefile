@@ -22,7 +22,7 @@ Dockerfile:
 bin:
 	mkdir $@
 
-bin/all: ms.bib ms.tex .dockerignore .gitignore Dockerfile bin
+bin/all: .dockerignore .gitignore Dockerfile bin ms.bib ms.tex
 	touch bin/ms.bbl && cp bin/ms.bbl .
 	docker container run \
 		$$(test -t 0 && printf '%s' '--interactive --tty') \
@@ -61,7 +61,7 @@ bin/check-bib: bin/all
 		node npm exec --yes -- git+https://github.com/FlamingTempura/bibtex-tidy.git --curly --tab --no-align --blank-lines --duplicates=key --sort-fields ms.bib
 	touch $@
 
-bin/check-tex: ms.tex .dockerignore Dockerfile
+bin/check-tex: .dockerignore Dockerfile ms.tex
 	docker container run \
 		--rm \
 		--user $$(id -u):$$(id -g) \

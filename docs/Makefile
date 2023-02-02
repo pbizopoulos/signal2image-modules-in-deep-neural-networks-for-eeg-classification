@@ -39,9 +39,9 @@ bin/cert.pem: .dockerignore .gitignore bin
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/work/ \
 		--workdir /work/ \
-		alpine/openssl req -subj "/C=.." -nodes -x509 -keyout bin/key.pem -out bin/cert.pem
+		alpine/openssl req -subj "/C=.." -nodes -x509 -keyout bin/key.pem -out $@
 
-bin/check-css: style.css .dockerignore .gitignore Dockerfile bin bin/stylelintrc.json package.json
+bin/check-css: .dockerignore .gitignore Dockerfile bin/stylelintrc.json package.json style.css
 	docker container run \
 		--rm \
 		--volume $$(pwd):/work/ \
@@ -51,7 +51,7 @@ bin/check-css: style.css .dockerignore .gitignore Dockerfile bin bin/stylelintrc
 		css-validator --profile css3svg style.css'
 	touch $@
 
-bin/check-html: index.html .dockerignore .gitignore Dockerfile bin package.json
+bin/check-html: .dockerignore .gitignore Dockerfile bin index.html package.json
 	docker container run \
 		--rm \
 		--volume $$(pwd):/work/ \
@@ -61,7 +61,7 @@ bin/check-html: index.html .dockerignore .gitignore Dockerfile bin package.json
 		html-validate index.html'
 	touch $@
 
-bin/check-js: script.js .dockerignore .gitignore Dockerfile bin package.json
+bin/check-js: .dockerignore .gitignore Dockerfile bin package.json script.js
 	docker container run \
 		--rm \
 		--volume $$(pwd):/work/ \
