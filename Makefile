@@ -5,7 +5,7 @@ make_all_docker_cmd = /bin/sh -c 'latexmk -gg -pdf -outdir=bin/ ms.tex && tar cf
 all: bin/all
 
 check:
-	$(MAKE) $$(test -s ms.bib && printf 'bin/check-bib') bin/check-tex
+	$(MAKE) bin/all $$(test -s ms.bib && printf 'bin/check-bib') bin/check-tex
 
 clean:
 	rm -rf bin/
@@ -35,7 +35,7 @@ bin/all: .dockerignore .gitignore Dockerfile bin ms.bib ms.tex
 	rm ms.bbl
 	touch $@
 
-bin/check-bib: bin/all
+bin/check-bib: .dockerignore Dockerfile ms.bib
 	docker container run \
 		--rm \
 		--user $$(id -u):$$(id -g) \
