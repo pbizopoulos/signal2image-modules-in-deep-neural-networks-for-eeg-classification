@@ -29,6 +29,7 @@ bin/all: .dockerignore .gitignore Dockerfile bin main.py pyproject.toml
 		$$(test -t 0 && printf '%s' '--interactive --tty') \
 		--detach-keys 'ctrl-^,ctrl-^' \
 		--env DEBUG=$(DEBUG) \
+		--env HOME=/work/bin \
 		--env PYTHONDONTWRITEBYTECODE=1 \
 		--rm \
 		--user $$(id -u):$$(id -g) \
