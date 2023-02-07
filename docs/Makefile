@@ -11,8 +11,8 @@ all: Dockerfile bin/cert.pem index.html package.json
 		--publish 3000:3000 \
 		--rm \
 		--user $$(id -u):$$(id -g) \
-		--volume $$(pwd):/work/ \
-		--workdir /work/ \
+		--volume $$(pwd):/usr/src/app/ \
+		--workdir /usr/src/app/ \
 		$$(docker image build --quiet .) $(make_all_docker_cmd)
 
 check:
@@ -37,15 +37,15 @@ bin/cert.pem: .dockerignore .gitignore bin
 	docker container run \
 		--rm \
 		--user $$(id -u):$$(id -g) \
-		--volume $$(pwd):/work/ \
-		--workdir /work/ \
+		--volume $$(pwd):/usr/src/app/ \
+		--workdir /usr/src/app/ \
 		alpine/openssl req -subj "/C=.." -nodes -x509 -keyout bin/key.pem -out $@
 
 bin/check-css: .dockerignore .gitignore Dockerfile bin/stylelintrc.json package.json style.css
 	docker container run \
 		--rm \
-		--volume $$(pwd):/work/ \
-		--workdir /work/ \
+		--volume $$(pwd):/usr/src/app/ \
+		--workdir /usr/src/app/ \
 		$$(docker image build --quiet .) /bin/sh -c '\
 		stylelint --config bin/stylelintrc.json --fix style.css && \
 		css-validator --profile css3svg style.css'
@@ -54,8 +54,8 @@ bin/check-css: .dockerignore .gitignore Dockerfile bin/stylelintrc.json package.
 bin/check-html: .dockerignore .gitignore Dockerfile bin index.html package.json
 	docker container run \
 		--rm \
-		--volume $$(pwd):/work/ \
-		--workdir /work/ \
+		--volume $$(pwd):/usr/src/app/ \
+		--workdir /usr/src/app/ \
 		$$(docker image build --quiet .) /bin/sh -c '\
 		js-beautify --end-with-newline --indent-inner-html --indent-with-tabs --no-preserve-newlines --type html --replace index.html && \
 		html-validate index.html'
@@ -64,8 +64,8 @@ bin/check-html: .dockerignore .gitignore Dockerfile bin index.html package.json
 bin/check-js: .dockerignore .gitignore Dockerfile bin package.json script.js
 	docker container run \
 		--rm \
-		--volume $$(pwd):/work/ \
-		--workdir /work/ \
+		--volume $$(pwd):/usr/src/app/ \
+		--workdir /usr/src/app/ \
 		$$(docker image build --quiet .) /bin/sh -c '\
 		rome check --apply-suggested script.js && \
 		rome format --line-width 320 --quote-style single --write script.js'

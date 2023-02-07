@@ -18,7 +18,7 @@ clean:
 	printf 'bin/\n' > $@
 
 Dockerfile:
-	printf 'FROM python\nWORKDIR /work\nCOPY pyproject.toml .\nRUN python3 -m pip install --upgrade pip && python3 -m pip install .[dev]\n' > $@
+	printf 'FROM python\nWORKDIR /usr/src/app\nCOPY pyproject.toml .\nRUN python3 -m pip install --upgrade pip && python3 -m pip install .[dev]\n' > $@
 
 bin:
 	mkdir $@
@@ -29,12 +29,12 @@ bin/all: .dockerignore .gitignore Dockerfile bin main.py pyproject.toml
 		$$(test -t 0 && printf '%s' '--interactive --tty') \
 		--detach-keys 'ctrl-^,ctrl-^' \
 		--env DEBUG=$(DEBUG) \
-		--env HOME=/work/bin \
+		--env HOME=/usr/src/app/bin \
 		--env PYTHONDONTWRITEBYTECODE=1 \
 		--rm \
 		--user $$(id -u):$$(id -g) \
-		--volume $$(pwd):/work/ \
-		--workdir /work/ \
+		--volume $$(pwd):/usr/src/app/ \
+		--workdir /usr/src/app/ \
 		$$(docker image build --quiet .) $(make_all_docker_cmd)
 	touch $@
 
@@ -42,8 +42,8 @@ bin/check: .dockerignore .gitignore Dockerfile bin main.py pyproject.toml
 	docker container run \
 		--rm \
 		--user $$(id -u):$$(id -g) \
-		--volume $$(pwd):/work/ \
-		--workdir /work/ \
+		--volume $$(pwd):/usr/src/app/ \
+		--workdir /usr/src/app/ \
 		$$(docker image build --quiet .) ruff main.py
 	touch $@
 

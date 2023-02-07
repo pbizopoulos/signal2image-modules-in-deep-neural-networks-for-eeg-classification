@@ -29,8 +29,8 @@ bin/all: .dockerignore .gitignore Dockerfile bin ms.bib ms.tex
 		--detach-keys 'ctrl-^,ctrl-^' \
 		--rm \
 		--user $$(id -u):$$(id -g) \
-		--volume $$(pwd):/work/ \
-		--workdir /work/ \
+		--volume $$(pwd):/usr/src/app/ \
+		--workdir /usr/src/app/ \
 		$$(docker image build --quiet .) $(make_all_docker_cmd)
 	rm ms.bbl
 	touch $@
@@ -39,25 +39,25 @@ bin/check-bib: .dockerignore Dockerfile ms.bib
 	docker container run \
 		--rm \
 		--user $$(id -u):$$(id -g) \
-		--volume $$(pwd):/work/ \
-		--workdir /work/ \
+		--volume $$(pwd):/usr/src/app/ \
+		--workdir /usr/src/app/ \
 		$$(docker image build --quiet .) checkcites bin/ms.aux
 	docker container run \
-		--env HOME=/work/bin \
+		--env HOME=/usr/src/app/bin \
 		--rm \
 		--user $$(id -u):$$(id -g) \
-		--volume $$(pwd):/work/ \
-		--workdir /work/ \
+		--volume $$(pwd):/usr/src/app/ \
+		--workdir /usr/src/app/ \
 		python /bin/sh -c "\
 		python3 -m pip install --upgrade pip && \
 		python3 -m pip install rebiber && \
 		bin/.local/bin/rebiber --input_bib ms.bib --sort True"
 	docker container run \
-		--env HOME=/work/bin \
+		--env HOME=/usr/src/app/bin \
 		--rm \
 		--user $$(id -u):$$(id -g) \
-		--volume $$(pwd):/work/ \
-		--workdir /work/ \
+		--volume $$(pwd):/usr/src/app/ \
+		--workdir /usr/src/app/ \
 		node npm exec --yes -- git+https://github.com/FlamingTempura/bibtex-tidy.git --curly --tab --no-align --blank-lines --duplicates=key --sort-fields ms.bib
 	touch $@
 
@@ -65,8 +65,8 @@ bin/check-tex: .dockerignore Dockerfile ms.tex
 	docker container run \
 		--rm \
 		--user $$(id -u):$$(id -g) \
-		--volume $$(pwd):/work/ \
-		--workdir /work/ \
+		--volume $$(pwd):/usr/src/app/ \
+		--workdir /usr/src/app/ \
 		$$(docker image build --quiet .) /bin/sh -c '\
 		chktex ms.tex && \
 		lacheck ms.tex'
