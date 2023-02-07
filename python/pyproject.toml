@@ -12,7 +12,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["ruff==0.0.242"]
+dev = ["ruff==0.0.243"]
 
 [tool.ruff]
 select = ["A", "B", "BLE", "C", "C4", "COM", "E", "EM", "ERA", "F", "I", "ICN", "ISC", "N", "PD", "PGH", "PIE", "PLC", "PLE", "PLR", "PLW", "Q", "RET", "RUF", "S", "SIM", "T10", "T20", "TID", "UP", "W"]
