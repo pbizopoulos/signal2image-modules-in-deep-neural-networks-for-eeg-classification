@@ -1,6 +1,5 @@
-import os
 from os import environ
-from os.path import exists, isfile, join
+from pathlib import Path
 from shutil import move, rmtree
 from typing import TypeVar
 
@@ -359,12 +358,12 @@ class UCIEpilepsy(Dataset):
         return (self.data[index], self.target[index])
 
     def __init__(self, samples_num: int, training_validation_test: str) -> None:
-        data_file_path = join('bin', 'data.csv')
-        if not isfile(data_file_path):
-            with open(data_file_path, 'wb') as file:
+        data_file_path = Path('bin/data.csv')
+        if not data_file_path.is_file():
+            with data_file_path.open('wb') as file:
                 response = requests.get('https://web.archive.org/web/20200318000445/http://archive.ics.uci.edu/ml/machine-learning-databases/00388/data.csv', timeout=60)
                 file.write(response.content)
-        dataset = pd.read_csv(data_file_path)
+        dataset = pd.read_csv(data_file_path.as_posix())
         dataset = dataset[:samples_num]
         signals_all = dataset.drop(columns=['Unnamed: 0', 'y'])
         classes_all = dataset['y']
@@ -390,7 +389,7 @@ class VGG(nn.Module):
     def __init__(self, classes_num: int, features: nn.Module) -> None:
         super().__init__()
         self.features = features
-        self.classifier = nn.Sequential(nn.Linear(2560, 4096), nn.ReLU(True), nn.Dropout(), nn.Linear(4096, 4096), nn.ReLU(True), nn.Dropout(), nn.Linear(4096, classes_num))
+        self.classifier = nn.Sequential(nn.Linear(2560, 4096), nn.ReLU(inplace=True), nn.Dropout(), nn.Linear(4096, 4096), nn.ReLU(inplace=True), nn.Dropout(), nn.Linear(4096, classes_num)) # noqa: PD002
         self._initialize_weights()
 
     def _initialize_weights(self) -> None:
@@ -502,8 +501,9 @@ def main() -> None:
                 accuracy_validation = 100 * predictions_correct_num / predictions_num
                 if accuracy_validation > accuracy_validation_best:
                     accuracy_validation_best = accuracy_validation
-                    torch.save(model.state_dict(), join('bin', f'{model_file_name}.pt'))
-            model.load_state_dict(torch.load(join('bin', f'{model_file_name}.pt')))
+                    model_file_path = Path(f'bin/{model_file_name}.pt')
+                    torch.save(model.state_dict(), model_file_path)
+            model.load_state_dict(torch.load(model_file_path))
             loss_test_sum = 0
             predictions_correct_num = 0
             predictions_num = 0
@@ -523,15 +523,16 @@ def main() -> None:
             if model_file_name == 'resnet34-1D':
                 save_tfjs_from_torch(dataset_training[0][0].unsqueeze(0), model, model_file_name)
                 if environ['DEBUG'] != '1':
-                    rmtree(join('dist', model_file_name))
-                    move(join('bin', model_file_name), join('dist', model_file_name))
+                    dist_model_file_path = Path('dist') / model_file_name
+                    rmtree(dist_model_file_path)
+                    move(Path('bin') / model_file_name, Path('dist') / model_file_name)
             if environ['DEBUG'] == '1' and model_file_name != 'alexnet-cnn-one-layer':
-                os.remove(join('bin', f'{model_file_name}.pt'))
+                Path(f'bin/{model_file_name}.pt').unlink()
     styler = pd.DataFrame(accuracy_test_array, index=['1D', '2D, signal as image', '2D, spectrogram', '2D, one layer CNN', '2D, two layer CNN'], columns=model_base_names).style
     styler.format(precision=1)
     styler.highlight_max(props='bfseries: ;')
-    styler.to_latex(join('bin', 'results.tex'), hrules=True)
-    dataset = pd.read_csv(join('bin', 'data.csv'))
+    styler.to_latex('bin/results.tex', hrules=True)
+    dataset = pd.read_csv('bin/data.csv')
     signals_all = dataset.drop(columns=['Unnamed: 0', 'y'])
     classes_all = dataset['y']
     signals_all = torch.tensor(signals_all.to_numpy(), dtype=torch.float)
@@ -544,7 +545,7 @@ def main() -> None:
         plt.axis('off')
         plt.xlim([0, signals_all.shape[-1] - 1])
         plt.ylim([-1000, 1000])
-        plt.savefig(join('bin', f'signal-{class_name}.png'))
+        plt.savefig(f'bin/signal-{class_name}.png')
         plt.close()
         signals_all_min = -1000
         signals_all_max = 1000
@@ -555,15 +556,15 @@ def main() -> None:
         for index in range(signals_all.shape[-1]):
             data[signals_all.shape[-1] - 1 - signal[index], index] = 255
         plt.figure()
-        plt.imsave(join('bin', f'signal-as-image-{class_name}.png'), data, cmap='gray')
+        plt.imsave(f'bin/signal-as-image-{class_name}.png', data, cmap='gray')
         plt.close()
         f_array, t_array, spectrogram_array = spectrogram(signals_all[signal_index], fs=signals_all.shape[-1], noverlap=4, nperseg=8, nfft=64, mode='magnitude')
         data = np.array(Image.fromarray(spectrogram_array[0]).resize((signals_all.shape[-1], signals_all.shape[-1]), resample=1))
         plt.figure()
-        plt.imsave(join('bin', f'spectrogram-{class_name}.png'), data, cmap='gray')
+        plt.imsave(Path(f'bin/spectrogram-{class_name}.png'), data, cmap='gray')
         plt.close()
         model = CNNOneLayer(classes_num, models.alexnet(), 'alexnet-cnn-one-layer')
-        model.load_state_dict(torch.load(join('bin', 'alexnet-cnn-one-layer.pt')))
+        model.load_state_dict(torch.load(Path('bin/alexnet-cnn-one-layer.pt')))
         signal = signals_all[signal_index].unsqueeze(0)
         hook = Hook()
         model.conv.register_forward_hook(hook)
@@ -571,7 +572,7 @@ def main() -> None:
         data = hook.outputs[0][0, 0].cpu().detach().numpy()
         data = np.array(Image.fromarray(data).resize((signals_all.shape[-1], signals_all.shape[-1]), resample=1))
         plt.figure()
-        plt.imsave(join('bin', f'cnn-{class_name}.png'), data, cmap='gray')
+        plt.imsave(Path(f'bin/cnn-{class_name}.png'), data, cmap='gray')
         plt.close()
 
 
@@ -619,17 +620,17 @@ def resnet50(classes_num: int) -> nn.Module:
 
 
 def save_tfjs_from_torch(example_input: torch.Tensor, model: nn.Module, model_file_name: str) -> None:
-    model_file_path = join('bin', model_file_name)
-    if exists(model_file_path):
+    model_file_path = Path('bin') / model_file_name
+    if model_file_path.exists():
         rmtree(model_file_path)
-    os.makedirs(model_file_path)
-    torch.onnx.export(model.cpu(), example_input, join(model_file_path, 'model.onnx'), export_params=True, opset_version=11)
-    model_onnx = onnx.load(join(model_file_path, 'model.onnx'))
+    model_file_path.mkdir()
+    torch.onnx.export(model.cpu(), example_input, model_file_path / 'model.onnx', export_params=True, opset_version=11)
+    model_onnx = onnx.load(model_file_path / 'model.onnx')
     model_tf = prepare(model_onnx)
-    model_tf.export_graph(join(model_file_path, 'model'))
-    tf_saved_model_conversion_v2.convert_tf_saved_model(join(model_file_path, 'model'), model_file_path, skip_op_check=True)
-    rmtree(join(model_file_path, 'model'))
-    os.remove(join(model_file_path, 'model.onnx'))
+    model_tf.export_graph(model_file_path / 'model')
+    tf_saved_model_conversion_v2.convert_tf_saved_model((model_file_path / 'model').as_posix(), model_file_path, skip_op_check=True)
+    rmtree(model_file_path / 'model')
+    (model_file_path / 'model.onnx').unlink()
 
 
 def vgg11(classes_num: int) -> nn.Module:
