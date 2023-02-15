@@ -40,6 +40,7 @@ bin/all: .dockerignore .gitignore Dockerfile bin main.py pyproject.toml
 
 bin/check: .dockerignore .gitignore Dockerfile bin bin/ruff.toml main.py pyproject.toml
 	docker container run \
+		$$(test -t 0 && printf '%s' '--interactive --tty') \
 		--env HOME=/usr/src/app/bin \
 		--rm \
 		--user $$(id -u):$$(id -g) \
