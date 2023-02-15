@@ -40,15 +40,16 @@ bin/all: .dockerignore .gitignore Dockerfile bin main.py pyproject.toml
 
 bin/check: .dockerignore .gitignore Dockerfile bin bin/ruff.toml main.py pyproject.toml
 	docker container run \
+		--env HOME=/usr/src/app/bin \
 		--rm \
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/usr/src/app/ \
 		--workdir /usr/src/app/ \
-		$$(docker image build --quiet .) ruff --config bin/ruff.toml main.py
+		$$(docker image build --quiet .) /bin/sh -c 'mypy --cache-dir bin/ --ignore-missing-imports --install-types --non-interactive main.py && ruff --config bin/ruff.toml main.py'
 	touch $@
 
 bin/ruff.toml:
-	printf 'select = ["A", "B", "BLE", "C", "C4", "COM", "E", "EM", "ERA", "F", "I", "ICN", "ISC", "N", "PD", "PGH", "PIE", "PLC", "PLE", "PLR", "PLW", "Q", "RET", "RUF", "S", "SIM", "T10", "T20", "TID", "UP", "W"]\nignore = ["B905", "C901", "E501", "PLR0912", "PLR0913", "PLR0915", "PLR2004", "S101"]\nfix = true\ncache-dir = "bin/ruff"\n\n[flake8-quotes]\ninline-quotes = "single"\n' > $@
+	printf 'select = ["A", "ANN", "B", "BLE", "C", "C4", "COM", "E", "EM", "ERA", "F", "I", "ICN", "ISC", "N", "PD", "PGH", "PIE", "PLC", "PLE", "PLR", "PLW", "Q", "RET", "RUF", "S", "SIM", "T10", "T20", "TCH", "TID", "UP", "W"]\nignore = ["ANN101", "B905", "C901", "E501", "PLR0912", "PLR0913", "PLR0915", "PLR2004", "S101"]\nfix = true\ncache-dir = "bin/ruff"\n\n[flake8-quotes]\ninline-quotes = "single"\n' > $@
 
 main.py:
 	printf '' > $@

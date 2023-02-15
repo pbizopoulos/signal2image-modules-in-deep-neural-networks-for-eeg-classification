@@ -12,4 +12,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["ruff==0.0.243"]
+dev = [
+	"mypy==1.0.0",
+	"ruff==0.0.246",
+]
