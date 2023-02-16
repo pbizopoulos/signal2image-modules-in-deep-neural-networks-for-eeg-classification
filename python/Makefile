@@ -46,7 +46,7 @@ bin/check: .dockerignore .gitignore Dockerfile bin bin/ruff.toml main.py pyproje
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/usr/src/app/ \
 		--workdir /usr/src/app/ \
-		$$(docker image build --quiet .) /bin/sh -c 'mypy --cache-dir bin/ --ignore-missing-imports --install-types --non-interactive main.py && ruff --config bin/ruff.toml main.py'
+		$$(docker image build --quiet .) /bin/sh -c 'mypy --cache-dir bin/ --ignore-missing-imports --install-types --non-interactive --strict main.py && ruff --config bin/ruff.toml main.py'
 	touch $@
 
 bin/ruff.toml:
