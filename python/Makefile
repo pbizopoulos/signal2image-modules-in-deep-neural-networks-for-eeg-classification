@@ -50,7 +50,7 @@ bin/check: .dockerignore .gitignore Dockerfile bin bin/ruff.toml main.py pyproje
 	touch $@
 
 bin/ruff.toml:
-	printf 'select = ["A", "ANN", "B", "BLE", "C", "C4", "COM", "E", "EM", "ERA", "F", "FBT", "G", "I", "ICN", "INP", "ISC", "N", "PD", "PGH", "PIE", "PL", "PTH", "PYI", "Q", "RET", "RSE", "RUF", "S", "SLF", "SIM", "T10", "T20", "TCH", "TID", "TRY", "UP", "W"]\nignore = ["ANN101", "B905", "C901", "E501", "PLR0912", "PLR0913", "PLR0915", "PLR2004", "S101"]\nfix = true\ncache-dir = "bin/ruff"\n\n[flake8-quotes]\ninline-quotes = "single"\n' > $@
+	printf 'select = ["A", "ANN", "B", "BLE", "C", "C4", "COM", "E", "EM", "ERA", "F", "FBT", "G", "I", "ICN", "INP", "ISC", "N", "PD", "PGH", "PIE", "PL", "PTH", "PYI", "Q", "RET", "RSE", "RUF", "S", "SLF", "SIM", "T10", "T20", "TCH", "TID", "TRY", "UP", "W"]\nignore = ["B905", "C901", "E501", "PLR0912", "PLR0913", "PLR0915", "PLR2004", "S101"]\nfix = true\ncache-dir = "bin/ruff"\n\n[flake8-quotes]\ninline-quotes = "single"\n' > $@
 
 main.py:
 	printf '' > $@
