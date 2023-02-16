@@ -4,19 +4,9 @@ DEBUG = 1
 
 make_all_docker_cmd = /bin/sh -c "serve --ssl-cert bin/cert.pem --ssl-key bin/key.pem $$(test $(DEBUG) = 1 && printf '& sleep 1; kill $$!')"
 
-all: Dockerfile bin/cert.pem index.html package.json
-	docker container run \
-		$$(test -t 0 && printf '%s' '--interactive --tty') \
-		--detach-keys 'ctrl-^,ctrl-^' \
-		--publish 3000:3000 \
-		--rm \
-		--user $$(id -u):$$(id -g) \
-		--volume $$(pwd):/usr/src/app/ \
-		--workdir /usr/src/app/ \
-		$$(docker image build --quiet .) $(make_all_docker_cmd)
+all: bin/all
 
-check:
-	$(MAKE) $$(test -s style.css && printf 'bin/check-css') $$(test -s index.html && printf 'bin/check-html') $$(test -s script.js && printf 'bin/check-js')
+check: bin/check
 
 clean:
 	rm -rf bin/
@@ -33,6 +23,18 @@ Dockerfile:
 bin:
 	mkdir $@
 
+bin/all: Dockerfile bin/cert.pem index.html package.json
+	docker container run \
+		$$(test -t 0 && printf '%s' '--interactive --tty') \
+		--detach-keys 'ctrl-^,ctrl-^' \
+		--publish 3000:3000 \
+		--rm \
+		--user $$(id -u):$$(id -g) \
+		--volume $$(pwd):/usr/src/app/ \
+		--workdir /usr/src/app/ \
+		$$(docker image build --quiet .) $(make_all_docker_cmd)
+	touch $@
+
 bin/cert.pem: .dockerignore .gitignore bin
 	docker container run \
 		--rm \
@@ -40,6 +42,10 @@ bin/cert.pem: .dockerignore .gitignore bin
 		--volume $$(pwd):/usr/src/app/ \
 		--workdir /usr/src/app/ \
 		alpine/openssl req -subj "/C=.." -nodes -x509 -keyout bin/key.pem -out $@
+
+bin/check:
+	$(MAKE) $$(test -s style.css && printf 'bin/check-css') $$(test -s index.html && printf 'bin/check-html') $$(test -s script.js && printf 'bin/check-js')
+	touch $@
 
 bin/check-css: .dockerignore .gitignore Dockerfile bin/stylelintrc.json package.json style.css
 	docker container run \
