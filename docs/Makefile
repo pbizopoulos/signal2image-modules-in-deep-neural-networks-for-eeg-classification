@@ -6,7 +6,8 @@ make_all_docker_cmd = /bin/sh -c "serve --ssl-cert bin/cert.pem --ssl-key bin/ke
 
 all: bin/all
 
-check: bin/check
+check:
+	$(MAKE) $$(test -s style.css && printf 'bin/check-css') $$(test -s index.html && printf 'bin/check-html') $$(test -s script.js && printf 'bin/check-js')
 
 clean:
 	rm -rf bin/
@@ -42,10 +43,6 @@ bin/cert.pem: .dockerignore .gitignore bin
 		--volume $$(pwd):/usr/src/app/ \
 		--workdir /usr/src/app/ \
 		alpine/openssl req -subj "/C=.." -nodes -x509 -keyout bin/key.pem -out $@
-
-bin/check:
-	$(MAKE) $$(test -s style.css && printf 'bin/check-css') $$(test -s index.html && printf 'bin/check-html') $$(test -s script.js && printf 'bin/check-js')
-	touch $@
 
 bin/check-css: .dockerignore .gitignore Dockerfile bin/stylelintrc.json package.json style.css
 	docker container run \
