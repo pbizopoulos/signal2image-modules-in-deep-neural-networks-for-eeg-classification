@@ -2,33 +2,35 @@
 
 DEBUG = 1
 
-make_all_docker_cmd = /bin/sh -c "serve --ssl-cert bin/cert.pem --ssl-key bin/key.pem $$(test $(DEBUG) = 1 && printf '& sleep 1; kill $$!')"
+make_all_docker_cmd = python3 main.py
 
 all: bin/all
 
-check:
-	$(MAKE) $$(test -s style.css && printf 'bin/check-css') $$(test -s index.html && printf 'bin/check-html') $$(test -s script.js && printf 'bin/check-js')
+check: bin/check
 
 clean:
 	rm -rf bin/
 
 .dockerignore:
-	printf '*\n!package.json\n' > $@
+	printf '*\n!pyproject.toml\n' > $@
 
 .gitignore:
 	printf 'bin/\n' > $@
 
 Dockerfile:
-	printf 'FROM node\nRUN apt-get update && apt-get install -y jq\nCOPY package.json .\nRUN npm install --global $$(jq --raw-output ".devDependencies | to_entries | map_values( .key + \"@\" + .value ) | join(\" \")" package.json)\n' > $@
+	printf 'FROM python\nWORKDIR /usr/src/app\nCOPY pyproject.toml .\nRUN python3 -m pip install --upgrade pip && python3 -m pip install .[dev]\n' > $@
 
 bin:
 	mkdir $@
 
-bin/all: Dockerfile bin/cert.pem index.html package.json
+bin/all: .dockerignore .gitignore Dockerfile bin main.py pyproject.toml
 	docker container run \
+		$$(command -v nvidia-container-toolkit > /dev/null && printf '%s' '--gpus all') \
 		$$(test -t 0 && printf '%s' '--interactive --tty') \
 		--detach-keys 'ctrl-^,ctrl-^' \
-		--publish 3000:3000 \
+		--env DEBUG=$(DEBUG) \
+		--env HOME=/usr/src/app/bin \
+		--env PYTHONDONTWRITEBYTECODE=1 \
 		--rm \
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/usr/src/app/ \
@@ -36,49 +38,22 @@ bin/all: Dockerfile bin/cert.pem index.html package.json
 		$$(docker image build --quiet .) $(make_all_docker_cmd)
 	touch $@
 
-bin/cert.pem: .dockerignore .gitignore bin
+bin/check: .dockerignore .gitignore Dockerfile bin bin/ruff.toml main.py pyproject.toml
 	docker container run \
+		$$(test -t 0 && printf '%s' '--interactive --tty') \
+		--env HOME=/usr/src/app/bin \
 		--rm \
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/usr/src/app/ \
 		--workdir /usr/src/app/ \
-		alpine/openssl req -subj "/C=.." -nodes -x509 -keyout bin/key.pem -out $@
-
-bin/check-css: .dockerignore .gitignore Dockerfile bin/stylelintrc.json package.json style.css
-	docker container run \
-		--rm \
-		--volume $$(pwd):/usr/src/app/ \
-		--workdir /usr/src/app/ \
-		$$(docker image build --quiet .) /bin/sh -c '\
-		stylelint --config bin/stylelintrc.json --fix style.css && \
-		css-validator --profile css3svg style.css'
+		$$(docker image build --quiet .) /bin/sh -c 'mypy --cache-dir bin/ --ignore-missing-imports --install-types --non-interactive --strict main.py && ruff --config bin/ruff.toml main.py'
 	touch $@
 
-bin/check-html: .dockerignore .gitignore Dockerfile bin index.html package.json
-	docker container run \
-		--rm \
-		--volume $$(pwd):/usr/src/app/ \
-		--workdir /usr/src/app/ \
-		$$(docker image build --quiet .) /bin/sh -c '\
-		js-beautify --end-with-newline --indent-inner-html --indent-with-tabs --no-preserve-newlines --type html --replace index.html && \
-		html-validate index.html'
-	touch $@
+bin/ruff.toml:
+	printf 'select = ["A", "ANN", "ARG", "B", "BLE", "C", "C4", "COM", "E", "EM", "ERA", "EXE", "F", "FBT", "G", "I", "ICN", "INP", "ISC", "N", "NPY", "PD", "PGH", "PIE", "PL", "PTH", "PYI", "Q", "RET", "RSE", "RUF", "S", "SLF", "SIM", "T10", "T20", "TCH", "TID", "TRY", "UP", "W"]\nignore = ["B905", "E501", "PLR0912", "PLR0913", "PLR0915", "PLR2004", "S101"]\nfix = true\ncache-dir = "bin/ruff"\n\n[flake8-quotes]\ninline-quotes = "single"\n' > $@
 
-bin/check-js: .dockerignore .gitignore Dockerfile bin package.json script.js
-	docker container run \
-		--rm \
-		--volume $$(pwd):/usr/src/app/ \
-		--workdir /usr/src/app/ \
-		$$(docker image build --quiet .) /bin/sh -c '\
-		rome check --apply-suggested script.js && \
-		rome format --line-width 320 --quote-style single --write script.js'
-	touch $@
+main.py:
+	printf '' > $@
 
-bin/stylelintrc.json: bin
-	printf '{ "extends": "stylelint-config-standard", "plugins": [ "stylelint-order" ], "rules": { "indentation": "tab", "order/properties-alphabetical-order": true } }\n' > $@
-
-index.html:
-	printf '\n' > $@
-
-package.json:
-	printf '{\n\t"devDependencies": {\n\t\t"css-validator": "latest",\n\t\t"html-validate": "latest",\n\t\t"js-beautify": "latest",\n\t\t"rome": "latest",\n\t\t"serve": "latest",\n\t\t"stylelint": "latest",\n\t\t"stylelint-config-standard": "latest",\n\t\t"stylelint-order": "latest"\n\t}\n}\n' > $@
+pyproject.toml:
+	printf '[project]\nname = "UNKNOWN"\nversion = "0.0.0"\ndependencies = []\n\n[project.optional-dependencies]\ndev = [\n\t"mypy",\n\t"ruff",\n]\n' > $@
