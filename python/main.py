@@ -209,7 +209,7 @@ class DenseNet(nn.Module):
 
 class Hook:
 
-    def __call__(self: 'Hook', module: nn.Module, module_in: nn.Module, module_out: nn.Module) -> None:
+    def __call__(self: 'Hook', module: nn.Module, module_in: nn.Module, module_out: nn.Module) -> None: # noqa: ARG002
         self.outputs.append(module_out)
 
     def __init__(self: 'Hook') -> None:
