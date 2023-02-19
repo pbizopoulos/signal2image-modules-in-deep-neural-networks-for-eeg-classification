@@ -57,7 +57,8 @@ class Alexnet(nn.Module):
         out = self.dropout(out)
         out = self.linear2(out)
         out = self.relu(out)
-        return self.linear3(out) # type: ignore[no-any-return]
+        output: torch.Tensor = self.linear3(out)
+        return output
 
 
 class BasicBlock(nn.Module):
@@ -82,7 +83,8 @@ class BasicBlock(nn.Module):
         if self.downsample is not None:
             identity = self.downsample(signal)
         out += identity
-        return self.relu(out) # type: ignore[no-any-return]
+        output: torch.Tensor = self.relu(out)
+        return output
 
 
 class Bottleneck(nn.Module):
@@ -113,7 +115,8 @@ class Bottleneck(nn.Module):
         if self.downsample is not None:
             identity = self.downsample(signal)
         out += identity
-        return self.relu(out) # type: ignore[no-any-return]
+        output: torch.Tensor = self.relu(out)
+        return output
 
 
 class CNNOneLayer(nn.Module):
@@ -128,7 +131,8 @@ class CNNOneLayer(nn.Module):
         out.unsqueeze_(1)
         out = functional.interpolate(out, signal.shape[-1], mode='bilinear')
         out = torch.cat((out, out, out), 1)
-        return self.model_base(out) # type: ignore[no-any-return]
+        output: torch.Tensor = self.model_base(out)
+        return output
 
 
 class CNNTwoLayers(nn.Module):
@@ -146,7 +150,8 @@ class CNNTwoLayers(nn.Module):
         out.unsqueeze_(1)
         out = functional.interpolate(out, signal.shape[-1], mode='bilinear')
         out = torch.cat((out, out, out), 1)
-        return self.model_base(out) # type: ignore[no-any-return]
+        output: torch.Tensor = self.model_base(out)
+        return output
 
 
 class DenseBlock(nn.Sequential):
@@ -204,7 +209,8 @@ class DenseNet(nn.Module):
         features = self.features(signal)
         out = functional.relu(features)
         out = functional.adaptive_avg_pool1d(out, 1).view(features.size(0), -1)
-        return self.classifier(out) # type: ignore[no-any-return]
+        output: torch.Tensor = self.classifier(out)
+        return output
 
 
 class Hook:
@@ -234,7 +240,8 @@ class LeNet2D(nn.Module):
         out = out.view(out.size(0), -1)
         out = functional.relu(self.fc1(out))
         out = functional.relu(self.fc2(out))
-        return self.fc3(out) # type: ignore[no-any-return]
+        output: torch.Tensor = self.fc3(out)
+        return output
 
 
 class Lenet(nn.Module):
@@ -255,7 +262,8 @@ class Lenet(nn.Module):
         out = out.view(out.size(0), -1)
         out = functional.relu(self.fc1(out))
         out = functional.relu(self.fc2(out))
-        return self.fc3(out) # type: ignore[no-any-return]
+        output: torch.Tensor = self.fc3(out)
+        return output
 
 M = TypeVar('M', BasicBlock, Bottleneck)
 
@@ -303,7 +311,8 @@ class ResNet(nn.Module):
         out = self.layer4(out)
         out = self.avgpool(out)
         out = out.view(out.size(0), -1)
-        return self.fc(out) # type: ignore[no-any-return]
+        output: torch.Tensor = self.fc(out)
+        return output
 
 
 class SignalAsImage(nn.Module):
@@ -405,7 +414,8 @@ class VGG(nn.Module):
     def forward(self: 'VGG', signal: torch.Tensor) -> torch.Tensor:
         out = self.features(signal)
         out = out.view(out.size(0), -1)
-        return self.classifier(out) # type: ignore[no-any-return]
+        output: torch.Tensor = self.classifier(out)
+        return output
 
 
 def conv1x1(in_planes: int, out_planes: int, stride: int=1) -> nn.Module:
