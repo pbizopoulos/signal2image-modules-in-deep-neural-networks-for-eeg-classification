@@ -448,7 +448,6 @@ def main() -> None:
     if environ['DEBUG'] == '1':
         samples_num = 10
         epochs_num = 1
-    np.random.seed(0)
     torch.backends.cudnn.benchmark = False
     torch.backends.cudnn.deterministic = True
     torch.manual_seed(0)
