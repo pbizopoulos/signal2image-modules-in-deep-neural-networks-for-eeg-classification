@@ -52,13 +52,6 @@ bin/check-bib: .dockerignore Dockerfile ms.bib
 		python3 -m pip install --upgrade pip && \
 		python3 -m pip install rebiber && \
 		bin/.local/bin/rebiber --input_bib ms.bib --sort True"
-	docker container run \
-		--env HOME=/usr/src/app/bin \
-		--rm \
-		--user $$(id -u):$$(id -g) \
-		--volume $$(pwd):/usr/src/app/ \
-		--workdir /usr/src/app/ \
-		node npm exec --yes -- git+https://github.com/FlamingTempura/bibtex-tidy.git --curly --tab --no-align --blank-lines --duplicates=key --sort-fields ms.bib
 	touch $@
 
 bin/check-tex: .dockerignore Dockerfile ms.tex
