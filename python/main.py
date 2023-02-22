@@ -289,7 +289,7 @@ class ResNet(nn.Module):
                 nn.init.constant_(module.weight, 1)
                 nn.init.constant_(module.bias, 0)
 
-    def _make_layer(self: 'ResNet', block: type[M], blocks: int, expansion: int, planes: int, stride: int=1) -> nn.Module:
+    def _make_layer(self: 'ResNet', block: type[M], blocks: int, expansion: int, planes: int, stride: int=1) -> nn.Module: # noqa: PLR0913
         downsample = None
         if stride != 1 or self.inplanes != planes * expansion:
             downsample = nn.Sequential(conv1x1(self.inplanes, planes * expansion, stride), nn.BatchNorm1d(planes * expansion))
@@ -317,7 +317,7 @@ class ResNet(nn.Module):
 
 class SignalAsImage(nn.Module):
 
-    def __init__(self: 'SignalAsImage', classes_num: int, model_base: nn.Module, model_file_name: str, signals_all_max: int, signals_all_min: int) -> None:
+    def __init__(self: 'SignalAsImage', classes_num: int, model_base: nn.Module, model_file_name: str, signals_all_max: int, signals_all_min: int) -> None: # noqa: PLR0913
         super().__init__()
         self.signals_all_max = signals_all_max
         self.signals_all_min = signals_all_min
@@ -442,7 +442,7 @@ def densenet201(classes_num: int) -> nn.Module:
     return DenseNet(block_config=(6, 12, 48, 32), classes_num=classes_num, growth_rate=32, init_features_num=64)
 
 
-def main() -> None:
+def main() -> None: # noqa: C901,PLR0912,PLR0915
     samples_num = 11500
     epochs_num = 100
     if environ['DEBUG'] == '1':
