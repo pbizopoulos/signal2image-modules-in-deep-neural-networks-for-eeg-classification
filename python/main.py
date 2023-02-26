@@ -486,8 +486,8 @@ def main() -> None: # noqa: C901,PLR0912,PLR0915
             for _ in range(epochs_num):
                 model.train()
                 for data, target in dataloader_training:
-                    data = data.to(device)
-                    target = target.to(device)
+                    data = data.to(device) # noqa: PLW2901
+                    target = target.to(device) # noqa: PLW2901
                     output = model(data)
                     loss = cross_entropy_loss(output, target)
                     optimizer.zero_grad()
@@ -499,8 +499,8 @@ def main() -> None: # noqa: C901,PLR0912,PLR0915
                 model.eval()
                 with torch.no_grad():
                     for data, target in validation_dataloader:
-                        data = data.to(device)
-                        target = target.to(device)
+                        data = data.to(device) # noqa: PLW2901
+                        target = target.to(device) # noqa: PLW2901
                         output = model(data)
                         prediction = output.argmax(dim=1)
                         predictions_correct_num += sum(prediction == target).item()
@@ -519,8 +519,8 @@ def main() -> None: # noqa: C901,PLR0912,PLR0915
             model.eval()
             with torch.no_grad():
                 for data, target in dataloader_test:
-                    data = data.to(device)
-                    target = target.to(device)
+                    data = data.to(device) # noqa: PLW2901
+                    target = target.to(device) # noqa: PLW2901
                     output = model(data)
                     prediction = output.argmax(dim=1)
                     predictions_correct_num += sum(prediction == target).item()
