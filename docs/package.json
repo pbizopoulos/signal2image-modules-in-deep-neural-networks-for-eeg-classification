@@ -1,12 +1,12 @@
 {
 	"devDependencies": {
 		"css-validator": "0.11.0",
-		"html-validate": "7.13.1",
+		"html-validate": "7.13.2",
 		"js-beautify": "1.14.7",
 		"rome": "11.0.0",
 		"serve": "14.2.0",
 		"stylelint": "14.16.1",
 		"stylelint-config-standard": "29.0.0",
-		"stylelint-order": "6.0.1"
+		"stylelint-order": "6.0.2"
 	}
 }
