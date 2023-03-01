@@ -6,7 +6,7 @@ dependencies = [
 	"matplotlib==3.6.3",
 	"onnx-tf==1.10.0",
 	"pandas==1.5.3",
-	"scipy==1.10.0",
+	"scipy==1.10.1",
 	"tensorflow-probability==0.19.0",
 	"tensorflowjs==4.2.0",
 ]
