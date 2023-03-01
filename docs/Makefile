@@ -19,7 +19,7 @@ clean:
 	printf 'bin/\n' > $@
 
 Dockerfile:
-	printf 'FROM node\nRUN apt-get update && apt-get install -y jq\nCOPY package.json .\nRUN npm install --global $$(jq --raw-output ".devDependencies | to_entries | map_values( .key + \"@\" + .value ) | join(\" \")" package.json)\n' > $@
+	printf 'FROM node\nRUN apt-get update && apt-get install -y jq\nCOPY package.json .\nRUN npm install --global $$(jq --raw-output ".devDependencies | to_entries | map_values( .key + \\"@\\" + .value ) | join(\\" \\")" package.json)\n' > $@
 
 bin:
 	mkdir $@
