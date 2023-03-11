@@ -17,7 +17,7 @@ clean:
 	printf 'bin/\n' > $@
 
 Dockerfile:
-	printf 'FROM texlive/texlive\n' > $@
+	printf 'FROM texlive/texlive\nWORKDIR /usr/src/app\nRUN apt-get update -y && apt-get install -y python3-pip\nRUN python3 -m pip install --break-system-packages rebiber\n' > $@
 
 bin:
 	mkdir $@
@@ -41,17 +41,9 @@ bin/check-bib: .dockerignore Dockerfile ms.bib
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/usr/src/app/ \
 		--workdir /usr/src/app/ \
-		$$(docker image build --quiet .) checkcites bin/ms.aux
-	docker container run \
-		--env HOME=/usr/src/app/bin \
-		--rm \
-		--user $$(id -u):$$(id -g) \
-		--volume $$(pwd):/usr/src/app/ \
-		--workdir /usr/src/app/ \
-		python /bin/sh -c "\
-		python3 -m pip install --upgrade pip && \
-		python3 -m pip install rebiber && \
-		bin/.local/bin/rebiber --input_bib ms.bib --sort True"
+		$$(docker image build --quiet .) /bin/sh -c '\
+		checkcites bin/ms.aux && \
+		rebiber --input_bib ms.bib'
 	touch $@
 
 bin/check-tex: .dockerignore Dockerfile ms.tex
