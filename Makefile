@@ -1,6 +1,6 @@
 .POSIX:
 
-make_all_docker_cmd = /bin/sh -c 'latexmk -gg -pdf -outdir=bin/ ms.tex && tar cf bin/tex.tar ms.bbl ms.bib ms.tex $$(grep "^INPUT ./" bin/ms.fls | uniq | cut -b 9-)'
+make_all_docker_cmd = /bin/sh -c 'latexmk -outdir=bin/ -pdf ms.tex && tar cf bin/tex.tar ms.bbl ms.bib ms.tex $$(grep "^INPUT ./" bin/ms.fls | uniq | cut -b 9-)'
 
 all: bin/all
 
