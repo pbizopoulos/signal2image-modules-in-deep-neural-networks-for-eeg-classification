@@ -41,7 +41,7 @@ bin/check-bib: .dockerignore Dockerfile ms.bib
 		--workdir /usr/src/app/ \
 		$$(docker image build --quiet .) /bin/sh -c '\
 		checkcites bin/ms.aux && \
-		rebiber --input_bib ms.bib'
+		rebiber --input_bib ms.bib --remove url'
 	touch $@
 
 bin/check-tex: .dockerignore Dockerfile ms.tex
