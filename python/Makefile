@@ -4,9 +4,9 @@ DEBUG = 1
 
 make_all_docker_cmd = python3 main.py
 
-all: bin/all
+all: bin/done
 
-check: bin/check
+check: bin/check/done
 
 clean:
 	rm -rf bin/
@@ -23,7 +23,7 @@ Dockerfile:
 bin:
 	mkdir $@
 
-bin/all: .dockerignore .gitignore Dockerfile bin main.py pyproject.toml
+bin/done: .dockerignore .gitignore Dockerfile bin main.py pyproject.toml
 	docker container run \
 		$$(command -v nvidia-container-toolkit > /dev/null && printf '%s' '--gpus all') \
 		$$(test -t 0 && printf '%s' '--interactive --tty') \
@@ -38,7 +38,7 @@ bin/all: .dockerignore .gitignore Dockerfile bin main.py pyproject.toml
 		$$(docker image build --quiet .) $(make_all_docker_cmd)
 	touch $@
 
-bin/check: .dockerignore .gitignore Dockerfile bin bin/ruff.toml main.py pyproject.toml
+bin/check/done: .dockerignore .gitignore Dockerfile bin bin/check/ruff.toml main.py pyproject.toml
 	docker container run \
 		$$(test -t 0 && printf '%s' '--interactive --tty') \
 		--env HOME=/usr/src/app/bin \
@@ -46,11 +46,12 @@ bin/check: .dockerignore .gitignore Dockerfile bin bin/ruff.toml main.py pyproje
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/usr/src/app/ \
 		--workdir /usr/src/app/ \
-		$$(docker image build --quiet .) /bin/sh -c 'mypy --cache-dir bin/ --ignore-missing-imports --install-types --non-interactive --strict main.py && ruff --config bin/ruff.toml main.py'
+		$$(docker image build --quiet .) /bin/sh -c 'mypy --cache-dir bin/check --ignore-missing-imports --install-types --non-interactive --strict main.py && ruff --config bin/check/ruff.toml main.py'
 	touch $@
 
-bin/ruff.toml:
-	printf 'select = ["A", "ANN", "ARG", "B", "BLE", "C", "C40", "C90", "COM", "DJ", "DTZ", "E", "EM", "ERA", "EXE", "F", "FBT", "G", "I", "ICN", "INP", "ISC", "N", "NPY", "PD", "PGH", "PIE", "PL", "PT", "PTH", "PYI", "Q", "RET", "RSE", "RUF", "S", "SLF", "SIM", "T10", "T20", "TCH", "TID", "TRY", "UP", "YTT", "W"]\nignore = ["E501", "S101"]\nfix = true\ncache-dir = "bin/ruff"\n\n[flake8-quotes]\ninline-quotes = "single"\n' > $@
+bin/check/ruff.toml:
+	mkdir -p bin/check
+	printf 'select = ["A", "ANN", "ARG", "B", "BLE", "C", "C40", "C90", "COM", "DJ", "DTZ", "E", "EM", "ERA", "EXE", "F", "FBT", "G", "I", "ICN", "INP", "ISC", "N", "NPY", "PD", "PGH", "PIE", "PL", "PT", "PTH", "PYI", "Q", "RET", "RSE", "RUF", "S", "SLF", "SIM", "T10", "T20", "TCH", "TID", "TRY", "UP", "YTT", "W"]\nignore = ["E501", "S101"]\nfix = true\ncache-dir = "bin/check/ruff"\n\n[flake8-quotes]\ninline-quotes = "single"\n' > $@
 
 main.py:
 	printf '' > $@
