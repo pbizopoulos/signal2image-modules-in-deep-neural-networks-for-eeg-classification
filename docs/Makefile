@@ -61,7 +61,7 @@ bin/check/html-done: .dockerignore .gitignore Dockerfile bin index.html package.
 		--volume $$(pwd):/usr/src/app/ \
 		--workdir /usr/src/app/ \
 		$$(docker image build --quiet .) /bin/sh -c '\
-		js-beautify index.html && \
+		js-beautify --end-with-newline --indent-inner-html --indent-with-tabs --no-preserve-newlines --type html --replace index.html && \
 		html-validate index.html'
 	touch $@
 
@@ -79,4 +79,4 @@ index.html:
 	printf '\n' > $@
 
 package.json:
-	printf '{\n\t"devDependencies": {\n\t\t"css-validator": "latest",\n\t\t"html-validate": "latest",\n\t\t"js-beautify": "latest",\n\t\t"rome": "latest",\n\t\t"serve": "latest",\n\t\t"stylelint": "latest",\n\t\t"stylelint-config-standard": "latest",\n\t\t"stylelint-order": "latest"\n\t},\n\t"js-beautify": {\n\t\t"end_with_newline": true,\n\t\t"indent_inner_html": true,\n\t\t"indent_with_tabs": true,\n\t\t"no_preserve_newlines": true,\n\t\t"replace ": true,\n\t\t"type": "html"\n\t},\n\t"stylelint": {\n\t\t"extends": "stylelint-config-standard",\n\t\t"plugins": ["stylelint-order"],\n\t\t"rules": {\n\t\t\t"indentation": "tab",\n\t\t\t"order/properties-alphabetical-order": true\n\t\t}\n\t}\n}\n' > $@
+	printf '{\n\t"devDependencies": {\n\t\t"css-validator": "latest",\n\t\t"html-validate": "latest",\n\t\t"js-beautify": "latest",\n\t\t"rome": "latest",\n\t\t"serve": "latest",\n\t\t"stylelint": "latest",\n\t\t"stylelint-config-standard": "latest",\n\t\t"stylelint-order": "latest"\n\t},\n\t"stylelint": {\n\t\t"extends": "stylelint-config-standard",\n\t\t"plugins": ["stylelint-order"],\n\t\t"rules": {\n\t\t\t"indentation": "tab",\n\t\t\t"order/properties-alphabetical-order": true\n\t\t}\n\t}\n}\n' > $@

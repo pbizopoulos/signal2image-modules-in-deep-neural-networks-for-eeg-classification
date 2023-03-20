@@ -9,14 +9,6 @@
 		"stylelint-config-standard": "29.0.0",
 		"stylelint-order": "6.0.2"
 	},
-	"js-beautify": {
-		"end_with_newline": true,
-		"indent_inner_html": true,
-		"indent_with_tabs": true,
-		"no_preserve_newlines": true,
-		"replace ": true,
-		"type": "html"
-	},
 	"stylelint": {
 		"extends": "stylelint-config-standard",
 		"plugins": ["stylelint-order"],
