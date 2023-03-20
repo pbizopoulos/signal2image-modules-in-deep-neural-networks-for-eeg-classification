@@ -45,13 +45,13 @@ bin/cert.pem: .dockerignore .gitignore bin
 		--workdir /usr/src/app/ \
 		alpine/openssl req -subj "/C=.." -nodes -x509 -keyout bin/key.pem -out $@
 
-bin/check/css-done: .dockerignore .gitignore Dockerfile bin/check/stylelintrc.json package.json style.css
+bin/check/css-done: .dockerignore .gitignore Dockerfile package.json style.css
 	docker container run \
 		--rm \
 		--volume $$(pwd):/usr/src/app/ \
 		--workdir /usr/src/app/ \
 		$$(docker image build --quiet .) /bin/sh -c '\
-		stylelint --config bin/check/stylelintrc.json --fix style.css && \
+		stylelint --fix style.css && \
 		css-validator --profile css3svg style.css'
 	touch $@
 
@@ -75,11 +75,8 @@ bin/check/js-done: .dockerignore .gitignore Dockerfile bin package.json script.j
 		rome format --line-width 320 --quote-style single --write script.js'
 	touch $@
 
-bin/check/stylelintrc.json: bin
-	printf '{ "extends": "stylelint-config-standard", "plugins": [ "stylelint-order" ], "rules": { "indentation": "tab", "order/properties-alphabetical-order": true } }\n' > $@
-
 index.html:
 	printf '\n' > $@
 
 package.json:
-	printf '{\n\t"devDependencies": {\n\t\t"css-validator": "latest",\n\t\t"html-validate": "latest",\n\t\t"js-beautify": "latest",\n\t\t"rome": "latest",\n\t\t"serve": "latest",\n\t\t"stylelint": "latest",\n\t\t"stylelint-config-standard": "latest",\n\t\t"stylelint-order": "latest"\n\t}\n}\n' > $@
+	printf '{\n\t"devDependencies": {\n\t\t"css-validator": "latest",\n\t\t"html-validate": "latest",\n\t\t"js-beautify": "latest",\n\t\t"rome": "latest",\n\t\t"serve": "latest",\n\t\t"stylelint": "latest",\n\t\t"stylelint-config-standard": "latest",\n\t\t"stylelint-order": "latest"\n\t},\n\t"stylelint": {\n\t\t"extends": "stylelint-config-standard",\n\t\t"plugins": [ "stylelint-order"],\n\t\t"rules": {\n\t\t\t"indentation": "tab",\n\t\t\t"order/properties-alphabetical-order": true\n\t\t}\n\t}\n}\n' > $@

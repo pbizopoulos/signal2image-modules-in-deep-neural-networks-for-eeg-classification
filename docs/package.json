@@ -8,5 +8,13 @@
 		"stylelint": "14.16.1",
 		"stylelint-config-standard": "29.0.0",
 		"stylelint-order": "6.0.2"
+	},
+	"stylelint": {
+		"extends": "stylelint-config-standard",
+		"plugins": [ "stylelint-order" ],
+		"rules": {
+			"indentation": "tab",
+			"order/properties-alphabetical-order": true
+		}
 	}
 }
