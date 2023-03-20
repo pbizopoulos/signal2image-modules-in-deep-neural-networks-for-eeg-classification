@@ -38,7 +38,7 @@ bin/done: .dockerignore .gitignore Dockerfile bin main.py pyproject.toml
 		$$(docker image build --quiet .) $(make_all_docker_cmd)
 	touch $@
 
-bin/check/done: .dockerignore .gitignore Dockerfile bin bin/check/ruff.toml main.py pyproject.toml
+bin/check/done: .dockerignore .gitignore Dockerfile bin main.py pyproject.toml
 	docker container run \
 		$$(test -t 0 && printf '%s' '--interactive --tty') \
 		--env HOME=/usr/src/app/bin \
@@ -46,15 +46,11 @@ bin/check/done: .dockerignore .gitignore Dockerfile bin bin/check/ruff.toml main
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/usr/src/app/ \
 		--workdir /usr/src/app/ \
-		$$(docker image build --quiet .) /bin/sh -c 'mypy --cache-dir bin/check --ignore-missing-imports --install-types --non-interactive --strict main.py && ruff --config bin/check/ruff.toml main.py'
+		$$(docker image build --quiet .) /bin/sh -c 'mypy main.py && ruff main.py'
 	touch $@
-
-bin/check/ruff.toml:
-	mkdir -p bin/check
-	printf 'select = ["A", "ANN", "ARG", "B", "BLE", "C", "C40", "C90", "COM", "DJ", "DTZ", "E", "EM", "ERA", "EXE", "F", "FBT", "G", "I", "ICN", "INP", "ISC", "N", "NPY", "PD", "PGH", "PIE", "PL", "PT", "PTH", "PYI", "Q", "RET", "RSE", "RUF", "S", "SLF", "SIM", "T10", "T20", "TCH", "TID", "TRY", "UP", "YTT", "W"]\nignore = ["E501", "S101"]\nfix = true\ncache-dir = "bin/check/ruff"\n\n[flake8-quotes]\ninline-quotes = "single"\n' > $@
 
 main.py:
 	printf '' > $@
 
 pyproject.toml:
-	printf '[project]\nname = "UNKNOWN"\nversion = "0.0.0"\ndependencies = []\n\n[project.optional-dependencies]\ndev = [\n\t"mypy",\n\t"ruff",\n]\n' > $@
+	printf '[project]\nname = "UNKNOWN"\nversion = "0.0.0"\ndependencies = []\n\n[project.optional-dependencies]\ndev = [\n\t"mypy",\n\t"ruff",\n]\n\n[tool.mypy]\ncache_dir = "bin/check"\nignore_missing_imports = true\ninstall_types = true\nnon_interactive = true\nstrict = true\n\n[tool.ruff]\nselect = ["A", "ANN", "ARG", "B", "BLE", "C", "C40", "C90", "COM", "DJ", "DTZ", "E", "EM", "ERA", "EXE", "F", "FBT", "G", "I", "ICN", "INP", "ISC", "N", "NPY", "PD", "PGH", "PIE", "PL", "PT", "PTH", "PYI", "Q", "RET", "RSE", "RUF", "S", "SLF", "SIM", "T10", "T20", "TCH", "TID", "TRY", "UP", "YTT", "W"]\nignore = ["E501", "S101"]\nfix = true\ncache-dir = "bin/check/ruff"\n\n[flake8-quotes]\ninline-quotes = "single"\n' > $@
