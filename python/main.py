@@ -22,7 +22,7 @@ from torchvision import models
 
 class Alexnet(nn.Module):
 
-    def __init__(self: 'Alexnet', classes_num: int) -> None:
+    def __init__(self: "Alexnet", classes_num: int) -> None:
         super().__init__()
         self.conv1 = nn.Conv1d(1, 64, kernel_size=11, stride=4, padding=2)
         self.relu = nn.ReLU()
@@ -36,7 +36,7 @@ class Alexnet(nn.Module):
         self.linear2 = nn.Linear(4096, 4096)
         self.linear3 = nn.Linear(4096, classes_num)
 
-    def forward(self: 'Alexnet', signal: torch.Tensor) -> torch.Tensor:
+    def forward(self: "Alexnet", signal: torch.Tensor) -> torch.Tensor:
         out = self.conv1(signal)
         out = self.relu(out)
         out = self.maxpool1d(out)
@@ -63,7 +63,7 @@ class Alexnet(nn.Module):
 
 class BasicBlock(nn.Module):
 
-    def __init__(self: 'BasicBlock', downsample: nn.Module | None, inplanes: int, planes: int, stride: int=1) -> None:
+    def __init__(self: "BasicBlock", downsample: nn.Module | None, inplanes: int, planes: int, stride: int=1) -> None:
         super().__init__()
         self.conv1 = conv3x3(inplanes, planes, stride)
         self.bn1 = nn.BatchNorm1d(planes)
@@ -73,7 +73,7 @@ class BasicBlock(nn.Module):
         self.downsample = downsample
         self.stride = stride
 
-    def forward(self: 'BasicBlock', signal: torch.Tensor) -> torch.Tensor:
+    def forward(self: "BasicBlock", signal: torch.Tensor) -> torch.Tensor:
         identity = signal
         out = self.conv1(signal)
         out = self.bn1(out)
@@ -89,7 +89,7 @@ class BasicBlock(nn.Module):
 
 class Bottleneck(nn.Module):
 
-    def __init__(self: 'Bottleneck', downsample: nn.Module | None, inplanes: int, planes: int, stride: int=1) -> None:
+    def __init__(self: "Bottleneck", downsample: nn.Module | None, inplanes: int, planes: int, stride: int=1) -> None:
         super().__init__()
         expansion = 4
         self.conv1 = conv1x1(inplanes, planes)
@@ -102,7 +102,7 @@ class Bottleneck(nn.Module):
         self.downsample = downsample
         self.stride = stride
 
-    def forward(self: 'Bottleneck', signal: torch.Tensor) -> torch.Tensor:
+    def forward(self: "Bottleneck", signal: torch.Tensor) -> torch.Tensor:
         identity = signal
         out = self.conv1(signal)
         out = self.bn1(out)
@@ -121,15 +121,15 @@ class Bottleneck(nn.Module):
 
 class CNNOneLayer(nn.Module):
 
-    def __init__(self: 'CNNOneLayer', classes_num: int, model_base: nn.Module, model_file_name: str) -> None:
+    def __init__(self: "CNNOneLayer", classes_num: int, model_base: nn.Module, model_file_name: str) -> None:
         super().__init__()
         self.conv = nn.Conv1d(1, 8, 3, padding=2)
         self.model_base = replace_last_layer(classes_num, model_base, model_file_name)
 
-    def forward(self: 'CNNOneLayer', signal: torch.Tensor) -> torch.Tensor:
+    def forward(self: "CNNOneLayer", signal: torch.Tensor) -> torch.Tensor:
         out = self.conv(signal)
         out.unsqueeze_(1)
-        out = functional.interpolate(out, signal.shape[-1], mode='bilinear')
+        out = functional.interpolate(out, signal.shape[-1], mode="bilinear")
         out = torch.cat((out, out, out), 1)
         output: torch.Tensor = self.model_base(out)
         return output
@@ -137,18 +137,18 @@ class CNNOneLayer(nn.Module):
 
 class CNNTwoLayers(nn.Module):
 
-    def __init__(self: 'CNNTwoLayers', classes_num: int, model_base: nn.Module, model_file_name: str) -> None:
+    def __init__(self: "CNNTwoLayers", classes_num: int, model_base: nn.Module, model_file_name: str) -> None:
         super().__init__()
         self.conv1 = nn.Conv1d(1, 8, 3, padding=2)
         self.conv2 = nn.Conv1d(8, 16, 3, padding=2)
         self.model_base = replace_last_layer(classes_num, model_base, model_file_name)
 
-    def forward(self: 'CNNTwoLayers', signal: torch.Tensor) -> torch.Tensor:
+    def forward(self: "CNNTwoLayers", signal: torch.Tensor) -> torch.Tensor:
         out = functional.relu(self.conv1(signal))
         out = functional.max_pool1d(out, 2)
         out = self.conv2(out)
         out.unsqueeze_(1)
-        out = functional.interpolate(out, signal.shape[-1], mode='bilinear')
+        out = functional.interpolate(out, signal.shape[-1], mode="bilinear")
         out = torch.cat((out, out, out), 1)
         output: torch.Tensor = self.model_base(out)
         return output
@@ -156,45 +156,45 @@ class CNNTwoLayers(nn.Module):
 
 class DenseBlock(nn.Sequential):
 
-    def __init__(self: 'DenseBlock', bn_size: int, growth_rate: int, input_features_num: int, layers_num: int) -> None:
+    def __init__(self: "DenseBlock", bn_size: int, growth_rate: int, input_features_num: int, layers_num: int) -> None:
         super().__init__()
         for index in range(layers_num):
             layer = DenseLayer(bn_size, growth_rate, input_features_num + index * growth_rate)
-            self.add_module('denselayer%d' % (index + 1), layer)
+            self.add_module("denselayer%d" % (index + 1), layer)
 
 
 class DenseLayer(nn.Sequential):
 
-    def __init__(self: 'DenseLayer', bn_size: int, growth_rate: int, input_features_num: int) -> None:
+    def __init__(self: "DenseLayer", bn_size: int, growth_rate: int, input_features_num: int) -> None:
         super().__init__()
-        self.add_module('norm1', nn.BatchNorm1d(input_features_num))
-        self.add_module('relu1', nn.ReLU())
-        self.add_module('conv1', nn.Conv1d(input_features_num, bn_size * growth_rate, kernel_size=1, stride=1, bias=False))
-        self.add_module('norm2', nn.BatchNorm1d(bn_size * growth_rate))
-        self.add_module('relu2', nn.ReLU())
-        self.add_module('conv2', nn.Conv1d(bn_size * growth_rate, growth_rate, kernel_size=3, stride=1, padding=1, bias=False))
+        self.add_module("norm1", nn.BatchNorm1d(input_features_num))
+        self.add_module("relu1", nn.ReLU())
+        self.add_module("conv1", nn.Conv1d(input_features_num, bn_size * growth_rate, kernel_size=1, stride=1, bias=False))
+        self.add_module("norm2", nn.BatchNorm1d(bn_size * growth_rate))
+        self.add_module("relu2", nn.ReLU())
+        self.add_module("conv2", nn.Conv1d(bn_size * growth_rate, growth_rate, kernel_size=3, stride=1, padding=1, bias=False))
 
-    def forward(self: 'DenseLayer', signal: torch.Tensor) -> torch.Tensor:
+    def forward(self: "DenseLayer", signal: torch.Tensor) -> torch.Tensor:
         new_features = super().forward(signal) # type: ignore[no-untyped-call]
         return torch.cat([signal, new_features], 1)
 
 
 class DenseNet(nn.Module):
 
-    def __init__(self: 'DenseNet', block_config: tuple[int, ...], classes_num: int, growth_rate: int, init_features_num: int) -> None:
+    def __init__(self: "DenseNet", block_config: tuple[int, ...], classes_num: int, growth_rate: int, init_features_num: int) -> None:
         super().__init__()
         bn_size = 4
         self.features = nn.Sequential(nn.Conv1d(1, init_features_num, kernel_size=7, stride=2, padding=3, bias=False), nn.BatchNorm1d(init_features_num), nn.ReLU(), nn.MaxPool1d(kernel_size=3, stride=2, padding=1))
         features_num = init_features_num
         for index, layers_num in enumerate(block_config):
             block = DenseBlock(bn_size=bn_size, growth_rate=growth_rate, input_features_num=features_num, layers_num=layers_num)
-            self.features.add_module('denseblock%d' % (index + 1), block)
+            self.features.add_module("denseblock%d" % (index + 1), block)
             features_num = features_num + layers_num * growth_rate
             if index != len(block_config) - 1:
                 trans = Transition(input_features_num=features_num, output_features_num=features_num // 2)
-                self.features.add_module('transition%d' % (index + 1), trans)
+                self.features.add_module("transition%d" % (index + 1), trans)
                 features_num = features_num // 2
-        self.features.add_module('norm5', nn.BatchNorm1d(features_num))
+        self.features.add_module("norm5", nn.BatchNorm1d(features_num))
         self.classifier = nn.Linear(features_num, classes_num)
         for module in self.modules():
             if isinstance(module, nn.Conv1d):
@@ -205,7 +205,7 @@ class DenseNet(nn.Module):
             elif isinstance(module, nn.Linear):
                 nn.init.constant_(module.bias, 0)
 
-    def forward(self: 'DenseNet', signal: torch.Tensor) -> torch.Tensor:
+    def forward(self: "DenseNet", signal: torch.Tensor) -> torch.Tensor:
         features = self.features(signal)
         out = functional.relu(features)
         out = functional.adaptive_avg_pool1d(out, 1).view(features.size(0), -1)
@@ -215,16 +215,16 @@ class DenseNet(nn.Module):
 
 class Hook:
 
-    def __call__(self: 'Hook', module: nn.Module, module_in: nn.Module, module_out: nn.Module) -> None: # noqa: ARG002
+    def __call__(self: "Hook", module: nn.Module, module_in: nn.Module, module_out: nn.Module) -> None: # noqa: ARG002
         self.outputs.append(module_out)
 
-    def __init__(self: 'Hook') -> None:
+    def __init__(self: "Hook") -> None:
         self.outputs: list[nn.Module] = []
 
 
 class LeNet2D(nn.Module):
 
-    def __init__(self: 'LeNet2D') -> None:
+    def __init__(self: "LeNet2D") -> None:
         super().__init__()
         self.conv1 = nn.Conv2d(3, 3, 5)
         self.conv2 = nn.Conv2d(3, 16, 5)
@@ -232,7 +232,7 @@ class LeNet2D(nn.Module):
         self.fc2 = nn.Linear(120, 84)
         self.fc3 = nn.Linear(84, 5)
 
-    def forward(self: 'LeNet2D', signal: torch.Tensor) -> torch.Tensor:
+    def forward(self: "LeNet2D", signal: torch.Tensor) -> torch.Tensor:
         out = functional.relu(self.conv1(signal))
         out = functional.max_pool2d(out, 2)
         out = functional.relu(self.conv2(out))
@@ -246,7 +246,7 @@ class LeNet2D(nn.Module):
 
 class Lenet(nn.Module):
 
-    def __init__(self: 'Lenet', classes_num: int) -> None:
+    def __init__(self: "Lenet", classes_num: int) -> None:
         super().__init__()
         self.conv1 = nn.Conv1d(1, 3, 5)
         self.conv2 = nn.Conv1d(3, 16, 5)
@@ -254,7 +254,7 @@ class Lenet(nn.Module):
         self.fc2 = nn.Linear(120, 84)
         self.fc3 = nn.Linear(84, classes_num)
 
-    def forward(self: 'Lenet', signal: torch.Tensor) -> torch.Tensor:
+    def forward(self: "Lenet", signal: torch.Tensor) -> torch.Tensor:
         out = functional.relu(self.conv1(signal))
         out = functional.max_pool1d(out, 2)
         out = functional.relu(self.conv2(out))
@@ -265,11 +265,11 @@ class Lenet(nn.Module):
         output: torch.Tensor = self.fc3(out)
         return output
 
-M = TypeVar('M', BasicBlock, Bottleneck)
+M = TypeVar("M", BasicBlock, Bottleneck)
 
 class ResNet(nn.Module):
 
-    def __init__(self: 'ResNet', block: type[M], classes_num: int, expansion: int, layers: list[int]) -> None:
+    def __init__(self: "ResNet", block: type[M], classes_num: int, expansion: int, layers: list[int]) -> None:
         super().__init__()
         self.inplanes = 64
         self.conv1 = nn.Conv1d(1, 64, kernel_size=7, stride=2, padding=3, bias=False)
@@ -284,12 +284,12 @@ class ResNet(nn.Module):
         self.fc = nn.Linear(512 * expansion, classes_num)
         for module in self.modules():
             if isinstance(module, nn.Conv1d):
-                nn.init.kaiming_normal_(module.weight, mode='fan_out', nonlinearity='relu')
+                nn.init.kaiming_normal_(module.weight, mode="fan_out", nonlinearity="relu")
             elif isinstance(module, nn.BatchNorm1d):
                 nn.init.constant_(module.weight, 1)
                 nn.init.constant_(module.bias, 0)
 
-    def _make_layer(self: 'ResNet', block: type[M], blocks: int, expansion: int, planes: int, stride: int=1) -> nn.Module: # noqa: PLR0913
+    def _make_layer(self: "ResNet", block: type[M], blocks: int, expansion: int, planes: int, stride: int=1) -> nn.Module: # noqa: PLR0913
         downsample = None
         if stride != 1 or self.inplanes != planes * expansion:
             downsample = nn.Sequential(conv1x1(self.inplanes, planes * expansion, stride), nn.BatchNorm1d(planes * expansion))
@@ -300,7 +300,7 @@ class ResNet(nn.Module):
             layers.append(block(None, self.inplanes, planes))
         return nn.Sequential(*layers)
 
-    def forward(self: 'ResNet', signal: torch.Tensor) -> torch.Tensor:
+    def forward(self: "ResNet", signal: torch.Tensor) -> torch.Tensor:
         out = self.conv1(signal)
         out = self.bn1(out)
         out = self.relu(out)
@@ -317,13 +317,13 @@ class ResNet(nn.Module):
 
 class SignalAsImage(nn.Module):
 
-    def __init__(self: 'SignalAsImage', classes_num: int, model_base: nn.Module, model_file_name: str, signals_all_max: int, signals_all_min: int) -> None: # noqa: PLR0913
+    def __init__(self: "SignalAsImage", classes_num: int, model_base: nn.Module, model_file_name: str, signals_all_max: int, signals_all_min: int) -> None: # noqa: PLR0913
         super().__init__()
         self.signals_all_max = signals_all_max
         self.signals_all_min = signals_all_min
         self.model_base = replace_last_layer(classes_num, model_base, model_file_name)
 
-    def forward(self: 'SignalAsImage', signal: torch.Tensor) -> torch.Tensor:
+    def forward(self: "SignalAsImage", signal: torch.Tensor) -> torch.Tensor:
         signal = signal - self.signals_all_min
         signal = signal.shape[-1] * signal / (self.signals_all_max - self.signals_all_min)
         signal = signal.floor().long()
@@ -337,15 +337,15 @@ class SignalAsImage(nn.Module):
 
 class Spectrogram(nn.Module):
 
-    def __init__(self: 'Spectrogram', classes_num: int, model_base: nn.Module, model_file_name: str) -> None:
+    def __init__(self: "Spectrogram", classes_num: int, model_base: nn.Module, model_file_name: str) -> None:
         super().__init__()
         self.model_base = replace_last_layer(classes_num, model_base, model_file_name)
 
-    def forward(self: 'Spectrogram', signal: torch.Tensor) -> torch.Tensor:
+    def forward(self: "Spectrogram", signal: torch.Tensor) -> torch.Tensor:
         out = torch.zeros(signal.shape[0], 1, signal.shape[-1], signal.shape[-1]).to(signal.device)
         for index, signal_element in enumerate(signal):
-            f_array, t_array, spectrogram_array = spectrogram(signal_element.cpu(), fs=signal_element.shape[-1], noverlap=4, nperseg=8, nfft=64, mode='magnitude')
-            out[index, 0] = functional.interpolate(torch.tensor(spectrogram_array).unsqueeze(0), signal_element.shape[-1], mode='bilinear')
+            f_array, t_array, spectrogram_array = spectrogram(signal_element.cpu(), fs=signal_element.shape[-1], noverlap=4, nperseg=8, nfft=64, mode="magnitude")
+            out[index, 0] = functional.interpolate(torch.tensor(spectrogram_array).unsqueeze(0), signal_element.shape[-1], mode="bilinear")
         out = torch.cat((out, out, out), 1)
         out = self.model_base(out)
         return out
@@ -353,65 +353,65 @@ class Spectrogram(nn.Module):
 
 class Transition(nn.Sequential):
 
-    def __init__(self: 'Transition', input_features_num: int, output_features_num: int) -> None:
+    def __init__(self: "Transition", input_features_num: int, output_features_num: int) -> None:
         super().__init__()
-        self.add_module('norm', nn.BatchNorm1d(input_features_num))
-        self.add_module('relu', nn.ReLU())
-        self.add_module('conv', nn.Conv1d(input_features_num, output_features_num, kernel_size=1, stride=1, bias=False))
-        self.add_module('pool', nn.AvgPool1d(kernel_size=2, stride=2))
+        self.add_module("norm", nn.BatchNorm1d(input_features_num))
+        self.add_module("relu", nn.ReLU())
+        self.add_module("conv", nn.Conv1d(input_features_num, output_features_num, kernel_size=1, stride=1, bias=False))
+        self.add_module("pool", nn.AvgPool1d(kernel_size=2, stride=2))
 
 
 class UCIEpilepsy(Dataset): # type: ignore[type-arg]
 
-    def __getitem__(self: 'UCIEpilepsy', index: int) -> tuple[torch.Tensor, torch.Tensor]:
+    def __getitem__(self: "UCIEpilepsy", index: int) -> tuple[torch.Tensor, torch.Tensor]:
         return (self.data[index], self.target[index])
 
-    def __init__(self: 'UCIEpilepsy', samples_num: int, training_validation_test: str) -> None:
-        data_file_path = Path('bin/data.csv')
+    def __init__(self: "UCIEpilepsy", samples_num: int, training_validation_test: str) -> None:
+        data_file_path = Path("bin/data.csv")
         if not data_file_path.is_file():
-            with data_file_path.open('wb') as file:
-                response = requests.get('https://web.archive.org/web/20200318000445/http://archive.ics.uci.edu/ml/machine-learning-databases/00388/data.csv', timeout=60)
+            with data_file_path.open("wb") as file:
+                response = requests.get("https://web.archive.org/web/20200318000445/http://archive.ics.uci.edu/ml/machine-learning-databases/00388/data.csv", timeout=60)
                 file.write(response.content)
         dataset = pd.read_csv(data_file_path.as_posix())
         dataset = dataset[:samples_num]
-        signals_all = dataset.drop(columns=['Unnamed: 0', 'y'])
-        classes_all = dataset['y']
+        signals_all = dataset.drop(columns=["Unnamed: 0", "y"])
+        classes_all = dataset["y"]
         last_training_index = int(signals_all.shape[0] * 0.76)
         last_validation_index = int(signals_all.shape[0] * 0.88)
-        if training_validation_test == 'training':
+        if training_validation_test == "training":
             self.data = torch.tensor(signals_all.to_numpy()[:last_training_index, :], dtype=torch.float)
             self.target = torch.tensor(classes_all[:last_training_index].to_numpy()) - 1
-        elif training_validation_test == 'validation':
+        elif training_validation_test == "validation":
             self.data = torch.tensor(signals_all.to_numpy()[last_training_index:last_validation_index, :], dtype=torch.float)
             self.target = torch.tensor(classes_all[last_training_index:last_validation_index].to_numpy()) - 1
-        elif training_validation_test == 'test':
+        elif training_validation_test == "test":
             self.data = torch.tensor(signals_all.to_numpy()[last_validation_index:, :], dtype=torch.float)
             self.target = torch.tensor(classes_all[last_validation_index:].to_numpy()) - 1
         self.data.unsqueeze_(1)
 
-    def __len__(self: 'UCIEpilepsy') -> int:
+    def __len__(self: "UCIEpilepsy") -> int:
         return self.target.shape[0]
 
 
 class VGG(nn.Module):
 
-    def __init__(self: 'VGG', classes_num: int, features: nn.Module) -> None:
+    def __init__(self: "VGG", classes_num: int, features: nn.Module) -> None:
         super().__init__()
         self.features = features
         self.classifier = nn.Sequential(nn.Linear(2560, 4096), nn.ReLU(inplace=True), nn.Dropout(), nn.Linear(4096, 4096), nn.ReLU(inplace=True), nn.Dropout(), nn.Linear(4096, classes_num)) # noqa: PD002
         self._initialize_weights()
 
-    def _initialize_weights(self: 'VGG') -> None:
+    def _initialize_weights(self: "VGG") -> None:
         for module in self.modules():
             if isinstance(module, nn.Conv1d):
-                nn.init.kaiming_normal_(module.weight, mode='fan_out', nonlinearity='relu')
+                nn.init.kaiming_normal_(module.weight, mode="fan_out", nonlinearity="relu")
                 if module.bias is not None:
                     nn.init.constant_(module.bias, 0)
             elif isinstance(module, nn.Linear):
                 nn.init.normal_(module.weight, 0, 0.01)
                 nn.init.constant_(module.bias, 0)
 
-    def forward(self: 'VGG', signal: torch.Tensor) -> torch.Tensor:
+    def forward(self: "VGG", signal: torch.Tensor) -> torch.Tensor:
         out = self.features(signal)
         out = out.view(out.size(0), -1)
         output: torch.Tensor = self.classifier(out)
@@ -445,40 +445,40 @@ def densenet201(classes_num: int) -> nn.Module:
 def main() -> None: # noqa: C901, PLR0912, PLR0915
     samples_num = 11500
     epochs_num = 100
-    if environ['DEBUG'] == '1':
+    if environ["DEBUG"] == "1":
         samples_num = 10
         epochs_num = 1
     torch.backends.cudnn.benchmark = False
     torch.backends.cudnn.deterministic = True
     torch.manual_seed(0)
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     classes_num = 5
     batch_size = 20
     signals_all_max = 2047
     signals_all_min = -1885
-    dataset_training = UCIEpilepsy(samples_num, 'training')
-    dataset_validation = UCIEpilepsy(samples_num, 'validation')
-    dataset_test = UCIEpilepsy(samples_num, 'test')
+    dataset_training = UCIEpilepsy(samples_num, "training")
+    dataset_validation = UCIEpilepsy(samples_num, "validation")
+    dataset_test = UCIEpilepsy(samples_num, "test")
     dataloader_training = DataLoader(dataset=dataset_training, batch_size=batch_size, shuffle=True)
     validation_dataloader = DataLoader(dataset=dataset_validation, batch_size=batch_size)
     dataloader_test = DataLoader(dataset=dataset_test, batch_size=batch_size)
     cross_entropy_loss = nn.CrossEntropyLoss()
-    model_base_names = ['lenet', 'alexnet', 'vgg11', 'vgg13', 'vgg16', 'vgg19', 'resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152', 'densenet121', 'densenet161', 'densenet169', 'densenet201']
+    model_base_names = ["lenet", "alexnet", "vgg11", "vgg13", "vgg16", "vgg19", "resnet18", "resnet34", "resnet50", "resnet101", "resnet152", "densenet121", "densenet161", "densenet169", "densenet201"]
     models_base_1d = [Lenet, Alexnet, vgg11, vgg13, vgg16, vgg19, resnet18, resnet34, resnet50, resnet101, resnet152, densenet121, densenet161, densenet169, densenet201]
     models_base_2d = [LeNet2D, models.alexnet, models.vgg11, models.vgg13, models.vgg16, models.vgg19, models.resnet18, models.resnet34, models.resnet50, models.resnet101, models.resnet152, models.densenet121, models.densenet161, models.densenet169, models.densenet201]
     accuracy_test_array = np.zeros((5, 15))
     for model_base_name_index, model_base_name in enumerate(model_base_names):
-        for model_module_name_index, model_module_name in enumerate(['1D', 'signal-as-image', 'spectrogram', 'cnn-one-layer', 'cnn-two-layers']):
-            model_file_name = f'{model_base_name}-{model_module_name}'
-            if model_module_name == '1D':
+        for model_module_name_index, model_module_name in enumerate(["1D", "signal-as-image", "spectrogram", "cnn-one-layer", "cnn-two-layers"]):
+            model_file_name = f"{model_base_name}-{model_module_name}"
+            if model_module_name == "1D":
                 model = models_base_1d[model_base_name_index](classes_num)
-            elif model_module_name == 'signal-as-image':
+            elif model_module_name == "signal-as-image":
                 model = SignalAsImage(classes_num, models_base_2d[model_base_name_index](), model_file_name, signals_all_max, signals_all_min)
-            elif model_module_name == 'spectrogram':
+            elif model_module_name == "spectrogram":
                 model = Spectrogram(classes_num, models_base_2d[model_base_name_index](), model_file_name)
-            elif model_module_name == 'cnn-one-layer':
+            elif model_module_name == "cnn-one-layer":
                 model = CNNOneLayer(classes_num, models_base_2d[model_base_name_index](), model_file_name)
-            elif model_module_name == 'cnn-two-layers':
+            elif model_module_name == "cnn-two-layers":
                 model = CNNTwoLayers(classes_num, models_base_2d[model_base_name_index](), model_file_name)
             model = model.to(device)
             optimizer = Adam(model.parameters())
@@ -510,7 +510,7 @@ def main() -> None: # noqa: C901, PLR0912, PLR0915
                 accuracy_validation = 100 * predictions_correct_num / predictions_num
                 if accuracy_validation > accuracy_validation_best:
                     accuracy_validation_best = accuracy_validation
-                    model_file_path = Path(f'bin/{model_file_name}.pt')
+                    model_file_path = Path(f"bin/{model_file_name}.pt")
                     torch.save(model.state_dict(), model_file_path)
             model.load_state_dict(torch.load(model_file_path))
             loss_test_sum = 0
@@ -529,32 +529,32 @@ def main() -> None: # noqa: C901, PLR0912, PLR0915
                     loss_test_sum += loss.item()
             accuracy_test = 100 * predictions_correct_num / predictions_num
             accuracy_test_array[model_module_name_index, model_base_name_index] = accuracy_test
-            if model_file_name == 'resnet34-1D':
+            if model_file_name == "resnet34-1D":
                 save_tfjs_from_torch(dataset_training[0][0].unsqueeze(0), model, model_file_name)
-                if environ['DEBUG'] != '1':
-                    dist_model_file_path = Path('dist') / model_file_name
+                if environ["DEBUG"] != "1":
+                    dist_model_file_path = Path("dist") / model_file_name
                     rmtree(dist_model_file_path)
-                    move(Path('bin') / model_file_name, Path('dist') / model_file_name)
-            if environ['DEBUG'] == '1' and model_file_name != 'alexnet-cnn-one-layer':
-                Path(f'bin/{model_file_name}.pt').unlink()
-    styler = pd.DataFrame(accuracy_test_array, index=['1D', '2D, signal as image', '2D, spectrogram', '2D, one layer CNN', '2D, two layer CNN'], columns=model_base_names).style
+                    move(Path("bin") / model_file_name, Path("dist") / model_file_name)
+            if environ["DEBUG"] == "1" and model_file_name != "alexnet-cnn-one-layer":
+                Path(f"bin/{model_file_name}.pt").unlink()
+    styler = pd.DataFrame(accuracy_test_array, index=["1D", "2D, signal as image", "2D, spectrogram", "2D, one layer CNN", "2D, two layer CNN"], columns=model_base_names).style
     styler.format(precision=1)
-    styler.highlight_max(props='bfseries: ;')
-    styler.to_latex('bin/results.tex', hrules=True)
-    dataset = pd.read_csv('bin/data.csv')
-    signals_all = dataset.drop(columns=['Unnamed: 0', 'y'])
-    classes_all = dataset['y']
+    styler.highlight_max(props="bfseries: ;")
+    styler.to_latex("bin/results.tex", hrules=True)
+    dataset = pd.read_csv("bin/data.csv")
+    signals_all = dataset.drop(columns=["Unnamed: 0", "y"])
+    classes_all = dataset["y"]
     signals_all = torch.tensor(signals_all.to_numpy(), dtype=torch.float)
     classes_all = torch.tensor(classes_all.to_numpy()) - 1
-    class_names = ['eyes-open', 'eyes-closed', 'healthy-area', 'tumor-area', 'epilepsy']
+    class_names = ["eyes-open", "eyes-closed", "healthy-area", "tumor-area", "epilepsy"]
     for class_index, class_name in enumerate(class_names):
         signal_index = (classes_all == class_index).nonzero()[-1]
         plt.figure()
-        plt.plot(signals_all[signal_index].squeeze(), linewidth=4, color='k')
-        plt.axis('off')
+        plt.plot(signals_all[signal_index].squeeze(), linewidth=4, color="k")
+        plt.axis("off")
         plt.xlim([0, signals_all.shape[-1] - 1])
         plt.ylim([-1000, 1000])
-        plt.savefig(f'bin/signal-{class_name}.png')
+        plt.savefig(f"bin/signal-{class_name}.png")
         plt.close()
         signals_all_min = -1000
         signals_all_max = 1000
@@ -565,15 +565,15 @@ def main() -> None: # noqa: C901, PLR0912, PLR0915
         for index in range(signals_all.shape[-1]):
             data[signals_all.shape[-1] - 1 - signal[index], index] = 255
         plt.figure()
-        plt.imsave(f'bin/signal-as-image-{class_name}.png', data, cmap='gray')
+        plt.imsave(f"bin/signal-as-image-{class_name}.png", data, cmap="gray")
         plt.close()
-        f_array, t_array, spectrogram_array = spectrogram(signals_all[signal_index], fs=signals_all.shape[-1], noverlap=4, nperseg=8, nfft=64, mode='magnitude')
+        f_array, t_array, spectrogram_array = spectrogram(signals_all[signal_index], fs=signals_all.shape[-1], noverlap=4, nperseg=8, nfft=64, mode="magnitude")
         data = np.array(Image.fromarray(spectrogram_array[0]).resize((signals_all.shape[-1], signals_all.shape[-1]), resample=1))
         plt.figure()
-        plt.imsave(Path(f'bin/spectrogram-{class_name}.png'), data, cmap='gray')
+        plt.imsave(Path(f"bin/spectrogram-{class_name}.png"), data, cmap="gray")
         plt.close()
-        model = CNNOneLayer(classes_num, models.alexnet(), 'alexnet-cnn-one-layer')
-        model.load_state_dict(torch.load(Path('bin/alexnet-cnn-one-layer.pt')))
+        model = CNNOneLayer(classes_num, models.alexnet(), "alexnet-cnn-one-layer")
+        model.load_state_dict(torch.load(Path("bin/alexnet-cnn-one-layer.pt")))
         signal = signals_all[signal_index].unsqueeze(0)
         hook = Hook()
         model.conv.register_forward_hook(hook)
@@ -581,7 +581,7 @@ def main() -> None: # noqa: C901, PLR0912, PLR0915
         data = hook.outputs[0][0, 0].cpu().detach().numpy() # type: ignore[index]
         data = np.array(Image.fromarray(data).resize((signals_all.shape[-1], signals_all.shape[-1]), resample=1))
         plt.figure()
-        plt.imsave(Path(f'bin/cnn-{class_name}.png'), data, cmap='gray')
+        plt.imsave(Path(f"bin/cnn-{class_name}.png"), data, cmap="gray")
         plt.close()
 
 
@@ -589,7 +589,7 @@ def make_layers(cfg: list) -> nn.Module: # type: ignore[type-arg]
     layers: list[nn.Module] = []
     in_channels = 1
     for cfg_element in cfg:
-        if cfg_element == 'M':
+        if cfg_element == "M":
             layers += [nn.MaxPool1d(kernel_size=2, stride=2)]
         else:
             conv1d = nn.Conv1d(in_channels, cfg_element, kernel_size=3, padding=1)
@@ -599,11 +599,11 @@ def make_layers(cfg: list) -> nn.Module: # type: ignore[type-arg]
 
 
 def replace_last_layer(classes_num: int, model_base: nn.Module, model_file_name: str) -> nn.Module:
-    if model_file_name.startswith(('alexnet', 'vgg')):
+    if model_file_name.startswith(("alexnet", "vgg")):
         model_base.classifier[-1] = nn.Linear(model_base.classifier[-1].in_features, classes_num) # type: ignore[assignment, index, operator, union-attr]
-    elif model_file_name.startswith('resnet'):
+    elif model_file_name.startswith("resnet"):
         model_base.fc = nn.Linear(model_base.fc.in_features, classes_num) # type: ignore[arg-type, union-attr]
-    elif model_file_name.startswith('densenet'):
+    elif model_file_name.startswith("densenet"):
         model_base.classifier = nn.Linear(model_base.classifier.in_features, classes_num) # type: ignore[arg-type, union-attr]
     return model_base
 
@@ -629,38 +629,38 @@ def resnet50(classes_num: int) -> nn.Module:
 
 
 def save_tfjs_from_torch(example_input: torch.Tensor, model: nn.Module, model_file_name: str) -> None:
-    model_file_path = Path('bin') / model_file_name
+    model_file_path = Path("bin") / model_file_name
     if model_file_path.exists():
         rmtree(model_file_path)
     model_file_path.mkdir()
-    torch.onnx.export(model.cpu(), example_input, model_file_path / 'model.onnx', export_params=True, opset_version=11)
-    model_onnx = onnx.load(model_file_path / 'model.onnx')
+    torch.onnx.export(model.cpu(), example_input, model_file_path / "model.onnx", export_params=True, opset_version=11)
+    model_onnx = onnx.load(model_file_path / "model.onnx")
     model_tf = prepare(model_onnx)
-    model_tf.export_graph(model_file_path / 'model')
-    tf_saved_model_conversion_v2.convert_tf_saved_model((model_file_path / 'model').as_posix(), model_file_path, skip_op_check=True)
-    rmtree(model_file_path / 'model')
-    (model_file_path / 'model.onnx').unlink()
+    model_tf.export_graph(model_file_path / "model")
+    tf_saved_model_conversion_v2.convert_tf_saved_model((model_file_path / "model").as_posix(), model_file_path, skip_op_check=True)
+    rmtree(model_file_path / "model")
+    (model_file_path / "model.onnx").unlink()
 
 
 def vgg11(classes_num: int) -> nn.Module:
-    cfg = [64, 'M', 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M']
+    cfg = [64, "M", 128, "M", 256, 256, "M", 512, 512, "M", 512, 512, "M"]
     return VGG(classes_num, make_layers(cfg))
 
 
 def vgg13(classes_num: int) -> nn.Module:
-    cfg = [64, 64, 'M', 128, 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M']
+    cfg = [64, 64, "M", 128, 128, "M", 256, 256, "M", 512, 512, "M", 512, 512, "M"]
     return VGG(classes_num, make_layers(cfg))
 
 
 def vgg16(classes_num: int) -> nn.Module:
-    cfg = [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M']
+    cfg = [64, 64, "M", 128, 128, "M", 256, 256, 256, "M", 512, 512, 512, "M", 512, 512, 512, "M"]
     return VGG(classes_num, make_layers(cfg))
 
 
 def vgg19(classes_num: int) -> nn.Module:
-    cfg = [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 256, 'M', 512, 512, 512, 512, 'M', 512, 512, 512, 512, 'M']
+    cfg = [64, 64, "M", 128, 128, "M", 256, 256, 256, 256, "M", 512, 512, 512, 512, "M", 512, 512, 512, 512, "M"]
     return VGG(classes_num, make_layers(cfg))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

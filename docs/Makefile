@@ -72,7 +72,7 @@ bin/check/js-done: .dockerignore .gitignore Dockerfile bin package.json script.j
 		--workdir /usr/src/app/ \
 		$$(docker image build --quiet .) /bin/sh -c '\
 		rome check --apply-suggested script.js && \
-		rome format --line-width 320 --quote-style single --write script.js'
+		rome format --line-width 320 --write script.js'
 	touch $@
 
 index.html:
