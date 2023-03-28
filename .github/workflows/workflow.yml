@@ -8,6 +8,6 @@ jobs:
         uses: actions/checkout@v3
       - name: Check code and build
         run: |
-          cd docs/ && make check all && cd ..
-          cd python/ && make check all && cd ..
-          make check all
+          cd docs/ && make clean check all && cd ..
+          cd python/ && make clean check all && cd ..
+          make clean check all

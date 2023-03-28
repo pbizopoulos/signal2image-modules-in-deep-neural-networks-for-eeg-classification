@@ -12,6 +12,6 @@ NVIDIA Container Toolkit (Optional)
 # Download, check and build
 git clone https://github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification
 cd signal2image-modules-in-deep-neural-networks-for-eeg-classification/
-cd docs/ && make check all && cd ..
-cd python/ && make check all && cd ..
-make check all
+cd docs/ && make clean check all && cd ..
+cd python/ && make clean check all && cd ..
+make clean check all
