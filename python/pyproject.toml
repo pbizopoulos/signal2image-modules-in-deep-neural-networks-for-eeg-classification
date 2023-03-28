@@ -18,7 +18,7 @@ dev = [
 ]
 
 [tool.mypy]
-cache_dir = "bin/check"
+cache_dir = "bin/check/mypy"
 ignore_missing_imports = true
 install_types = true
 non_interactive = true
