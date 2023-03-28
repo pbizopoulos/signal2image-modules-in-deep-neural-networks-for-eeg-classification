@@ -7,6 +7,7 @@ all: bin/done
 check:
 	mkdir -p bin/check
 	$(MAKE) bin/done $$(test -s ms.bib && printf 'bin/check/bib-done') bin/check/tex-done
+
 clean:
 	rm -rf bin/
 
