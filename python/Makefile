@@ -34,7 +34,6 @@ bin/done: .dockerignore .gitignore Dockerfile bin main.py pyproject.toml
 		--rm \
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/usr/src/app/ \
-		--workdir /usr/src/app/ \
 		$$(docker image build --quiet .) $(make_all_docker_cmd)
 	touch $@
 
@@ -45,7 +44,6 @@ bin/check/done: .dockerignore .gitignore Dockerfile bin main.py pyproject.toml
 		--rm \
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/usr/src/app/ \
-		--workdir /usr/src/app/ \
 		$$(docker image build --quiet .) /bin/sh -c 'mypy main.py && ruff main.py'
 	touch $@
 

@@ -20,7 +20,7 @@ clean:
 	printf 'bin/\n' > $@
 
 Dockerfile:
-	printf 'FROM node\nRUN apt-get update && apt-get install -y jq\nCOPY package.json .\nRUN npm install --global $$(jq --raw-output ".devDependencies | to_entries | map_values( .key + \\"@\\" + .value ) | join(\\" \\")" package.json)\n' > $@
+	printf 'FROM node\nWORKDIR /urs/src/app\nRUN apt-get update && apt-get install -y jq\nCOPY package.json .\nRUN npm install --global $$(jq --raw-output ".devDependencies | to_entries | map_values( .key + \\"@\\" + .value ) | join(\\" \\")" package.json)\n' > $@
 
 bin:
 	mkdir $@
@@ -32,7 +32,6 @@ bin/done: Dockerfile bin/cert.pem index.html package.json
 		--rm \
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/usr/src/app/ \
-		--workdir /usr/src/app/ \
 		$$(docker image build --quiet .) $(make_all_docker_cmd)
 	touch $@
 
@@ -41,14 +40,12 @@ bin/cert.pem: .dockerignore .gitignore bin
 		--rm \
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/usr/src/app/ \
-		--workdir /usr/src/app/ \
-		alpine/openssl req -subj "/C=.." -nodes -x509 -keyout bin/key.pem -out $@
+		$$(docker image build --quiet .) openssl req -subj "/C=.." -nodes -x509 -keyout bin/key.pem -out $@
 
 bin/check/css-done: .dockerignore .gitignore Dockerfile package.json style.css
 	docker container run \
 		--rm \
 		--volume $$(pwd):/usr/src/app/ \
-		--workdir /usr/src/app/ \
 		$$(docker image build --quiet .) /bin/sh -c '\
 		stylelint --fix style.css && \
 		css-validator --profile css3svg style.css'
@@ -58,7 +55,6 @@ bin/check/html-done: .dockerignore .gitignore Dockerfile bin index.html package.
 	docker container run \
 		--rm \
 		--volume $$(pwd):/usr/src/app/ \
-		--workdir /usr/src/app/ \
 		$$(docker image build --quiet .) /bin/sh -c '\
 		js-beautify --end-with-newline --indent-inner-html --indent-with-tabs --no-preserve-newlines --type html --replace index.html && \
 		html-validate index.html'
@@ -68,7 +64,6 @@ bin/check/js-done: .dockerignore .gitignore Dockerfile bin package.json script.j
 	docker container run \
 		--rm \
 		--volume $$(pwd):/usr/src/app/ \
-		--workdir /usr/src/app/ \
 		$$(docker image build --quiet .) /bin/sh -c '\
 		rome check --apply-suggested script.js && \
 		rome format --line-width 320 --write script.js'
