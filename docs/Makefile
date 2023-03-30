@@ -29,7 +29,6 @@ bin/done: Dockerfile bin/cert.pem index.html package.json
 	docker container run \
 		$$(test -t 0 && printf '%s' '--interactive --tty') \
 		--detach-keys 'ctrl-^,ctrl-^' \
-		--publish 3000:3000 \
 		--rm \
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/usr/src/app/ \
