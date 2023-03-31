@@ -18,7 +18,7 @@ clean:
 	printf 'bin/\n' > $@
 
 Dockerfile:
-	printf 'FROM python\nENV HOME=/urs/src/app/bin\nENV PYTHONDONTWRITEBYTECODE=1\nWORKDIR /usr/src/app\nCOPY pyproject.toml .\nRUN python3 -m pip install --upgrade pip && python3 -m pip install .[dev]\n' > $@
+	printf 'FROM python\nENV HOME=/usr/src/app/bin\nENV PYTHONDONTWRITEBYTECODE=1\nWORKDIR /usr/src/app\nCOPY pyproject.toml .\nRUN python3 -m pip install --upgrade pip && python3 -m pip install .[dev]\n' > $@
 
 bin:
 	mkdir $@
