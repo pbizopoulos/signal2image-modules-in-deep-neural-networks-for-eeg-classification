@@ -30,7 +30,6 @@ bin/done: .dockerignore .gitignore Dockerfile bin ms.bib ms.tex
 		--rm \
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/usr/src/app/ \
-		--workdir /usr/src/app/ \
 		$$(docker image build --quiet .) $(make_all_docker_cmd)
 	touch $@
 
@@ -39,7 +38,6 @@ bin/check/bib-done: .dockerignore Dockerfile ms.bib
 		--rm \
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/usr/src/app/ \
-		--workdir /usr/src/app/ \
 		$$(docker image build --quiet .) /bin/sh -c '\
 		checkcites bin/ms.aux && \
 		rebiber --input_bib ms.bib --remove url'
@@ -50,7 +48,6 @@ bin/check/tex-done: .dockerignore Dockerfile ms.tex
 		--rm \
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/usr/src/app/ \
-		--workdir /usr/src/app/ \
 		$$(docker image build --quiet .) /bin/sh -c '\
 		chktex ms.tex && \
 		lacheck ms.tex'
