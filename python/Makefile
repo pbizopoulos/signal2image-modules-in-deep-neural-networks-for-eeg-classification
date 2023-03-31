@@ -45,7 +45,7 @@ bin/check/done: .dockerignore .gitignore Dockerfile bin main.py pyproject.toml
 	touch $@
 
 main.py:
-	printf '' > $@
+	touch $@
 
 pyproject.toml:
 	printf '[project]\nname = "UNKNOWN"\nversion = "0.0.0"\ndependencies = []\n\n[project.optional-dependencies]\ndev = [\n\t"mypy",\n\t"ruff",\n]\n\n[tool.mypy]\ncache_dir = "bin/check/mypy"\nignore_missing_imports = true\ninstall_types = true\nnon_interactive = true\nstrict = true\n\n[tool.ruff]\ncache-dir = "bin/check/ruff"\nfix = true\nignore = ["E501", "S101"]\nselect = ["A", "ANN", "ARG", "B", "BLE", "C", "C40", "C90", "COM", "DJ", "DTZ", "E", "EM", "ERA", "EXE", "F", "FBT", "G", "I", "ICN", "INP", "ISC", "N", "NPY", "PD", "PGH", "PIE", "PL", "PT", "PTH", "PYI", "Q", "RET", "RSE", "RUF", "S", "SLF", "SIM", "T10", "T20", "TCH", "TID", "TRY", "UP", "YTT", "W"]\n' > $@
