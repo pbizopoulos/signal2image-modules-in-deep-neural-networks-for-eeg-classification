@@ -576,7 +576,7 @@ def main() -> None: # noqa: C901, PLR0912, PLR0915
         model.load_state_dict(torch.load(Path("bin/alexnet-cnn-one-layer.pt")))
         signal = signals_all[signal_index].unsqueeze(0)
         hook = Hook()
-        model.conv.register_forward_hook(hook)
+        model.conv.register_forward_hook(hook) # type: ignore[arg-type]
         model(signal)
         data = hook.outputs[0][0, 0].cpu().detach().numpy() # type: ignore[index]
         data = np.array(Image.fromarray(data).resize((signals_all.shape[-1], signals_all.shape[-1]), resample=1))
