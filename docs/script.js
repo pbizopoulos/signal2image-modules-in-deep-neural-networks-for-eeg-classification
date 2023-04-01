@@ -58,7 +58,7 @@ async function predictView() {
 	const classProbabilityArray = modelOutput.softmax().mul(100).arraySync()[0];
 	outputDiv.textContent = "";
 	for (let i = 0; i < classProbabilityArray.length; i++) {
-		let elementDiv = document.createElement("div");
+		const elementDiv = document.createElement("div");
 		elementDiv.textContent = `${classNameArray[i]}: ${classProbabilityArray[i].toFixed(2)}%`;
 		outputDiv.append(elementDiv);
 	}
