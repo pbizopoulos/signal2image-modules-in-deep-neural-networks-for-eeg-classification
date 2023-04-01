@@ -1,4 +1,4 @@
-FROM node:19.7.0
+FROM node:19.8.1
 WORKDIR /usr/src/app
 RUN apt-get update && apt-get install -y jq
 COPY package.json .
