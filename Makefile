@@ -18,7 +18,7 @@ clean:
 	printf 'bin/\n' > $@
 
 Dockerfile:
-	printf 'FROM texlive/texlive\nWORKDIR /usr/src/app\nRUN apt-get update -y && apt-get install -y python3-pip\nRUN python3 -m pip install --break-system-packages rebiber\n' > $@
+	printf 'FROM texlive/texlive\nWORKDIR /usr/src/app\nRUN apt-get update && apt-get install -y python3-pip\nRUN python3 -m pip install --break-system-packages rebiber\n' > $@
 
 bin:
 	mkdir $@
