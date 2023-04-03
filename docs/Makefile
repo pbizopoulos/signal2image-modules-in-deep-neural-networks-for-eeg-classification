@@ -64,7 +64,6 @@ bin/done: bin/cert.pem index.html index.js
 		$$(test -t 0 && printf '%s' '--interactive --tty') \
 		--detach-keys 'ctrl-^,ctrl-^' \
 		--env DEBUG=$(DEBUG) \
-		--env NODE_PATH=/usr/src/node_modules/ \
 		--pid=host \
 		--rm \
 		--user $$(id -u):$$(id -g) \
