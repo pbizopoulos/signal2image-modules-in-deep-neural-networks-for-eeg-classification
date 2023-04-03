@@ -20,7 +20,7 @@ clean:
 	printf 'bin/\n' > $@
 
 Dockerfile:
-	printf 'FROM node\nWORKDIR /usr/src\nCOPY package.json .\nRUN npm install --omit=dev\nWORKDIR /usr/src/app\nRUN apt-get update && apt-get install -y jq\nCOPY package.json .\nRUN npm install --global $$(jq -r ".devDependencies | to_entries[] | \\"\(.key)@\(.value)\\"" package.json)\n' > $@
+	printf 'FROM node\nWORKDIR /usr/src/app\nRUN apt-get update && apt-get install -y jq\nCOPY package.json /usr/src/\nRUN npm install --omit=dev --prefix /usr/src\nRUN npm install --global $$(jq --raw-output ".devDependencies | to_entries[] | \\"\(.key)@\(.value)\\"" /usr/src/package.json)\n' > $@
 
 bin:
 	mkdir $@
