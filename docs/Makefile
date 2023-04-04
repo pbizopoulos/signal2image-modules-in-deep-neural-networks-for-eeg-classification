@@ -25,7 +25,8 @@ Dockerfile:
 bin:
 	mkdir $@
 
-bin/cert.pem: .dockerignore .gitignore Dockerfile bin package.json
+bin/cert.pem: .dockerignore .gitignore Dockerfile package.json
+	mkdir -p bin
 	docker container run \
 		--rm \
 		--user $$(id -u):$$(id -g) \
@@ -55,8 +56,8 @@ bin/check/js-done: .dockerignore .gitignore Dockerfile bin package.json script.j
 		--rm \
 		--volume $$(pwd):/usr/src/app/ \
 		$$(docker image build --quiet .) /bin/sh -c '\
-		rome check --apply-unsafe . && \
-		rome format --line-width 320 --write .'
+		rome check --apply-unsafe *.js && \
+		rome format --line-width 320 --write *.js'
 	touch $@
 
 bin/done: bin/cert.pem index.html index.js
