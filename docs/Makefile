@@ -4,7 +4,7 @@ DEBUG = 1
 
 make_all_docker_cmd = node index.js
 
-all: bin/cert.pem bin/done
+all: bin bin/cert.pem bin/done
 
 check: .dockerignore .gitignore Dockerfile bin bin/check package.json
 	$(MAKE) $$(test -s style.css && printf 'bin/check/css-done') $$(test -s index.html && printf 'bin/check/html-done') $$(test -s script.js && printf 'bin/check/js-done')
@@ -25,7 +25,6 @@ bin:
 	mkdir $@
 
 bin/cert.pem: .dockerignore .gitignore Dockerfile package.json
-	mkdir -p bin
 	docker container run \
 		--rm \
 		--user $$(id -u):$$(id -g) \
