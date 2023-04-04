@@ -4,10 +4,9 @@ DEBUG = 1
 
 make_all_docker_cmd = node index.js
 
-all: bin/done
+all: bin/cert.pem bin/done
 
-check:
-	mkdir -p bin/check
+check: .dockerignore .gitignore Dockerfile bin bin/check package.json
 	$(MAKE) $$(test -s style.css && printf 'bin/check/css-done') $$(test -s index.html && printf 'bin/check/html-done') $$(test -s script.js && printf 'bin/check/js-done')
 
 clean:
@@ -33,7 +32,10 @@ bin/cert.pem: .dockerignore .gitignore Dockerfile package.json
 		--volume $$(pwd):/usr/src/app/ \
 		$$(docker image build --quiet .) openssl req -subj "/C=.." -nodes -x509 -keyout bin/key.pem -out $@
 
-bin/check/css-done: .dockerignore .gitignore Dockerfile package.json style.css
+bin/check:
+	mkdir $@
+
+bin/check/css-done: style.css
 	docker container run \
 		--rm \
 		--volume $$(pwd):/usr/src/app/ \
@@ -42,7 +44,7 @@ bin/check/css-done: .dockerignore .gitignore Dockerfile package.json style.css
 		css-validator --profile css3svg style.css'
 	touch $@
 
-bin/check/html-done: .dockerignore .gitignore Dockerfile bin index.html package.json
+bin/check/html-done: index.html
 	docker container run \
 		--rm \
 		--volume $$(pwd):/usr/src/app/ \
@@ -51,7 +53,7 @@ bin/check/html-done: .dockerignore .gitignore Dockerfile bin index.html package.
 		html-validate index.html'
 	touch $@
 
-bin/check/js-done: .dockerignore .gitignore Dockerfile bin package.json script.js
+bin/check/js-done: script.js
 	docker container run \
 		--rm \
 		--volume $$(pwd):/usr/src/app/ \
@@ -60,7 +62,7 @@ bin/check/js-done: .dockerignore .gitignore Dockerfile bin package.json script.j
 		rome format --line-width 320 --write *.js'
 	touch $@
 
-bin/done: bin/cert.pem index.html index.js
+bin/done: index.js
 	docker container run \
 		$$(test -t 0 && printf '%s' '--interactive --tty') \
 		--detach-keys 'ctrl-^,ctrl-^' \
@@ -70,9 +72,6 @@ bin/done: bin/cert.pem index.html index.js
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/usr/src/app/ \
 		$$(docker image build --quiet .) $(make_all_docker_cmd)
-	touch $@
-
-index.html:
 	touch $@
 
 index.js:
