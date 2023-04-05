@@ -2,11 +2,9 @@
 
 make_all_docker_cmd = /bin/sh -c 'latexmk -outdir=bin/ -pdf ms.tex && touch bin/ms.bbl && cp bin/ms.bbl . && tar cf bin/tex.tar ms.bbl ms.bib ms.tex $$(grep "^INPUT ./" bin/ms.fls | uniq | cut -b 9-) && rm ms.bbl'
 
-all: bin/done
+all: bin bin/done
 
-check:
-	mkdir -p bin/check
-	$(MAKE) bin/done $$(test -s ms.bib && printf 'bin/check/bib-done') bin/check/tex-done
+check: bin/done .dockerignore .gitignore Dockerfile bin bin/check bin/check/bib-done bin/check/tex-done
 
 clean:
 	rm -rf bin/
@@ -23,17 +21,10 @@ Dockerfile:
 bin:
 	mkdir $@
 
-bin/done: .dockerignore .gitignore Dockerfile bin ms.bib ms.tex
-	docker container run \
-		$$(test -t 0 && printf '%s' '--interactive --tty') \
-		--detach-keys 'ctrl-^,ctrl-^' \
-		--rm \
-		--user $$(id -u):$$(id -g) \
-		--volume $$(pwd):/usr/src/app/ \
-		$$(docker image build --quiet .) $(make_all_docker_cmd)
-	touch $@
+bin/check:
+	mkdir $@
 
-bin/check/bib-done: .dockerignore Dockerfile ms.bib
+bin/check/bib-done: ms.bib
 	docker container run \
 		--rm \
 		--user $$(id -u):$$(id -g) \
@@ -43,7 +34,7 @@ bin/check/bib-done: .dockerignore Dockerfile ms.bib
 		rebiber --input_bib ms.bib --remove url'
 	touch $@
 
-bin/check/tex-done: .dockerignore Dockerfile ms.tex
+bin/check/tex-done: ms.tex
 	docker container run \
 		--rm \
 		--user $$(id -u):$$(id -g) \
@@ -51,6 +42,16 @@ bin/check/tex-done: .dockerignore Dockerfile ms.tex
 		$$(docker image build --quiet .) /bin/sh -c '\
 		chktex ms.tex && \
 		lacheck ms.tex'
+	touch $@
+
+bin/done: .dockerignore .gitignore Dockerfile ms.bib ms.tex
+	docker container run \
+		$$(test -t 0 && printf '%s' '--interactive --tty') \
+		--detach-keys 'ctrl-^,ctrl-^' \
+		--rm \
+		--user $$(id -u):$$(id -g) \
+		--volume $$(pwd):/usr/src/app/ \
+		$$(docker image build --quiet .) $(make_all_docker_cmd)
 	touch $@
 
 ms.bib:
