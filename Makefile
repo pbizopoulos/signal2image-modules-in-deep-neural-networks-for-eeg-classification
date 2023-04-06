@@ -1,6 +1,6 @@
 .POSIX:
 
-make_all_docker_cmd = /bin/sh -c 'latexmk -outdir=bin/ -pdf ms.tex && touch bin/ms.bbl && cp bin/ms.bbl . && tar cf bin/tex.tar ms.bbl ms.bib ms.tex $$(grep "^INPUT ./" bin/ms.fls | uniq | cut -b 9-) && rm ms.bbl'
+cmd = /bin/sh -c 'latexmk -outdir=bin/ -pdf ms.tex && touch bin/ms.bbl && cp bin/ms.bbl . && tar cf bin/tex.tar ms.bbl ms.bib ms.tex $$(grep "^INPUT ./" bin/ms.fls | uniq | cut -b 9-) && rm ms.bbl'
 
 all: bin bin/done
 
@@ -51,7 +51,7 @@ bin/done: .dockerignore .gitignore Dockerfile ms.bib ms.tex
 		--rm \
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/usr/src/app/ \
-		$$(docker image build --quiet .) $(make_all_docker_cmd)
+		$$(docker image build --quiet .) $(cmd)
 	touch $@
 
 ms.bib:

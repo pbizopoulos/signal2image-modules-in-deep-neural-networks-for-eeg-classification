@@ -2,7 +2,7 @@
 
 DEBUG = 1
 
-make_all_docker_cmd = python3 main.py
+cmd = python3 main.py
 
 all: bin/done
 
@@ -32,7 +32,7 @@ bin/done: .dockerignore .gitignore Dockerfile bin main.py pyproject.toml
 		--rm \
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/usr/src/app/ \
-		$$(docker image build --quiet .) $(make_all_docker_cmd)
+		$$(docker image build --quiet .) $(cmd)
 	touch $@
 
 bin/check/done: .dockerignore .gitignore Dockerfile bin main.py pyproject.toml

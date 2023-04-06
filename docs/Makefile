@@ -2,7 +2,7 @@
 
 DEBUG = 1
 
-make_all_docker_cmd = node index.js
+cmd = node index.js
 
 all: bin bin/cert.pem bin/done
 
@@ -70,7 +70,7 @@ bin/done: index.js
 		--rm \
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/usr/src/app/ \
-		$$(docker image build --quiet .) $(make_all_docker_cmd)
+		$$(docker image build --quiet .) $(cmd)
 	touch $@
 
 index.js:
