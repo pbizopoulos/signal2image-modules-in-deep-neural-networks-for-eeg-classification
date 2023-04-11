@@ -5,7 +5,7 @@ updates:
     schedule:
       interval: 'monthly'
   - package-ecosystem: 'docker'
-    directory: '/python/'
+    directory: '/latex/python/'
     schedule:
       interval: 'monthly'
   - package-ecosystem: 'github-actions'
@@ -17,6 +17,6 @@ updates:
     schedule:
       interval: 'monthly'
   - package-ecosystem: 'pip'
-    directory: '/python/'
+    directory: '/latex/python/'
     schedule:
       interval: 'monthly'

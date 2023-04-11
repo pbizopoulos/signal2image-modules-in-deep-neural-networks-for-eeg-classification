@@ -8,6 +8,7 @@ all: bin bin/cert.pem bin/done
 
 check: .dockerignore .gitignore Dockerfile bin bin/check package.json
 	$(MAKE) $$(test -s style.css && printf 'bin/check/css-done') $$(test -s index.html && printf 'bin/check/html-done') $$(test -s script.js && printf 'bin/check/js-done')
+	if ls -a | grep -v -E -x '.|..|.dockerignore|.env|.gitignore|CNAME|Dockerfile|Makefile|bin|dist|docs|index.html|index.js|index.py|index.toml|package.json|python|script.js|style.css' | grep -q .; then echo "Error: Non-Makefile files found."; false; fi
 
 clean:
 	rm -rf bin/
@@ -16,7 +17,7 @@ clean:
 	printf '*\n!package.json\n' > $@
 
 .gitignore:
-	printf 'bin/\n' > $@
+	printf '.env\nbin/\n' > $@
 
 Dockerfile:
 	printf 'FROM node\nWORKDIR /usr/src/app\nRUN apt-get update && apt-get install -y jq\nCOPY package.json /usr/src/\nRUN npm install --omit=dev --prefix /usr/src\nRUN npm install --global $$(jq --raw-output ".devDependencies | to_entries[] | \\"\(.key)@\(.value)\\"" /usr/src/package.json)\n' > $@

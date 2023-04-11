@@ -9,5 +9,5 @@ jobs:
       - name: Check code and build
         run: |
           cd docs/ && make clean check all && cd ..
-          cd python/ && make clean check all && cd ..
-          make clean check all
+          cd latex/python/ && make clean check all && cd ../..
+          cd latex/ && make clean check all && cd ..
