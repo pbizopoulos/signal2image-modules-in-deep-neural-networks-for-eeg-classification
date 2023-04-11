@@ -3,7 +3,7 @@ const canvasHeight = 256;
 const canvasWidth = 256;
 const classNameArray = ["Open", "Closed", "Healthy", "Tumor", "Epilepsy"];
 const inputDiv = document.getElementById("input-div");
-const inputFileName = "https://raw.githubusercontent.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/main/python/dist/eeg-classification-example-data.txt";
+const inputFileName = "https://raw.githubusercontent.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/main/latex/python/dist/eeg-classification-example-data.txt";
 const modelDownloadDiv = document.getElementById("model-download-div");
 const modelDownloadProgress = document.getElementById("model-download-progress");
 const outputDiv = document.getElementById("output-div");
@@ -33,7 +33,7 @@ function drawSignal(text) {
 
 async function loadModel(predictFunction) {
 	const loadModelFunction = tf.loadGraphModel;
-	model = await loadModelFunction("https://raw.githubusercontent.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/main/python/dist/resnet34-1D/model.json", {
+	model = await loadModelFunction("https://raw.githubusercontent.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/main/latex/python/dist/resnet34-1D/model.json", {
 		onProgress: (fraction) => {
 			modelDownloadProgress.value = fraction;
 			if (fraction === 1) {
