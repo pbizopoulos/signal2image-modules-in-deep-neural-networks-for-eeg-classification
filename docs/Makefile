@@ -30,6 +30,7 @@ bin/cert.pem: .dockerignore .gitignore Dockerfile package.json
 		--rm \
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/usr/src/app/ \
+		--workdir /usr/src/app \
 		$$(docker image build --quiet .) openssl req -subj "/C=.." -nodes -x509 -keyout bin/key.pem -out $@
 
 bin/check:
@@ -39,6 +40,7 @@ bin/check/css-done: style.css
 	docker container run \
 		--rm \
 		--volume $$(pwd):/usr/src/app/ \
+		--workdir /usr/src/app \
 		$$(docker image build --quiet .) /bin/sh -c '\
 		stylelint --fix style.css && \
 		css-validator --profile css3svg style.css'
@@ -48,6 +50,7 @@ bin/check/html-done: index.html
 	docker container run \
 		--rm \
 		--volume $$(pwd):/usr/src/app/ \
+		--workdir /usr/src/app \
 		$$(docker image build --quiet .) /bin/sh -c '\
 		js-beautify --end-with-newline --indent-inner-html --indent-with-tabs --no-preserve-newlines --type html --replace index.html && \
 		html-validate index.html'
@@ -57,6 +60,7 @@ bin/check/js-done: script.js
 	docker container run \
 		--rm \
 		--volume $$(pwd):/usr/src/app/ \
+		--workdir /usr/src/app \
 		$$(docker image build --quiet .) /bin/sh -c '\
 		rome check --apply-unsafe *.js && \
 		rome format --line-width 320 --write *.js'
@@ -71,6 +75,7 @@ bin/done: index.js
 		--rm \
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/usr/src/app/ \
+		--workdir /usr/src/app \
 		$$(docker image build --quiet .) $(cmd)
 	touch $@
 
