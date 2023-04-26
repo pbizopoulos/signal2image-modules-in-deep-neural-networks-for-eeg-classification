@@ -366,7 +366,7 @@ class UCIEpilepsy(Dataset): # type: ignore[type-arg]
     def __getitem__(self: "UCIEpilepsy", index: int) -> tuple[torch.Tensor, torch.Tensor]:
         return (self.data[index], self.target[index])
 
-    def __init__(self: "UCIEpilepsy", samples_num: int, training_validation_test: str) -> None:
+    def __init__(self: "UCIEpilepsy", samples_num: int, train_validation_test: str) -> None:
         data_file_path = Path("bin/data.csv")
         if not data_file_path.is_file():
             with data_file_path.open("wb") as file:
@@ -376,15 +376,15 @@ class UCIEpilepsy(Dataset): # type: ignore[type-arg]
         dataset = dataset[:samples_num]
         signals_all = dataset.drop(columns=["Unnamed: 0", "y"])
         classes_all = dataset["y"]
-        last_training_index = int(signals_all.shape[0] * 0.76)
+        last_train_index = int(signals_all.shape[0] * 0.76)
         last_validation_index = int(signals_all.shape[0] * 0.88)
-        if training_validation_test == "training":
-            self.data = torch.tensor(signals_all.to_numpy()[:last_training_index, :], dtype=torch.float)
-            self.target = torch.tensor(classes_all[:last_training_index].to_numpy()) - 1
-        elif training_validation_test == "validation":
-            self.data = torch.tensor(signals_all.to_numpy()[last_training_index:last_validation_index, :], dtype=torch.float)
-            self.target = torch.tensor(classes_all[last_training_index:last_validation_index].to_numpy()) - 1
-        elif training_validation_test == "test":
+        if train_validation_test == "train":
+            self.data = torch.tensor(signals_all.to_numpy()[:last_train_index, :], dtype=torch.float)
+            self.target = torch.tensor(classes_all[:last_train_index].to_numpy()) - 1
+        elif train_validation_test == "validation":
+            self.data = torch.tensor(signals_all.to_numpy()[last_train_index:last_validation_index, :], dtype=torch.float)
+            self.target = torch.tensor(classes_all[last_train_index:last_validation_index].to_numpy()) - 1
+        elif train_validation_test == "test":
             self.data = torch.tensor(signals_all.to_numpy()[last_validation_index:, :], dtype=torch.float)
             self.target = torch.tensor(classes_all[last_validation_index:].to_numpy()) - 1
         self.data.unsqueeze_(1)
@@ -456,10 +456,10 @@ def main() -> None: # noqa: C901, PLR0912, PLR0915
     batch_size = 20
     signals_all_max = 2047
     signals_all_min = -1885
-    dataset_training = UCIEpilepsy(samples_num, "training")
+    dataset_train = UCIEpilepsy(samples_num, "train")
     dataset_validation = UCIEpilepsy(samples_num, "validation")
     dataset_test = UCIEpilepsy(samples_num, "test")
-    dataloader_training = DataLoader(dataset=dataset_training, batch_size=batch_size, shuffle=True)
+    dataloader_train = DataLoader(dataset=dataset_train, batch_size=batch_size, shuffle=True)
     validation_dataloader = DataLoader(dataset=dataset_validation, batch_size=batch_size)
     dataloader_test = DataLoader(dataset=dataset_test, batch_size=batch_size)
     cross_entropy_loss = nn.CrossEntropyLoss()
@@ -485,7 +485,7 @@ def main() -> None: # noqa: C901, PLR0912, PLR0915
             accuracy_validation_best = -1.0
             for _ in range(epochs_num):
                 model.train()
-                for data, target in dataloader_training:
+                for data, target in dataloader_train:
                     data = data.to(device) # noqa: PLW2901
                     target = target.to(device) # noqa: PLW2901
                     output = model(data)
@@ -530,7 +530,7 @@ def main() -> None: # noqa: C901, PLR0912, PLR0915
             accuracy_test = 100 * predictions_correct_num / predictions_num
             accuracy_test_array[model_module_name_index, model_base_name_index] = accuracy_test
             if model_file_name == "resnet34-1D":
-                save_tfjs_from_torch(dataset_training[0][0].unsqueeze(0), model, model_file_name)
+                save_tfjs_from_torch(dataset_train[0][0].unsqueeze(0), model, model_file_name)
                 if environ["DEBUG"] != "1":
                     dist_model_file_path = Path("dist") / model_file_name
                     rmtree(dist_model_file_path)
