@@ -5,7 +5,7 @@ cmd = /bin/sh -c 'latexmk -outdir=bin/ -pdf ms.tex && touch bin/ms.bbl && cp bin
 all: bin bin/done
 
 check: bin/done .dockerignore .gitignore Dockerfile bin bin/check bin/check/bib-done bin/check/tex-done
-	if ls -a | grep -v -E -x '.|..|.dockerignore|.gitignore|Dockerfile|Makefile|bin|dist|docs|latex|ms.bib|ms.tex|python' | grep -q .; then false; fi
+	if ls -a | grep -v -E -x '.|..|.dockerignore|.gitignore|Dockerfile|Makefile|assets|bin|dist|docs|latex|ms.bib|ms.tex|python' | grep -q .; then false; fi
 	test $$(basename $$(pwd)) = "latex"
 
 clean:
