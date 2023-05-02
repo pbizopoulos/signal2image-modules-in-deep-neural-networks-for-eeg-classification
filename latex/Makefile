@@ -6,6 +6,7 @@ all: bin bin/done
 
 check: bin/done .dockerignore .gitignore Dockerfile bin bin/check bin/check/bib-done bin/check/tex-done
 	if ls -a | grep -v -E -x '.|..|.dockerignore|.gitignore|Dockerfile|Makefile|bin|dist|docs|latex|ms.bib|ms.tex|python' | grep -q .; then false; fi
+	test $$(basename $$(pwd)) = "latex"
 
 clean:
 	rm -rf bin/
