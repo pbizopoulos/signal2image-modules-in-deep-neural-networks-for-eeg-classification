@@ -45,7 +45,7 @@ bin/check/done: .dockerignore .gitignore Dockerfile bin main.py pyproject.toml
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/usr/src/app/ \
 		$$(docker image build --quiet .) /bin/sh -c 'mypy --cache-dir bin/check/mypy --ignore-missing-imports --install-types --non-interactive --strict main.py && ruff --cache-dir bin/check/ruff --fix --ignore D,E501,S101 --select ALL main.py'
-	if ls -a | grep -v -E -x '.|..|.dockerignore|.env|.gitignore|__init__.py|Dockerfile|Makefile|assets|bin|dist|docs|main.py|pyproject.toml|python|tests' | grep -q .; then false; fi
+	if ls -a | grep -v -E -x '.|..|.dockerignore|.env|.gitignore|__init__.py|Dockerfile|Makefile|assets|bin|dist|docs|latex|main.py|pyproject.toml|python|tests' | grep -q .; then false; fi
 	test $$(basename $$(pwd)) = "python"
 	touch $@
 
