@@ -4,8 +4,8 @@ const handler = require("serve-handler");
 const https = require("https");
 
 const options = {
-	key: fs.readFileSync("bin/key.pem"),
-	cert: fs.readFileSync("bin/cert.pem"),
+	key: fs.readFileSync("tmp/key.pem"),
+	cert: fs.readFileSync("tmp/cert.pem"),
 };
 
 const server = https.createServer(options, (request, response) => {
@@ -13,7 +13,5 @@ const server = https.createServer(options, (request, response) => {
 });
 
 if (process.env.DEBUG !== "1") {
-	server.listen(8000, "172.17.0.2", () => {
-		console.log("Running at https://172.17.0.2:8000");
-	});
+	server.listen(8000, "172.17.0.2", () => { console.log("Running at https://172.17.0.2:8000"); });
 }

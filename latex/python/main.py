@@ -367,7 +367,7 @@ class UCIEpilepsy(Dataset): # type: ignore[type-arg]
         return (self.data[index], self.target[index])
 
     def __init__(self: "UCIEpilepsy", samples_num: int, train_validation_test: str) -> None:
-        data_file_path = Path("bin/data.csv")
+        data_file_path = Path("data/data.csv")
         if not data_file_path.is_file():
             with data_file_path.open("wb") as file:
                 response = requests.get("https://web.archive.org/web/20200318000445/http://archive.ics.uci.edu/ml/machine-learning-databases/00388/data.csv", timeout=60)
@@ -443,6 +443,12 @@ def densenet201(classes_num: int) -> nn.Module:
 
 
 def main() -> None: # noqa: C901, PLR0912, PLR0915
+    bin_file_path = Path("bin")
+    if not bin_file_path.exists():
+        bin_file_path.mkdir(parents=True)
+    data_file_path = Path("data")
+    if not data_file_path.exists():
+        data_file_path.mkdir(parents=True)
     samples_num = 11500
     epochs_num = 100
     if environ["DEBUG"] == "1":
@@ -541,7 +547,7 @@ def main() -> None: # noqa: C901, PLR0912, PLR0915
     styler.format(precision=1)
     styler.highlight_max(props="bfseries: ;")
     styler.to_latex("bin/results.tex", hrules=True)
-    dataset = pd.read_csv("bin/data.csv")
+    dataset = pd.read_csv("data/data.csv")
     signals_all = dataset.drop(columns=["Unnamed: 0", "y"])
     classes_all = dataset["y"]
     signals_all = torch.tensor(signals_all.to_numpy(), dtype=torch.float)
