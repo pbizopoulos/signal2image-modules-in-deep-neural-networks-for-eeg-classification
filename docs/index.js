@@ -13,5 +13,7 @@ const server = https.createServer(options, (request, response) => {
 });
 
 if (process.env.DEBUG !== "1") {
-	server.listen(8000, "172.17.0.2", () => { console.log("Running at https://172.17.0.2:8000"); });
+	server.listen(8000, "172.17.0.2", () => {
+		console.log("Running at https://172.17.0.2:8000");
+	});
 }

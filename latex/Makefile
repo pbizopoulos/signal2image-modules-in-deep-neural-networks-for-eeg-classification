@@ -2,15 +2,13 @@
 
 cmd = /bin/sh -c 'latexmk -outdir=tmp/ -pdf ms.tex && touch tmp/ms.bbl && cp tmp/ms.bbl . && tar cf bin/tex.tar ms.bbl ms.bib ms.tex $$(grep "^INPUT ./" tmp/ms.fls | uniq | cut -b 9-) && rm ms.bbl && mv tmp/ms.pdf bin/ms.pdf'
 
-all: tmp tmp/done
+all: bin bin/done
 
-check: tmp/done .dockerignore .gitignore Dockerfile bin tmp tmp/check tmp/check/bib-done tmp/check/tex-done
+check: .dockerignore .gitignore Dockerfile bin/done tmp tmp/check-bib-done tmp/check-tex-done
 	if ls -a | grep -v -E -x '.|..|.dockerignore|.gitignore|Dockerfile|Makefile|assets|bin|dist|docs|latex|ms.bib|ms.tex|python|tmp' | grep -q .; then false; fi
 	test $$(basename $$(pwd)) = "latex"
 
-clean: mostlyclean
-
-mostlyclean:
+clean:
 	rm -rf bin/ tmp/
 
 .dockerignore:
@@ -25,13 +23,21 @@ Dockerfile:
 bin:
 	mkdir $@
 
+bin/done: .dockerignore .gitignore Dockerfile bin ms.bib ms.tex
+	docker container run \
+		$$(test -t 0 && printf '%s' '--interactive --tty') \
+		--detach-keys 'ctrl-^,ctrl-^' \
+		--rm \
+		--user $$(id -u):$$(id -g) \
+		--volume $$(pwd):/usr/src/app/ \
+		--workdir /usr/src/app \
+		$$(docker image build --quiet .) $(cmd)
+	touch $@
+
 tmp:
 	mkdir $@
 
-tmp/check:
-	mkdir $@
-
-tmp/check/bib-done: ms.bib
+tmp/check-bib-done: ms.bib
 	docker container run \
 		--rm \
 		--user $$(id -u):$$(id -g) \
@@ -42,7 +48,7 @@ tmp/check/bib-done: ms.bib
 		rebiber --input_bib ms.bib --remove url'
 	touch $@
 
-tmp/check/tex-done: ms.tex
+tmp/check-tex-done: ms.tex
 	docker container run \
 		--rm \
 		--user $$(id -u):$$(id -g) \
@@ -51,17 +57,6 @@ tmp/check/tex-done: ms.tex
 		$$(docker image build --quiet .) /bin/sh -c '\
 		chktex ms.tex && \
 		lacheck ms.tex'
-	touch $@
-
-tmp/done: .dockerignore .gitignore Dockerfile bin ms.bib ms.tex
-	docker container run \
-		$$(test -t 0 && printf '%s' '--interactive --tty') \
-		--detach-keys 'ctrl-^,ctrl-^' \
-		--rm \
-		--user $$(id -u):$$(id -g) \
-		--volume $$(pwd):/usr/src/app/ \
-		--workdir /usr/src/app \
-		$$(docker image build --quiet .) $(cmd)
 	touch $@
 
 ms.bib:

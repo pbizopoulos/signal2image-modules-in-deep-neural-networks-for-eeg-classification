@@ -4,15 +4,12 @@ DEBUG = 1
 
 cmd = python3 main.py
 
-all: tmp/done
+all: bin/done
 
-check: tmp/check/done
+check: tmp/done
 
-clean: mostlyclean
-	rm -rf data/
-
-mostlyclean:
-	rm -rf bin/ tmp/
+clean:
+	rm -rf bin/ data/ tmp/
 
 .dockerignore:
 	printf '*\n!pyproject.toml\n' > $@
@@ -23,7 +20,7 @@ mostlyclean:
 Dockerfile:
 	printf 'FROM python\nWORKDIR /usr/src/app\nCOPY pyproject.toml .\nRUN python3 -m pip install --upgrade pip && python3 -m pip install .[dev]\n' > $@
 
-tmp/done: .dockerignore .gitignore Dockerfile tmp main.py pyproject.toml
+bin/done: .dockerignore .gitignore Dockerfile tmp main.py pyproject.toml
 	docker container run \
 		$$(command -v nvidia-container-toolkit > /dev/null && printf '%s' '--gpus all') \
 		$$(test -t 0 && printf '%s' '--interactive --tty') \
@@ -37,18 +34,6 @@ tmp/done: .dockerignore .gitignore Dockerfile tmp main.py pyproject.toml
 		$$(docker image build --quiet .) $(cmd)
 	touch $@
 
-tmp/check/done: .dockerignore .gitignore Dockerfile tmp main.py pyproject.toml
-	docker container run \
-		$$(test -t 0 && printf '%s' '--interactive --tty') \
-		--env HOME=/usr/src/app/tmp \
-		--rm \
-		--user $$(id -u):$$(id -g) \
-		--volume $$(pwd):/usr/src/app/ \
-		$$(docker image build --quiet .) /bin/sh -c 'mypy --cache-dir tmp/check/mypy --ignore-missing-imports --install-types --non-interactive --strict main.py && ruff --cache-dir tmp/check/ruff --fix --ignore D,E501,S101 --select ALL main.py'
-	if ls -a | grep -v -E -x '.|..|.dockerignore|.env|.gitignore|__init__.py|Dockerfile|Makefile|assets|bin|data|dist|docs|latex|main.py|pyproject.toml|python|tests|tmp' | grep -q .; then false; fi
-	test $$(basename $$(pwd)) = "python"
-	touch $@
-
 main.py:
 	touch $@
 
@@ -57,3 +42,15 @@ pyproject.toml:
 
 tmp:
 	mkdir $@
+
+tmp/done: .dockerignore .gitignore Dockerfile tmp main.py pyproject.toml
+	docker container run \
+		$$(test -t 0 && printf '%s' '--interactive --tty') \
+		--env HOME=/usr/src/app/tmp \
+		--rm \
+		--user $$(id -u):$$(id -g) \
+		--volume $$(pwd):/usr/src/app/ \
+		$$(docker image build --quiet .) /bin/sh -c 'mypy --cache-dir tmp/mypy --ignore-missing-imports --install-types --non-interactive --strict main.py && ruff --cache-dir tmp/ruff --fix --ignore D,E501,S101 --select ALL main.py'
+	if ls -a | grep -v -E -x '.|..|.dockerignore|.env|.gitignore|__init__.py|Dockerfile|Makefile|assets|bin|data|dist|docs|latex|main.py|pyproject.toml|python|tests|tmp' | grep -q .; then false; fi
+	test $$(basename $$(pwd)) = "python"
+	touch $@
