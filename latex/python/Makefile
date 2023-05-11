@@ -20,7 +20,10 @@ clean:
 Dockerfile:
 	printf 'FROM python\nWORKDIR /usr/src/app\nCOPY pyproject.toml .\nRUN python3 -m pip install --upgrade pip && python3 -m pip install .[dev]\n' > $@
 
-bin/done: .dockerignore .gitignore Dockerfile tmp main.py pyproject.toml
+bin:
+	mkdir $@
+
+bin/done: .dockerignore .gitignore Dockerfile bin main.py pyproject.toml
 	docker container run \
 		$$(command -v nvidia-container-toolkit > /dev/null && printf '%s' '--gpus all') \
 		$$(test -t 0 && printf '%s' '--interactive --tty') \
