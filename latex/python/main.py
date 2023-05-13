@@ -398,7 +398,7 @@ class VGG(nn.Module):
     def __init__(self: "VGG", classes_num: int, features: nn.Module) -> None:
         super().__init__()
         self.features = features
-        self.classifier = nn.Sequential(nn.Linear(2560, 4096), nn.ReLU(inplace=True), nn.Dropout(), nn.Linear(4096, 4096), nn.ReLU(inplace=True), nn.Dropout(), nn.Linear(4096, classes_num)) # noqa: PD002
+        self.classifier = nn.Sequential(nn.Linear(2560, 4096), nn.ReLU(inplace=True), nn.Dropout(), nn.Linear(4096, 4096), nn.ReLU(inplace=True), nn.Dropout(), nn.Linear(4096, classes_num))
         self._initialize_weights()
 
     def _initialize_weights(self: "VGG") -> None:
