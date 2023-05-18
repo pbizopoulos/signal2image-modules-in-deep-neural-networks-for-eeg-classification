@@ -14,5 +14,5 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
 	"mypy==1.3.0",
-	"ruff==0.0.267",
+	"ruff==0.0.269",
 ]
