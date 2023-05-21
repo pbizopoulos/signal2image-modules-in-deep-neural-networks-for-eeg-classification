@@ -502,7 +502,7 @@ class Transition(nn.Sequential):
         self.add_module("pool", nn.AvgPool1d(kernel_size=2, stride=2))
 
 
-class UCIEpilepsy(Dataset):  # type: ignore[type-arg]
+class UCIEpilepsy(Dataset[tuple[torch.Tensor, torch.Tensor]]):
     def __getitem__(
         self: "UCIEpilepsy",
         index: int,
