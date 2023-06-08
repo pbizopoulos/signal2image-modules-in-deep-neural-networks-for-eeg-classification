@@ -974,9 +974,8 @@ def save_tfjs_from_torch(
         example_input,
         model_file_path / "model.onnx",
         export_params=True,
-        opset_version=11,
     )
-    model_onnx = onnx.load(model_file_path / "model.onnx")
+    model_onnx = onnx.load(model_file_path / "model.onnx")  # type: ignore[arg-type]
     model_tf = prepare(model_onnx)
     model_tf.export_graph(model_file_path / "model")
     tf_saved_model_conversion_v2.convert_tf_saved_model(
