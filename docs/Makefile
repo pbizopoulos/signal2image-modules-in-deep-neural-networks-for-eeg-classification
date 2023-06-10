@@ -43,7 +43,7 @@ index.js:
 	printf '"use strict";\nconst fs = require("fs");\nconst handler = require("serve-handler");\nconst https = require("https");\n\nconst options = {\n\tkey: fs.readFileSync("tmp/key.pem"),\n\tcert: fs.readFileSync("tmp/cert.pem"),\n};\n\nconst server = https.createServer(options, (request, response) => {\n\treturn handler(request, response);\n});\n\nif (process.env.DEBUG !== "1") {\n\tserver.listen(8000, "172.17.0.2", () => {\n\t\tconsole.log("Running at https://172.17.0.2:8000");\n\t});\n}\n' > $@
 
 package.json:
-	printf '{\n\t"dependencies": {\n\t\t"serve": "latest"\n\t},\n\t"devDependencies": {\n\t\t"css-validator": "latest",\n\t\t"html-validate": "latest",\n\t\t"js-beautify": "latest",\n\t\t"rome": "latest",\n\t\t"stylelint": "latest",\n\t\t"stylelint-config-standard": "latest",\n\t\t"stylelint-order": "latest"\n\t},\n\t"stylelint": {\n\t\t"extends": "stylelint-config-standard",\n\t\t"plugins": ["stylelint-order"],\n\t\t"rules": {\n\t\t\t"indentation": "tab",\n\t\t\t"order/properties-alphabetical-order": true\n\t\t}\n\t}\n}\n' > $@
+	printf '{\n\t"dependencies": {\n\t\t"serve": "latest"\n\t},\n\t"devDependencies": {\n\t\t"css-validator": "latest",\n\t\t"html-validate": "latest",\n\t\t"js-beautify": "latest",\n\t\t"rome": "latest",\n\t\t"stylelint": "latest",\n\t\t"stylelint-config-standard": "latest",\n\t\t"stylelint-order": "latest"\n\t},\n\t"stylelint": {\n\t\t"extends": "stylelint-config-standard",\n\t\t"plugins": ["stylelint-order"],\n\t\t"rules": {\n\t\t\t"order/properties-alphabetical-order": true\n\t\t}\n\t}\n}\n' > $@
 
 tmp:
 	mkdir $@
@@ -72,7 +72,7 @@ tmp/check-html-done: index.html
 		--volume $$(pwd):/usr/src/app/ \
 		--workdir /usr/src/app \
 		$$(docker image build --quiet .) /bin/sh -c '\
-		js-beautify --end-with-newline --indent-inner-html --indent-with-tabs --no-preserve-newlines --type html --replace index.html && \
+		js-beautify --end-with-newline --indent-inner-html --no-preserve-newlines --type html --replace index.html && \
 		html-validate index.html'
 	touch $@
 
