@@ -83,5 +83,5 @@ tmp/check-js-done: script.js
 		--workdir /usr/src/app \
 		$$(docker image build --quiet .) /bin/sh -c '\
 		rome check --apply-unsafe *.js && \
-		rome format --line-width 320 --write *.js'
+		rome format --write *.js'
 	touch $@
