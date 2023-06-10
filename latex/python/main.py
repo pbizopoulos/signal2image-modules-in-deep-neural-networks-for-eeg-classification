@@ -60,6 +60,17 @@ class Alexnet(nn.Module):
         return output
 
 
+def conv3x3(in_planes: int, out_planes: int, stride: int = 1) -> nn.Module:
+    return nn.Conv1d(
+        in_planes,
+        out_planes,
+        kernel_size=3,
+        stride=stride,
+        padding=1,
+        bias=False,
+    )
+
+
 class BasicBlock(nn.Module):
     def __init__(
         self: "BasicBlock",
@@ -89,6 +100,10 @@ class BasicBlock(nn.Module):
         out += identity
         output: torch.Tensor = self.relu(out)
         return output
+
+
+def conv1x1(in_planes: int, out_planes: int, stride: int = 1) -> nn.Module:
+    return nn.Conv1d(in_planes, out_planes, kernel_size=1, stride=stride, bias=False)
 
 
 class Bottleneck(nn.Module):
@@ -126,6 +141,29 @@ class Bottleneck(nn.Module):
         out += identity
         output: torch.Tensor = self.relu(out)
         return output
+
+
+def replace_last_layer(
+    classes_num: int,
+    model_base: nn.Module,
+    model_file_name: str,
+) -> nn.Module:
+    if model_file_name.startswith(("alexnet", "vgg")):
+        model_base.classifier[-1] = nn.Linear(  # type: ignore[assignment,operator]
+            model_base.classifier[-1].in_features,  # type: ignore[index,union-attr]
+            classes_num,
+        )
+    elif model_file_name.startswith("resnet"):
+        model_base.fc = nn.Linear(
+            model_base.fc.in_features,  # type: ignore[arg-type,union-attr]
+            classes_num,
+        )
+    elif model_file_name.startswith("densenet"):
+        model_base.classifier = nn.Linear(
+            model_base.classifier.in_features,  # type: ignore[arg-type,union-attr]
+            classes_num,
+        )
+    return model_base
 
 
 class CNNOneLayer(nn.Module):
@@ -171,24 +209,6 @@ class CNNTwoLayers(nn.Module):
         return output
 
 
-class DenseBlock(nn.Sequential):
-    def __init__(
-        self: "DenseBlock",
-        bn_size: int,
-        growth_rate: int,
-        input_features_num: int,
-        layers_num: int,
-    ) -> None:
-        super().__init__()
-        for index in range(layers_num):
-            layer = DenseLayer(
-                bn_size,
-                growth_rate,
-                input_features_num + index * growth_rate,
-            )
-            self.add_module("denselayer%d" % (index + 1), layer)
-
-
 class DenseLayer(nn.Sequential):
     def __init__(
         self: "DenseLayer",
@@ -226,6 +246,46 @@ class DenseLayer(nn.Sequential):
     def forward(self: "DenseLayer", signal: torch.Tensor) -> torch.Tensor:
         new_features = super().forward(signal)  # type: ignore[no-untyped-call]
         return torch.cat([signal, new_features], 1)
+
+
+class DenseBlock(nn.Sequential):
+    def __init__(
+        self: "DenseBlock",
+        bn_size: int,
+        growth_rate: int,
+        input_features_num: int,
+        layers_num: int,
+    ) -> None:
+        super().__init__()
+        for index in range(layers_num):
+            layer = DenseLayer(
+                bn_size,
+                growth_rate,
+                input_features_num + index * growth_rate,
+            )
+            self.add_module("denselayer%d" % (index + 1), layer)
+
+
+class Transition(nn.Sequential):
+    def __init__(
+        self: "Transition",
+        input_features_num: int,
+        output_features_num: int,
+    ) -> None:
+        super().__init__()
+        self.add_module("norm", nn.BatchNorm1d(input_features_num))
+        self.add_module("relu", nn.ReLU())
+        self.add_module(
+            "conv",
+            nn.Conv1d(
+                input_features_num,
+                output_features_num,
+                kernel_size=1,
+                stride=1,
+                bias=False,
+            ),
+        )
+        self.add_module("pool", nn.AvgPool1d(kernel_size=2, stride=2))
 
 
 class DenseNet(nn.Module):
@@ -288,6 +348,9 @@ class DenseNet(nn.Module):
 
 
 class Hook:
+    def __init__(self: "Hook") -> None:
+        self.outputs: list[nn.Module] = []
+
     def __call__(
         self: "Hook",
         module: nn.Module,  # noqa: ARG002
@@ -295,9 +358,6 @@ class Hook:
         module_out: nn.Module,
     ) -> None:
         self.outputs.append(module_out)
-
-    def __init__(self: "Hook") -> None:
-        self.outputs: list[nn.Module] = []
 
 
 class LeNet2D(nn.Module):
@@ -346,6 +406,27 @@ M = TypeVar("M", BasicBlock, Bottleneck)
 
 
 class ResNet(nn.Module):
+    def _make_layer(  # noqa: PLR0913
+        self: "ResNet",
+        block: type[M],
+        blocks: int,
+        expansion: int,
+        planes: int,
+        stride: int = 1,
+    ) -> nn.Module:
+        downsample = None
+        if stride != 1 or self.inplanes != planes * expansion:  # type: ignore[has-type]
+            downsample = nn.Sequential(
+                conv1x1(self.inplanes, planes * expansion, stride),  # type: ignore[has-type] # noqa: E501
+                nn.BatchNorm1d(planes * expansion),
+            )
+        layers = []
+        layers.append(block(downsample, self.inplanes, planes, stride))  # type: ignore[has-type] # noqa: E501
+        self.inplanes = planes * expansion
+        for _ in range(1, blocks):
+            layers.append(block(None, self.inplanes, planes))
+        return nn.Sequential(*layers)
+
     def __init__(
         self: "ResNet",
         block: type[M],
@@ -375,27 +456,6 @@ class ResNet(nn.Module):
             elif isinstance(module, nn.BatchNorm1d):
                 nn.init.constant_(module.weight, 1)
                 nn.init.constant_(module.bias, 0)
-
-    def _make_layer(  # noqa: PLR0913
-        self: "ResNet",
-        block: type[M],
-        blocks: int,
-        expansion: int,
-        planes: int,
-        stride: int = 1,
-    ) -> nn.Module:
-        downsample = None
-        if stride != 1 or self.inplanes != planes * expansion:
-            downsample = nn.Sequential(
-                conv1x1(self.inplanes, planes * expansion, stride),
-                nn.BatchNorm1d(planes * expansion),
-            )
-        layers = []
-        layers.append(block(downsample, self.inplanes, planes, stride))
-        self.inplanes = planes * expansion
-        for _ in range(1, blocks):
-            layers.append(block(None, self.inplanes, planes))
-        return nn.Sequential(*layers)
 
     def forward(self: "ResNet", signal: torch.Tensor) -> torch.Tensor:
         out = self.conv1(signal)
@@ -480,35 +540,7 @@ class Spectrogram(nn.Module):
         return out
 
 
-class Transition(nn.Sequential):
-    def __init__(
-        self: "Transition",
-        input_features_num: int,
-        output_features_num: int,
-    ) -> None:
-        super().__init__()
-        self.add_module("norm", nn.BatchNorm1d(input_features_num))
-        self.add_module("relu", nn.ReLU())
-        self.add_module(
-            "conv",
-            nn.Conv1d(
-                input_features_num,
-                output_features_num,
-                kernel_size=1,
-                stride=1,
-                bias=False,
-            ),
-        )
-        self.add_module("pool", nn.AvgPool1d(kernel_size=2, stride=2))
-
-
 class UCIEpilepsy(Dataset[tuple[torch.Tensor, torch.Tensor]]):
-    def __getitem__(
-        self: "UCIEpilepsy",
-        index: int,
-    ) -> tuple[torch.Tensor, torch.Tensor]:
-        return (self.data[index], self.target[index])
-
     def __init__(
         self: "UCIEpilepsy",
         samples_num: int,
@@ -555,25 +587,17 @@ class UCIEpilepsy(Dataset[tuple[torch.Tensor, torch.Tensor]]):
             )
         self.data.unsqueeze_(1)
 
+    def __getitem__(
+        self: "UCIEpilepsy",
+        index: int,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        return (self.data[index], self.target[index])
+
     def __len__(self: "UCIEpilepsy") -> int:
         return self.target.shape[0]
 
 
 class VGG(nn.Module):
-    def __init__(self: "VGG", classes_num: int, features: nn.Module) -> None:
-        super().__init__()
-        self.features = features
-        self.classifier = nn.Sequential(
-            nn.Linear(2560, 4096),
-            nn.ReLU(inplace=True),
-            nn.Dropout(),
-            nn.Linear(4096, 4096),
-            nn.ReLU(inplace=True),
-            nn.Dropout(),
-            nn.Linear(4096, classes_num),
-        )
-        self._initialize_weights()
-
     def _initialize_weights(self: "VGG") -> None:
         for module in self.modules():
             if isinstance(module, nn.Conv1d):
@@ -588,26 +612,25 @@ class VGG(nn.Module):
                 nn.init.normal_(module.weight, 0, 0.01)
                 nn.init.constant_(module.bias, 0)
 
+    def __init__(self: "VGG", classes_num: int, features: nn.Module) -> None:
+        super().__init__()
+        self.features = features
+        self.classifier = nn.Sequential(
+            nn.Linear(2560, 4096),
+            nn.ReLU(inplace=True),
+            nn.Dropout(),
+            nn.Linear(4096, 4096),
+            nn.ReLU(inplace=True),
+            nn.Dropout(),
+            nn.Linear(4096, classes_num),
+        )
+        self._initialize_weights()
+
     def forward(self: "VGG", signal: torch.Tensor) -> torch.Tensor:
         out = self.features(signal)
         out = out.view(out.size(0), -1)
         output: torch.Tensor = self.classifier(out)
         return output
-
-
-def conv1x1(in_planes: int, out_planes: int, stride: int = 1) -> nn.Module:
-    return nn.Conv1d(in_planes, out_planes, kernel_size=1, stride=stride, bias=False)
-
-
-def conv3x3(in_planes: int, out_planes: int, stride: int = 1) -> nn.Module:
-    return nn.Conv1d(
-        in_planes,
-        out_planes,
-        kernel_size=3,
-        stride=stride,
-        padding=1,
-        bias=False,
-    )
 
 
 def densenet121(classes_num: int) -> nn.Module:
@@ -644,6 +667,127 @@ def densenet201(classes_num: int) -> nn.Module:
         growth_rate=32,
         init_features_num=64,
     )
+
+
+def make_layers(cfg: list) -> nn.Module:  # type: ignore[type-arg]
+    layers: list[nn.Module] = []
+    in_channels = 1
+    for cfg_element in cfg:
+        if cfg_element == "M":
+            layers += [nn.MaxPool1d(kernel_size=2, stride=2)]
+        else:
+            conv1d = nn.Conv1d(in_channels, cfg_element, kernel_size=3, padding=1)
+            layers += [conv1d, nn.ReLU()]
+            in_channels = cfg_element
+    return nn.Sequential(*layers)
+
+
+def resnet101(classes_num: int) -> nn.Module:
+    return ResNet(Bottleneck, classes_num, expansion=4, layers=[3, 4, 23, 3])
+
+
+def resnet152(classes_num: int) -> nn.Module:
+    return ResNet(Bottleneck, classes_num, expansion=4, layers=[3, 8, 36, 3])
+
+
+def resnet18(classes_num: int) -> nn.Module:
+    return ResNet(BasicBlock, classes_num, expansion=1, layers=[2, 2, 2, 2])
+
+
+def resnet34(classes_num: int) -> nn.Module:
+    return ResNet(BasicBlock, classes_num, expansion=1, layers=[3, 4, 6, 3])
+
+
+def resnet50(classes_num: int) -> nn.Module:
+    return ResNet(Bottleneck, classes_num, expansion=4, layers=[3, 4, 6, 3])
+
+
+def save_tfjs_from_torch(
+    example_input: torch.Tensor,
+    model: nn.Module,
+    model_file_name: str,
+) -> None:
+    model_file_path = Path("bin") / model_file_name
+    if model_file_path.exists():
+        rmtree(model_file_path)
+    model_file_path.mkdir()
+    torch.onnx.export(
+        model.cpu(),
+        example_input,
+        model_file_path / "model.onnx",
+        export_params=True,
+    )
+    model_onnx = onnx.load(model_file_path / "model.onnx")
+    model_tf = prepare(model_onnx)
+    model_tf.export_graph(model_file_path / "model")
+    tf_saved_model_conversion_v2.convert_tf_saved_model(
+        (model_file_path / "model").as_posix(),
+        model_file_path,
+        skip_op_check=True,
+    )
+    rmtree(model_file_path / "model")
+    (model_file_path / "model.onnx").unlink()
+
+
+def vgg11(classes_num: int) -> nn.Module:
+    cfg = [64, "M", 128, "M", 256, 256, "M", 512, 512, "M", 512, 512, "M"]
+    return VGG(classes_num, make_layers(cfg))
+
+
+def vgg13(classes_num: int) -> nn.Module:
+    cfg = [64, 64, "M", 128, 128, "M", 256, 256, "M", 512, 512, "M", 512, 512, "M"]
+    return VGG(classes_num, make_layers(cfg))
+
+
+def vgg16(classes_num: int) -> nn.Module:
+    cfg = [
+        64,
+        64,
+        "M",
+        128,
+        128,
+        "M",
+        256,
+        256,
+        256,
+        "M",
+        512,
+        512,
+        512,
+        "M",
+        512,
+        512,
+        512,
+        "M",
+    ]
+    return VGG(classes_num, make_layers(cfg))
+
+
+def vgg19(classes_num: int) -> nn.Module:
+    cfg = [
+        64,
+        64,
+        "M",
+        128,
+        128,
+        "M",
+        256,
+        256,
+        256,
+        256,
+        "M",
+        512,
+        512,
+        512,
+        512,
+        "M",
+        512,
+        512,
+        512,
+        512,
+        "M",
+    ]
+    return VGG(classes_num, make_layers(cfg))
 
 
 def main() -> None:  # noqa: C901, PLR0912, PLR0915
@@ -902,150 +1046,6 @@ def main() -> None:  # noqa: C901, PLR0912, PLR0915
         plt.figure()
         plt.imsave(Path(f"bin/cnn-{class_name}.png"), data, cmap="gray")
         plt.close()
-
-
-def make_layers(cfg: list) -> nn.Module:  # type: ignore[type-arg]
-    layers: list[nn.Module] = []
-    in_channels = 1
-    for cfg_element in cfg:
-        if cfg_element == "M":
-            layers += [nn.MaxPool1d(kernel_size=2, stride=2)]
-        else:
-            conv1d = nn.Conv1d(in_channels, cfg_element, kernel_size=3, padding=1)
-            layers += [conv1d, nn.ReLU()]
-            in_channels = cfg_element
-    return nn.Sequential(*layers)
-
-
-def replace_last_layer(
-    classes_num: int,
-    model_base: nn.Module,
-    model_file_name: str,
-) -> nn.Module:
-    if model_file_name.startswith(("alexnet", "vgg")):
-        model_base.classifier[-1] = nn.Linear(  # type: ignore[assignment,operator]
-            model_base.classifier[-1].in_features,  # type: ignore[index,union-attr]
-            classes_num,
-        )
-    elif model_file_name.startswith("resnet"):
-        model_base.fc = nn.Linear(
-            model_base.fc.in_features,  # type: ignore[arg-type,union-attr]
-            classes_num,
-        )
-    elif model_file_name.startswith("densenet"):
-        model_base.classifier = nn.Linear(
-            model_base.classifier.in_features,  # type: ignore[arg-type,union-attr]
-            classes_num,
-        )
-    return model_base
-
-
-def resnet101(classes_num: int) -> nn.Module:
-    return ResNet(Bottleneck, classes_num, expansion=4, layers=[3, 4, 23, 3])
-
-
-def resnet152(classes_num: int) -> nn.Module:
-    return ResNet(Bottleneck, classes_num, expansion=4, layers=[3, 8, 36, 3])
-
-
-def resnet18(classes_num: int) -> nn.Module:
-    return ResNet(BasicBlock, classes_num, expansion=1, layers=[2, 2, 2, 2])
-
-
-def resnet34(classes_num: int) -> nn.Module:
-    return ResNet(BasicBlock, classes_num, expansion=1, layers=[3, 4, 6, 3])
-
-
-def resnet50(classes_num: int) -> nn.Module:
-    return ResNet(Bottleneck, classes_num, expansion=4, layers=[3, 4, 6, 3])
-
-
-def save_tfjs_from_torch(
-    example_input: torch.Tensor,
-    model: nn.Module,
-    model_file_name: str,
-) -> None:
-    model_file_path = Path("bin") / model_file_name
-    if model_file_path.exists():
-        rmtree(model_file_path)
-    model_file_path.mkdir()
-    torch.onnx.export(
-        model.cpu(),
-        example_input,
-        model_file_path / "model.onnx",
-        export_params=True,
-    )
-    model_onnx = onnx.load(model_file_path / "model.onnx")  # type: ignore[arg-type]
-    model_tf = prepare(model_onnx)
-    model_tf.export_graph(model_file_path / "model")
-    tf_saved_model_conversion_v2.convert_tf_saved_model(
-        (model_file_path / "model").as_posix(),
-        model_file_path,
-        skip_op_check=True,
-    )
-    rmtree(model_file_path / "model")
-    (model_file_path / "model.onnx").unlink()
-
-
-def vgg11(classes_num: int) -> nn.Module:
-    cfg = [64, "M", 128, "M", 256, 256, "M", 512, 512, "M", 512, 512, "M"]
-    return VGG(classes_num, make_layers(cfg))
-
-
-def vgg13(classes_num: int) -> nn.Module:
-    cfg = [64, 64, "M", 128, 128, "M", 256, 256, "M", 512, 512, "M", 512, 512, "M"]
-    return VGG(classes_num, make_layers(cfg))
-
-
-def vgg16(classes_num: int) -> nn.Module:
-    cfg = [
-        64,
-        64,
-        "M",
-        128,
-        128,
-        "M",
-        256,
-        256,
-        256,
-        "M",
-        512,
-        512,
-        512,
-        "M",
-        512,
-        512,
-        512,
-        "M",
-    ]
-    return VGG(classes_num, make_layers(cfg))
-
-
-def vgg19(classes_num: int) -> nn.Module:
-    cfg = [
-        64,
-        64,
-        "M",
-        128,
-        128,
-        "M",
-        256,
-        256,
-        256,
-        256,
-        "M",
-        512,
-        512,
-        512,
-        512,
-        "M",
-        512,
-        512,
-        512,
-        512,
-        "M",
-    ]
-    return VGG(classes_num, make_layers(cfg))
 
 
 if __name__ == "__main__":

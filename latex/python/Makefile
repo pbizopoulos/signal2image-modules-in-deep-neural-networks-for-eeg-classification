@@ -41,7 +41,7 @@ main.py:
 	touch $@
 
 pyproject.toml:
-	printf '[project]\nname = "UNKNOWN"\nversion = "0.0.0"\n\n[project.optional-dependencies]\ndev = [\n\t"black",\n\t"mypy",\n\t"ruff",\n]\n' > $@
+	printf '[project]\nname = "UNKNOWN"\nversion = "0.0.0"\n\n[project.optional-dependencies]\ndev = [\n\t"black",\n\t"mypy",\n\t"ruff",\n\t"ssort",\n]\n' > $@
 
 tmp:
 	mkdir $@
@@ -53,7 +53,7 @@ tmp/done: .dockerignore .gitignore Dockerfile tmp main.py pyproject.toml
 		--rm \
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/usr/src/app/ \
-		$$(docker image build --quiet .) /bin/sh -c 'black main.py && ruff --cache-dir tmp/ruff --fix --ignore D,S101 --select ALL main.py && mypy --cache-dir tmp/mypy --ignore-missing-imports --install-types --non-interactive --strict main.py'
+		$$(docker image build --quiet .) /bin/sh -c 'ssort main.py && black main.py && ruff --cache-dir tmp/ruff --fix --ignore D,S101 --select ALL main.py && mypy --cache-dir tmp/mypy --ignore-missing-imports --install-types --non-interactive --strict main.py'
 	if ls -a | grep -v -E -x '.|..|.dockerignore|.env|.gitignore|__init__.py|Dockerfile|Makefile|assets|bin|data|dist|docs|latex|main.py|pyproject.toml|python|tests|tmp' | grep -q .; then false; fi
 	test $$(basename $$(pwd)) = "python"
 	touch $@
