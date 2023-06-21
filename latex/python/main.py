@@ -503,8 +503,7 @@ class SignalAsImage(nn.Module):
                 range(signal.shape[-1]),
             ] = 255
         out = torch.cat((out, out, out), 1)
-        out = self.model_base(out)
-        return out
+        return self.model_base(out)  # type: ignore[no-any-return]
 
 
 class Spectrogram(nn.Module):
@@ -536,8 +535,7 @@ class Spectrogram(nn.Module):
                 mode="bilinear",
             )
         out = torch.cat((out, out, out), 1)
-        out = self.model_base(out)
-        return out
+        return self.model_base(out)  # type: ignore[no-any-return]
 
 
 class UCIEpilepsy(Dataset[tuple[torch.Tensor, torch.Tensor]]):
