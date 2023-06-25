@@ -6,16 +6,16 @@ cmd = python3 main.py
 
 all: bin/done
 
-check: tmp/done
+check: bin/check-done
 
 clean:
-	rm -rf bin/ data/ tmp/
+	rm -rf bin/
 
 .dockerignore:
 	printf '*\n!pyproject.toml\n' > $@
 
 .gitignore:
-	printf '.env\nbin/\ndata/\ntmp/\n' > $@
+	printf '.env\nbin/\n' > $@
 
 Dockerfile:
 	printf 'FROM python\nWORKDIR /usr/src/app\nCOPY pyproject.toml .\nRUN python3 -m pip install --upgrade pip && python3 -m pip install .[dev]\n' > $@
@@ -29,7 +29,7 @@ bin/done: .dockerignore .gitignore Dockerfile bin main.py pyproject.toml
 		$$(test -t 0 && printf '%s' '--interactive --tty') \
 		--detach-keys 'ctrl-^,ctrl-^' \
 		--env DEBUG=$(DEBUG) \
-		--env HOME=/usr/src/app/tmp \
+		--env HOME=/usr/src/app/bin \
 		--env PYTHONDONTWRITEBYTECODE=1 \
 		--rm \
 		--user $$(id -u):$$(id -g) \
@@ -43,17 +43,14 @@ main.py:
 pyproject.toml:
 	printf '[project]\nname = "UNKNOWN"\nversion = "0.0.0"\n\n[project.optional-dependencies]\ndev = [\n\t"black",\n\t"mypy",\n\t"ruff",\n\t"ssort",\n]\n' > $@
 
-tmp:
-	mkdir $@
-
-tmp/done: .dockerignore .gitignore Dockerfile tmp main.py pyproject.toml
+bin/check-done: .dockerignore .gitignore Dockerfile bin main.py pyproject.toml
 	docker container run \
 		$$(test -t 0 && printf '%s' '--interactive --tty') \
-		--env HOME=/usr/src/app/tmp \
+		--env HOME=/usr/src/app/bin \
 		--rm \
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/usr/src/app/ \
-		$$(docker image build --quiet .) /bin/sh -c 'ssort main.py && black main.py && ruff --cache-dir tmp/ruff --fix --ignore D,S101 --select ALL main.py && mypy --cache-dir tmp/mypy --ignore-missing-imports --install-types --non-interactive --strict main.py'
-	if ls -a | grep -v -E -x '.|..|.dockerignore|.env|.gitignore|__init__.py|Dockerfile|Makefile|assets|bin|data|dist|docs|latex|main.py|pyproject.toml|python|tests|tmp' | grep -q .; then false; fi
+		$$(docker image build --quiet .) /bin/sh -c 'ssort main.py && black main.py && ruff --cache-dir bin/ruff --fix --ignore D,S101 --select ALL main.py && mypy --cache-dir bin/mypy --ignore-missing-imports --install-types --non-interactive --strict main.py'
+	if ls -a | grep -v -E -x '.|..|.dockerignore|.env|.gitignore|__init__.py|Dockerfile|Makefile|assets|bin|dist|docs|latex|main.py|pyproject.toml|python|tests' | grep -q .; then false; fi
 	test $$(basename $$(pwd)) = "python"
 	touch $@

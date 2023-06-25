@@ -4,8 +4,8 @@ const handler = require("serve-handler");
 const https = require("https");
 
 const options = {
-	key: fs.readFileSync("tmp/key.pem"),
-	cert: fs.readFileSync("tmp/cert.pem"),
+	key: fs.readFileSync("bin/key.pem"),
+	cert: fs.readFileSync("bin/cert.pem"),
 };
 
 const server = https.createServer(options, (request, response) => {

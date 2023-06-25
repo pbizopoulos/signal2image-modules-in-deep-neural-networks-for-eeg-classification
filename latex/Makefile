@@ -4,18 +4,18 @@ cmd = /bin/sh -c 'latexmk -outdir=bin/ -pdf ms.tex && touch bin/ms.bbl && cp bin
 
 all: bin bin/done
 
-check: .dockerignore .gitignore Dockerfile bin/done tmp tmp/check-bib-done tmp/check-tex-done
-	if ls -a | grep -v -E -x '.|..|.dockerignore|.gitignore|Dockerfile|Makefile|assets|bin|dist|docs|latex|ms.bib|ms.tex|python|tmp' | grep -q .; then false; fi
+check: .dockerignore .gitignore Dockerfile bin/done bin/check-bib-done bin/check-tex-done
+	if ls -a | grep -v -E -x '.|..|.dockerignore|.gitignore|Dockerfile|Makefile|assets|bin|dist|docs|latex|ms.bib|ms.tex|python' | grep -q .; then false; fi
 	test $$(basename $$(pwd)) = "latex"
 
 clean:
-	rm -rf bin/ tmp/
+	rm -rf bin/
 
 .dockerignore:
 	printf '*\n' > $@
 
 .gitignore:
-	printf 'bin/\ntmp/\n' > $@
+	printf 'bin/\n' > $@
 
 Dockerfile:
 	printf 'FROM texlive/texlive\nRUN apt-get update && apt-get install -y python3-pip\nRUN python3 -m pip install --break-system-packages rebiber\n' > $@
@@ -34,10 +34,7 @@ bin/done: .dockerignore .gitignore Dockerfile bin ms.bib ms.tex
 		$$(docker image build --quiet .) $(cmd)
 	touch $@
 
-tmp:
-	mkdir $@
-
-tmp/check-bib-done: ms.bib
+bin/check-bib-done: ms.bib
 	docker container run \
 		--rm \
 		--user $$(id -u):$$(id -g) \
@@ -48,7 +45,7 @@ tmp/check-bib-done: ms.bib
 		rebiber --input_bib ms.bib --remove url'
 	touch $@
 
-tmp/check-tex-done: ms.tex
+bin/check-tex-done: ms.tex
 	docker container run \
 		--rm \
 		--user $$(id -u):$$(id -g) \
