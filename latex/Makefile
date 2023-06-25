@@ -1,6 +1,6 @@
 .POSIX:
 
-cmd = /bin/sh -c 'latexmk -outdir=tmp/ -pdf ms.tex && touch tmp/ms.bbl && cp tmp/ms.bbl . && tar cf bin/tex.tar ms.bbl ms.bib ms.tex $$(grep "^INPUT ./" tmp/ms.fls | uniq | cut -b 9-) && rm ms.bbl && mv tmp/ms.pdf bin/ms.pdf'
+cmd = /bin/sh -c 'latexmk -outdir=bin/ -pdf ms.tex && touch bin/ms.bbl && cp bin/ms.bbl . && tar cf bin/tex.tar ms.bbl ms.bib ms.tex $$(grep "^INPUT ./" bin/ms.fls | uniq | cut -b 9-) && rm ms.bbl'
 
 all: bin bin/done
 
@@ -44,7 +44,7 @@ tmp/check-bib-done: ms.bib
 		--volume $$(pwd):/usr/src/app/ \
 		--workdir /usr/src/app \
 		$$(docker image build --quiet .) /bin/sh -c '\
-		checkcites tmp/ms.aux && \
+		checkcites bin/ms.aux && \
 		rebiber --input_bib ms.bib --remove url'
 	touch $@
 
