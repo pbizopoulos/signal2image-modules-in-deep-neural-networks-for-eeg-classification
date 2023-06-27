@@ -544,7 +544,7 @@ class UCIEpilepsy(Dataset[tuple[torch.Tensor, torch.Tensor]]):
         samples_num: int,
         train_validation_test: str,
     ) -> None:
-        data_file_path = Path("bin/data.csv")
+        data_file_path = Path("tmp/data.csv")
         if not data_file_path.is_file():
             with data_file_path.open("wb") as file:
                 response = requests.get(
@@ -705,7 +705,7 @@ def save_tfjs_from_torch(
     model: nn.Module,
     model_file_name: str,
 ) -> None:
-    model_file_path = Path("bin") / model_file_name
+    model_file_path = Path("tmp") / model_file_name
     if model_file_path.exists():
         rmtree(model_file_path)
     model_file_path.mkdir()
@@ -931,7 +931,7 @@ def main() -> None:  # noqa: C901, PLR0912, PLR0915
                 accuracy_validation = 100 * predictions_correct_num / predictions_num
                 if accuracy_validation > accuracy_validation_best:
                     accuracy_validation_best = accuracy_validation
-                    model_file_path = Path(f"bin/{model_file_name}.pt")
+                    model_file_path = Path(f"tmp/{model_file_name}.pt")
                     torch.save(model.state_dict(), model_file_path)
             model.load_state_dict(torch.load(model_file_path))
             loss_test_sum = 0
@@ -962,9 +962,9 @@ def main() -> None:  # noqa: C901, PLR0912, PLR0915
                 if environ["DEBUG"] != "1":
                     dist_model_file_path = Path("dist") / model_file_name
                     rmtree(dist_model_file_path)
-                    move(Path("bin") / model_file_name, Path("dist") / model_file_name)
+                    move(Path("tmp") / model_file_name, Path("dist") / model_file_name)
             if environ["DEBUG"] == "1" and model_file_name != "alexnet-cnn-one-layer":
-                Path(f"bin/{model_file_name}.pt").unlink()
+                Path(f"tmp/{model_file_name}.pt").unlink()
     styler = pd.DataFrame(
         accuracy_test_array,
         index=[
@@ -978,8 +978,8 @@ def main() -> None:  # noqa: C901, PLR0912, PLR0915
     ).style
     styler.format(precision=1)
     styler.highlight_max(props="bfseries: ;")
-    styler.to_latex("bin/results.tex", hrules=True)
-    dataset = pd.read_csv("bin/data.csv")
+    styler.to_latex("tmp/results.tex", hrules=True)
+    dataset = pd.read_csv("tmp/data.csv")
     signals_all = dataset.drop(columns=["Unnamed: 0", "y"])
     classes_all = dataset["y"]
     signals_all = torch.tensor(signals_all.to_numpy(), dtype=torch.float)
@@ -992,7 +992,7 @@ def main() -> None:  # noqa: C901, PLR0912, PLR0915
         plt.axis("off")
         plt.xlim([0, signals_all.shape[-1] - 1])
         plt.ylim([-1000, 1000])
-        plt.savefig(f"bin/signal-{class_name}.png")
+        plt.savefig(f"tmp/signal-{class_name}.png")
         plt.close()
         signals_all_min = -1000
         signals_all_max = 1000
@@ -1003,7 +1003,7 @@ def main() -> None:  # noqa: C901, PLR0912, PLR0915
         for index in range(signals_all.shape[-1]):
             data[signals_all.shape[-1] - 1 - signal[index], index] = 255
         plt.figure()
-        plt.imsave(f"bin/signal-as-image-{class_name}.png", data, cmap="gray")
+        plt.imsave(f"tmp/signal-as-image-{class_name}.png", data, cmap="gray")
         plt.close()
         f_array, t_array, spectrogram_array = spectrogram(
             signals_all[signal_index],
@@ -1020,10 +1020,10 @@ def main() -> None:  # noqa: C901, PLR0912, PLR0915
             ),
         )
         plt.figure()
-        plt.imsave(Path(f"bin/spectrogram-{class_name}.png"), data, cmap="gray")
+        plt.imsave(Path(f"tmp/spectrogram-{class_name}.png"), data, cmap="gray")
         plt.close()
         model = CNNOneLayer(classes_num, models.alexnet(), "alexnet-cnn-one-layer")
-        model.load_state_dict(torch.load(Path("bin/alexnet-cnn-one-layer.pt")))
+        model.load_state_dict(torch.load(Path("tmp/alexnet-cnn-one-layer.pt")))
         signal = signals_all[signal_index].unsqueeze(0)
         hook = Hook()
         model.conv.register_forward_hook(hook)  # type: ignore[arg-type]
@@ -1036,7 +1036,7 @@ def main() -> None:  # noqa: C901, PLR0912, PLR0915
             ),
         )
         plt.figure()
-        plt.imsave(Path(f"bin/cnn-{class_name}.png"), data, cmap="gray")
+        plt.imsave(Path(f"tmp/cnn-{class_name}.png"), data, cmap="gray")
         plt.close()
 
 

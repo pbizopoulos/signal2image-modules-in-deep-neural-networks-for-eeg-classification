@@ -1,29 +1,29 @@
 .POSIX:
 
-cmd = /bin/sh -c 'latexmk -outdir=bin/ -pdf ms.tex && touch bin/ms.bbl && cp bin/ms.bbl . && tar cf bin/tex.tar ms.bbl ms.bib ms.tex $$(grep "^INPUT ./" bin/ms.fls | uniq | cut -b 9-) && rm ms.bbl'
+cmd = /bin/sh -c 'latexmk -outdir=tmp/ -pdf ms.tex && touch tmp/ms.bbl && cp tmp/ms.bbl . && tar cf tmp/tex.tar ms.bbl ms.bib ms.tex $$(grep "^INPUT ./" tmp/ms.fls | uniq | cut -b 9-) && rm ms.bbl'
 
-all: bin bin/done
+all: tmp tmp/done
 
-check: .dockerignore .gitignore Dockerfile bin/done bin/check-bib-done bin/check-tex-done
-	if ls -a | grep -v -E -x '.|..|.dockerignore|.gitignore|Dockerfile|Makefile|assets|bin|dist|docs|latex|ms.bib|ms.tex|python' | grep -q .; then false; fi
+check: .dockerignore .gitignore Dockerfile tmp/done tmp/check-bib-done tmp/check-tex-done
+	if ls -a | grep -v -E -x '.|..|.dockerignore|.gitignore|Dockerfile|Makefile|assets|dist|docs|latex|ms.bib|ms.tex|python|tmp' | grep -q .; then false; fi
 	test $$(basename $$(pwd)) = "latex"
 
 clean:
-	rm -rf bin/
+	rm -rf tmp/
 
 .dockerignore:
 	printf '*\n' > $@
 
 .gitignore:
-	printf 'bin/\n' > $@
+	printf 'tmp/\n' > $@
 
 Dockerfile:
 	printf 'FROM texlive/texlive\nRUN apt-get update && apt-get install -y python3-pip\nRUN python3 -m pip install --break-system-packages rebiber\n' > $@
 
-bin:
+tmp:
 	mkdir $@
 
-bin/done: .dockerignore .gitignore Dockerfile bin ms.bib ms.tex
+tmp/done: .dockerignore .gitignore Dockerfile ms.bib ms.tex tmp
 	docker container run \
 		$$(test -t 0 && printf '%s' '--interactive --tty') \
 		--detach-keys 'ctrl-^,ctrl-^' \
@@ -34,18 +34,18 @@ bin/done: .dockerignore .gitignore Dockerfile bin ms.bib ms.tex
 		$$(docker image build --quiet .) $(cmd)
 	touch $@
 
-bin/check-bib-done: ms.bib
+tmp/check-bib-done: ms.bib
 	docker container run \
 		--rm \
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/usr/src/app/ \
 		--workdir /usr/src/app \
 		$$(docker image build --quiet .) /bin/sh -c '\
-		checkcites bin/ms.aux && \
+		checkcites tmp/ms.aux && \
 		rebiber --input_bib ms.bib --remove url'
 	touch $@
 
-bin/check-tex-done: ms.tex
+tmp/check-tex-done: ms.tex
 	docker container run \
 		--rm \
 		--user $$(id -u):$$(id -g) \
