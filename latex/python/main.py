@@ -424,7 +424,7 @@ class ResNet(nn.Module):
         layers.append(block(downsample, self.inplanes, planes, stride))  # type: ignore[has-type] # noqa: E501
         self.inplanes = planes * expansion
         for _ in range(1, blocks):
-            layers.append(block(None, self.inplanes, planes))
+            layers.append(block(None, self.inplanes, planes))  # noqa: PERF401
         return nn.Sequential(*layers)
 
     def __init__(
