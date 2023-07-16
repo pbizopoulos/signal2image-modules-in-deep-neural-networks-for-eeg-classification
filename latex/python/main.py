@@ -353,8 +353,8 @@ class Hook:
 
     def __call__(
         self: "Hook",
-        module: nn.Module,  # noqa: ARG002
-        module_in: nn.Module,  # noqa: ARG002
+        _: nn.Module,
+        __: nn.Module,
         module_out: nn.Module,
     ) -> None:
         self.outputs.append(module_out)
@@ -420,8 +420,7 @@ class ResNet(nn.Module):
                 conv1x1(self.inplanes, planes * expansion, stride),  # type: ignore[has-type] # noqa: E501
                 nn.BatchNorm1d(planes * expansion),
             )
-        layers = []
-        layers.append(block(downsample, self.inplanes, planes, stride))  # type: ignore[has-type] # noqa: E501
+        layers = [block(downsample, self.inplanes, planes, stride)]  # type: ignore[has-type] # noqa: E501
         self.inplanes = planes * expansion
         for _ in range(1, blocks):
             layers.append(block(None, self.inplanes, planes))  # noqa: PERF401
