@@ -28,9 +28,9 @@ tmp/done: .dockerignore .gitignore Dockerfile main.py pyproject.toml tmp
 		$$(command -v nvidia-container-toolkit > /dev/null && printf '%s' '--gpus all') \
 		$$(test -t 0 && printf '%s' '--interactive --tty') \
 		--detach-keys 'ctrl-^,ctrl-^' \
-		--env DEBUG=$(DEBUG) \
 		--env HOME=/usr/src/app/tmp \
 		--env PYTHONDONTWRITEBYTECODE=1 \
+		--env PYTHONOPTIMIZE=$(shell [ "$(DEBUG)" = "0" ] && echo "1" || echo "0") \
 		--rm \
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/usr/src/app/ \
