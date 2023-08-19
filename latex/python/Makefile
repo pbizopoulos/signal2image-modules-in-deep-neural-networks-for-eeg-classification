@@ -20,6 +20,12 @@ clean:
 Dockerfile:
 	printf 'FROM python\nWORKDIR /usr/src/app\nCOPY pyproject.toml .\nRUN python3 -m pip install --upgrade pip && python3 -m pip install .[dev]\n' > $@
 
+main.py:
+	touch $@
+
+pyproject.toml:
+	printf '[project]\nname = "UNKNOWN"\nversion = "0.0.0"\n\n[project.optional-dependencies]\ndev = [\n\t"black",\n\t"mypy",\n\t"ruff",\n\t"ssort",\n]\n' > $@
+
 tmp:
 	mkdir $@
 
@@ -36,12 +42,6 @@ tmp/done: .dockerignore .gitignore Dockerfile main.py pyproject.toml tmp
 		--volume $$(pwd):/usr/src/app/ \
 		$$(docker image build --quiet .) $(cmd)
 	touch $@
-
-main.py:
-	touch $@
-
-pyproject.toml:
-	printf '[project]\nname = "UNKNOWN"\nversion = "0.0.0"\n\n[project.optional-dependencies]\ndev = [\n\t"black",\n\t"mypy",\n\t"ruff",\n\t"ssort",\n]\n' > $@
 
 tmp/check-done: .dockerignore .gitignore Dockerfile main.py pyproject.toml tmp
 	docker container run \
