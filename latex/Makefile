@@ -20,6 +20,12 @@ clean:
 Dockerfile:
 	printf 'FROM texlive/texlive\nRUN apt-get update && apt-get install -y python3-pip\nRUN python3 -m pip install --break-system-packages rebiber\n' > $@
 
+ms.bib:
+	touch $@
+
+ms.tex:
+	printf "\\\documentclass{article}\n\n\\\begin{document}\nTitle\n\\\end{document}\n" > $@
+
 tmp:
 	mkdir $@
 
@@ -55,9 +61,3 @@ tmp/check-tex-done: ms.tex
 		chktex ms.tex && \
 		lacheck ms.tex'
 	touch $@
-
-ms.bib:
-	touch $@
-
-ms.tex:
-	printf "\\\documentclass{article}\n\n\\\begin{document}\nTitle\n\\\end{document}\n" > $@
