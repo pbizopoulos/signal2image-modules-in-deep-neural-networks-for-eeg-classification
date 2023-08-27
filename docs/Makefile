@@ -7,7 +7,7 @@ cmd = node index.js
 all: tmp/done
 
 check: .dockerignore .gitignore Dockerfile package.json tmp
-	$(MAKE) $$(test -s style.css && printf 'tmp/check-css-done') $$(test -s index.html && printf 'tmp/check-html-done') $$(test -s script.js && printf 'tmp/check-js-done')
+	$(MAKE) $$(test -s style.css && printf 'tmp/check-css-done') $$(test -s index.html && printf 'tmp/check-html-done') $$(test -s script.js && printf 'tmp/check-js-done') tmp/check-json-done
 	if ls -a | grep -v -E -x '.|..|.dockerignore|.env|.gitignore|CNAME|Dockerfile|Makefile|assets|dist|docs|index.html|index.js|index.py|index.toml|package.json|python|script.js|style.css|tmp' | grep -q .; then false; fi
 	test $$(basename $$(pwd)) = "docs"
 
@@ -57,6 +57,16 @@ tmp/check-js-done: index.js script.js
 		$$(docker image build --quiet .) /bin/sh -c '\
 		rome check --apply-unsafe *.js && \
 		rome format --write *.js'
+	touch $@
+
+tmp/check-json-done: package.json
+	docker container run \
+		--rm \
+		--volume $$(pwd):/usr/src/app/ \
+		--workdir /usr/src/app \
+		$$(docker image build --quiet .) /bin/sh -c '\
+		rome check --apply-unsafe package.json && \
+		rome format --write package.json'
 	touch $@
 
 tmp/done: index.js tmp tmp/fullchain.pem
