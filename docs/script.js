@@ -4,7 +4,7 @@ const canvasWidth = 256;
 const classNameArray = ["Open", "Closed", "Healthy", "Tumor", "Epilepsy"];
 const inputDiv = document.getElementById("input-div");
 const inputFileName =
-	"https://raw.githubusercontent.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/main/latex/python/assets/eeg-classification-example-data.txt";
+	"https://raw.githubusercontent.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/main/latex/python/misc/eeg-classification-example-data.txt";
 const modelDownloadDiv = document.getElementById("model-download-div");
 const modelDownloadProgress = document.getElementById(
 	"model-download-progress",

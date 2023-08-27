@@ -8,7 +8,7 @@ all: tmp/done
 
 check: .dockerignore .gitignore Dockerfile package.json tmp
 	$(MAKE) $$(test -s style.css && printf 'tmp/check-css-done') $$(test -s index.html && printf 'tmp/check-html-done') $$(test -s script.js && printf 'tmp/check-js-done') tmp/check-json-done
-	if ls -a | grep -v -E -x '.|..|.dockerignore|.env|.gitignore|CNAME|Dockerfile|Makefile|assets|dist|docs|index.html|index.js|index.py|index.toml|package.json|python|script.js|style.css|tmp' | grep -q .; then false; fi
+	if ls -a | grep -v -E -x '.|..|.dockerignore|.env|.gitignore|CNAME|Dockerfile|Makefile|dist|docs|index.html|index.js|index.py|index.toml|misc|package.json|python|script.js|style.css|tmp' | grep -q .; then false; fi
 	test $$(basename $$(pwd)) = "docs"
 
 clean:
