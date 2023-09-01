@@ -1,4 +1,4 @@
-FROM node:20.5.0
+FROM node:20.5.1
 RUN apt-get update && apt-get install -y jq
 COPY package.json /usr/src/
 RUN npm install --omit=dev --prefix /usr/src
