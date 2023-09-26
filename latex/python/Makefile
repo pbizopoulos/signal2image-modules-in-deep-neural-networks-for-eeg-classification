@@ -51,6 +51,6 @@ tmp/check-done: .dockerignore .gitignore Dockerfile main.py pyproject.toml tmp
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/usr/src/app/ \
 		$$(docker image build --quiet .) /bin/sh -c 'ssort main.py && black main.py && ruff --cache-dir tmp/ruff --fix --ignore D,S101 --select ALL main.py && mypy --cache-dir tmp/mypy --ignore-missing-imports --install-types --non-interactive --strict main.py && if [ -d "templates/" ]; then djlint templates/ --lint --profile=jinja --quiet --reformat; fi'
-	if ls -a | grep -v -E -x '.|..|.dockerignore|.env|.gitignore|__init__.py|Dockerfile|Makefile|docs|latex|main.py|misc|prod|pyproject.toml|python|static|templates|tests|tmp' | grep -q .; then false; fi
+	if ls -a | grep -v -E -x '.|..|.dockerignore|.env|.gitignore|__init__.py|Dockerfile|Makefile|docs|latex|main.py|misc|prod|pyproject.toml|python|static|templates|tmp' | grep -q .; then false; fi
 	test $$(basename $$(pwd)) = "python"
 	touch $@
