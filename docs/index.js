@@ -1,6 +1,8 @@
 "use strict";
+const dns = require("dns");
 const fs = require("fs");
 const https = require("https");
+const os = require("os");
 const serveHandler = require("serve-handler");
 const server = https.createServer(
 	{
@@ -12,8 +14,10 @@ const server = https.createServer(
 	},
 );
 if (process.env.DEBUG !== "1") {
-	server.listen(8000, "172.17.0.2", () => {
-		console.log("Running at https://172.17.0.2:8000");
+	server.listen(443, "0.0.0.0", () => {
+		dns.lookup(os.hostname(), (err, address) => {
+			console.log(`Container IP address: https://${address}`);
+		});
 		process.on("SIGINT", () => {
 			process.exit(0);
 		});
