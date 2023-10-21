@@ -960,9 +960,9 @@ def main() -> None:  # noqa: C901, PLR0912, PLR0915
                     model_file_name,
                 )
                 if not __debug__:
-                    model_file_path = Path("prod") / model_file_name
+                    model_file_path = Path("prm") / model_file_name
                     rmtree(model_file_path)
-                    move(Path("tmp") / model_file_name, Path("prod") / model_file_name)
+                    move(Path("tmp") / model_file_name, Path("prm") / model_file_name)
             if __debug__ and model_file_name != "alexnet-cnn-one-layer":
                 Path(f"tmp/{model_file_name}.pt").unlink()
     styler = pd.DataFrame(
