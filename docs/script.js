@@ -43,7 +43,7 @@ function drawSignal(text) {
 async function loadModel(predictFunction) {
 	const loadModelFunction = tf.loadGraphModel;
 	model = await loadModelFunction(
-		"https://raw.githubusercontent.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/main/latex/python/prod/resnet34-1D/model.json",
+		"https://raw.githubusercontent.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/main/latex/python/prm/resnet34-1D/model.json",
 		{
 			onProgress: (fraction) => {
 				modelDownloadProgress.value = fraction;
