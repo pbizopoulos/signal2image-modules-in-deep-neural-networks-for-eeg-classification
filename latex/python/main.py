@@ -150,18 +150,15 @@ def replace_last_layer(
     model_file_name: str,
 ) -> nn.Module:
     if model_file_name.startswith(("alexnet", "vgg")):
-        model_base.classifier[-1] = nn.Linear(  # type: ignore[assignment,operator]
-            model_base.classifier[-1].in_features,  # type: ignore[index,union-attr]
+        model_base.classifier[-1] = nn.Linear(
+            model_base.classifier[-1].in_features,
             classes_num,
         )
     elif model_file_name.startswith("resnet"):
-        model_base.fc = nn.Linear(
-            model_base.fc.in_features,  # type: ignore[arg-type,union-attr]
-            classes_num,
-        )
+        model_base.fc = nn.Linear(model_base.fc.in_features, classes_num)
     elif model_file_name.startswith("densenet"):
         model_base.classifier = nn.Linear(
-            model_base.classifier.in_features,  # type: ignore[arg-type,union-attr]
+            model_base.classifier.in_features,
             classes_num,
         )
     return model_base
@@ -418,10 +415,10 @@ class ResNet(nn.Module):
         downsample = None
         if stride != 1 or self.inplanes != planes * expansion:  # type: ignore[has-type]
             downsample = nn.Sequential(
-                conv1x1(self.inplanes, planes * expansion, stride),  # type: ignore[has-type] # noqa: E501
+                conv1x1(self.inplanes, planes * expansion, stride),  # type: ignore[has-type]
                 nn.BatchNorm1d(planes * expansion),
             )
-        layers = [block(downsample, self.inplanes, planes, stride)]  # type: ignore[has-type] # noqa: E501
+        layers = [block(downsample, self.inplanes, planes, stride)]  # type: ignore[has-type]
         self.inplanes = planes * expansion
         for _ in range(1, blocks):
             layers.append(block(None, self.inplanes, planes))  # noqa: PERF401
