@@ -1,4 +1,3 @@
-"use strict";
 const canvasHeight = 256;
 const canvasWidth = 256;
 const classNameArray = ["Open", "Closed", "Healthy", "Tumor", "Epilepsy"];

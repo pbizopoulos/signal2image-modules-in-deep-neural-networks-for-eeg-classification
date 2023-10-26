@@ -1,4 +1,3 @@
-"use strict";
 const dns = require("dns");
 const fs = require("fs");
 const https = require("https");
