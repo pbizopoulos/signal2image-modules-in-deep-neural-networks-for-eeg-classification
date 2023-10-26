@@ -24,7 +24,7 @@ main.py:
 	touch $@
 
 pyproject.toml:
-	printf '[project]\nname = "UNKNOWN"\nversion = "0.0.0"\n\n[project.optional-dependencies]\ndev = ["djlint","mypy","ruff","ssort","toml-sort"]' > $@
+	printf '[project]\nname = "UNKNOWN"\nversion = "0.0.0"\n\n[project.optional-dependencies]\ndev = ["coverage","djlint","mypy","ruff","ssort","toml-sort"]' > $@
 
 tmp:
 	mkdir $@
@@ -47,10 +47,11 @@ tmp/check-done: .dockerignore .gitignore Dockerfile main.py pyproject.toml tmp
 	docker container run \
 		$$(test -t 0 && printf '%s' '--interactive --tty') \
 		--env HOME=/usr/src/app/tmp \
+		--env PYTHONDONTWRITEBYTECODE=1 \
 		--rm \
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/usr/src/app/ \
-		$$(docker image build --quiet .) /bin/sh -c 'toml-sort --all --in-place pyproject.toml && ssort main.py && ruff format --cache-dir tmp/ruff main.py && ruff --cache-dir tmp/ruff --fix --ignore D,S101 --select ALL main.py && mypy --cache-dir tmp/mypy --ignore-missing-imports --install-types --non-interactive --strict main.py && if [ -d "templates/" ]; then djlint templates/ --lint --profile=jinja --quiet --reformat; fi'
+		$$(docker image build --quiet .) /bin/sh -c 'toml-sort --all --in-place pyproject.toml && ssort main.py && ruff format --cache-dir tmp/ruff main.py && ruff --cache-dir tmp/ruff --fix --ignore D,S101 --select ALL main.py && mypy --cache-dir tmp/mypy --ignore-missing-imports --install-types --non-interactive --strict main.py && if [ -d "templates/" ]; then djlint templates/ --lint --profile=jinja --quiet --reformat; fi && [ $(DEBUG) -eq 0 ] && (coverage run --data-file=tmp/.coverage main.py && coverage html --data-file=tmp/.coverage --directory tmp/ --ignore-errors) || exit 0'
 	if ls -a | grep -v -E -x '.|..|.dockerignore|.env|.gitignore|Dockerfile|Makefile|main.py|prm|pyproject.toml|python|static|templates|tmp' | grep -q .; then false; fi
 	test $$(basename $$(pwd)) = "python"
 	touch $@
