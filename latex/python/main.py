@@ -1,29 +1,24 @@
 from __future__ import annotations
 
-import numbers
 from pathlib import Path
 from shutil import move, rmtree
-from typing import TYPE_CHECKING, TypeVar
+from typing import TypeVar
 
-import nobuco
 import numpy as np
+import onnx
 import pandas as pd
 import requests
-import tensorflowjs as tfjs
 import torch
 from matplotlib import pyplot as plt
-from nobuco import ChannelOrder, ChannelOrderingStrategy
+from onnx_tf.backend import prepare
 from PIL import Image
 from scipy.signal import spectrogram
-from tensorflow import keras
+from tensorflowjs.converters import tf_saved_model_conversion_v2
 from torch import nn
 from torch.nn import functional
 from torch.optim import Adam
 from torch.utils.data import DataLoader, Dataset
 from torchvision import models
-
-if TYPE_CHECKING:
-    from torch.types import _bool, _int, _size
 
 
 class Alexnet(nn.Module):
@@ -702,57 +697,6 @@ def resnet50(classes_num: int) -> nn.Module:
     return ResNet(Bottleneck, classes_num, expansion=4, layers=[3, 4, 6, 3])
 
 
-@nobuco.converter(
-    torch.max_pool1d,
-    channel_ordering_strategy=ChannelOrderingStrategy.FORCE_TENSORFLOW_ORDER,
-)
-def max_pool_1d(
-    input_: torch.Tensor,
-    kernel_size: _int | _size,
-    stride: _int | _size = (),
-    padding: _int | _size = 0,
-    dilation: _int | _size = 1,
-    ceil_mode: _bool = False,
-):
-    if isinstance(kernel_size, numbers.Number):
-        kernel_size = (kernel_size, kernel_size)
-    if isinstance(dilation, numbers.Number):
-        dilation = (dilation, dilation)
-    if isinstance(padding, numbers.Number):
-        padding = (padding, padding)
-    pad_layer = keras.layers.ZeroPadding1D(padding) if padding != (0, 0) else None
-
-    def func(input_, kernel_size, stride=(), padding=0, dilation=1, ceil_mode=False):
-        if pad_layer is not None:
-            input_ = pad_layer(input_)
-        return keras.layers.MaxPool1D(
-            pool_size=kernel_size,
-            strides=stride,
-            padding="valid",
-        )(input_)
-
-    return func
-
-
-@nobuco.converter(
-    functional.adaptive_avg_pool1d,
-    channel_ordering_strategy=ChannelOrderingStrategy.FORCE_TENSORFLOW_ORDER,
-)
-def adaptiveAvgPool1D(input_: torch.Tensor, output_size):
-    if output_size in ((1, 1), 1):
-
-        def func(input_, output_size):
-            return keras.layers.GlobalAvgPool1D(keepdims=True)(input_)
-    else:
-
-        def func(input_, output_size):
-            import tensorflow_addons as tfa
-
-            return tfa.layers.AdaptiveAveragePooling1D(output_size=output_size)(input_)
-
-    return func
-
-
 def save_tfjs_from_torch(
     example_input: torch.Tensor,
     model: nn.Module,
@@ -761,14 +705,23 @@ def save_tfjs_from_torch(
     model_file_path = Path("tmp") / model_file_name
     if model_file_path.exists():
         rmtree(model_file_path)
-    model_tf = nobuco.pytorch_to_keras(
-        model.eval().cpu(),
-        args=[example_input],
-        kwargs=None,
-        inputs_channel_order=ChannelOrder.TENSORFLOW,
-        outputs_channel_order=ChannelOrder.TENSORFLOW,
+    model_file_path.mkdir()
+    torch.onnx.export(
+        model.cpu(),
+        example_input,
+        model_file_path / "model.onnx",
+        export_params=True,
     )
-    tfjs.converters.save_keras_model(model_tf, model_file_path)
+    model_onnx = onnx.load(model_file_path / "model.onnx")
+    model_tf = prepare(model_onnx)
+    model_tf.export_graph(model_file_path / "model")
+    tf_saved_model_conversion_v2.convert_tf_saved_model(
+        (model_file_path / "model").as_posix(),
+        model_file_path,
+        skip_op_check=True,
+    )
+    rmtree(model_file_path / "model")
+    (model_file_path / "model.onnx").unlink()
 
 
 def vgg11(classes_num: int) -> nn.Module:
