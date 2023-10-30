@@ -1,12 +1,10 @@
 [project]
 dependencies = [
-  "Jinja2==3.1.2",
   "matplotlib==3.8.0",
-  "onnx-tf==1.10.0",
+  "nobuco==0.8.7",
   "pandas==2.1.1",
   "scipy==1.11.2",
-  "tensorflow-probability==0.19.0",
-  "tensorflowjs==4.4.0"
+  "tensorflowjs==4.12.0"
 ]
 name = "UNKNOWN"
 version = "0.0.0"
