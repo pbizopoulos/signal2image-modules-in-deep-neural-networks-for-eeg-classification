@@ -12,7 +12,7 @@ const server = https.createServer(
 		return serveHandler(request, response);
 	},
 );
-if (process.env.DEBUG !== "1") {
+if (process.env.STAGING) {
 	server.listen(443, "0.0.0.0", () => {
 		dns.lookup(os.hostname(), (err, address) => {
 			console.log(`Container IP address: https://${address}`);

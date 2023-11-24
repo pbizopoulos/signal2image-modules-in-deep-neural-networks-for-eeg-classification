@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from os import getenv
 from pathlib import Path
 from shutil import move, rmtree
 from typing import TypeVar
@@ -786,9 +787,10 @@ def vgg19(classes_num: int) -> nn.Module:
 
 
 def main() -> None:  # noqa: C901, PLR0912, PLR0915
-    samples_num = 11500
-    epochs_num = 100
-    if __debug__:
+    if getenv("STAGING"):
+        samples_num = 11500
+        epochs_num = 100
+    else:
         samples_num = 10
         epochs_num = 1
     torch.backends.cudnn.benchmark = False
@@ -956,11 +958,11 @@ def main() -> None:  # noqa: C901, PLR0912, PLR0915
                     model,
                     model_file_name,
                 )
-                if not __debug__:
+                if getenv("STAGING"):
                     model_file_path = Path("prm") / model_file_name
                     rmtree(model_file_path)
                     move(Path("tmp") / model_file_name, Path("prm") / model_file_name)
-            if __debug__ and model_file_name != "alexnet-cnn-one-layer":
+            if (not getenv("STAGING")) and model_file_name != "alexnet-cnn-one-layer":
                 Path(f"tmp/{model_file_name}.pt").unlink()
     styler = pd.DataFrame(
         accuracy_test_array,

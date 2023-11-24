@@ -1,7 +1,5 @@
 .POSIX:
 
-DEBUG = 1
-
 cmd = node index.js
 
 all: tmp/done
@@ -24,7 +22,7 @@ Dockerfile:
 	printf 'FROM node\nWORKDIR /usr/src/app\nRUN apt-get update && apt-get install -y jq\nCOPY package.json /usr/src/\nRUN npm install --omit=dev --prefix /usr/src\nRUN npm install --global $$(jq --raw-output ".devDependencies | to_entries[] | \\"\(.key)@\(.value)\\"" /usr/src/package.json)\n' > $@
 
 index.js:
-	printf 'const dns = require("dns"); const fs = require("fs"); const https = require("https"); const os = require("os"); const serveHandler = require("serve-handler"); const server = https.createServer({ cert: fs.readFileSync("tmp/fullchain.pem"), key: fs.readFileSync("tmp/privkey.pem"), }, (request, response) => { return serveHandler(request, response); }); if (process.env.DEBUG !== "1") { server.listen(443, "0.0.0.0", () => { dns.lookup(os.hostname(), (err, address) => { console.log(`Container IP address: https://$${address}`); }); process.on("SIGINT", () => { process.exit(0); }); }); }' > $@
+	printf 'const dns = require("dns"); const fs = require("fs"); const https = require("https"); const os = require("os"); const serveHandler = require("serve-handler"); const server = https.createServer({ cert: fs.readFileSync("tmp/fullchain.pem"), key: fs.readFileSync("tmp/privkey.pem"), }, (request, response) => { return serveHandler(request, response); }); if (process.env.STAGING) { server.listen(443, "0.0.0.0", () => { dns.lookup(os.hostname(), (err, address) => { console.log(`Container IP address: https://$${address}`); }); process.on("SIGINT", () => { process.exit(0); }); }); }' > $@
 
 tmp:
 	mkdir $@
@@ -66,7 +64,7 @@ tmp/done: index.js tmp tmp/fullchain.pem
 	docker container run \
 		$$(test -t 0 && printf '%s' '--interactive --tty') \
 		--detach-keys 'ctrl-^,ctrl-^' \
-		--env DEBUG=$(DEBUG) \
+		--env STAGING=$(STAGING) \
 		--rm \
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/usr/src/app/ \

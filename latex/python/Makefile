@@ -1,7 +1,5 @@
 .POSIX:
 
-DEBUG = 1
-
 cmd = python3 main.py
 
 all: tmp/done
@@ -36,7 +34,7 @@ tmp/done: .dockerignore .gitignore Dockerfile main.py pyproject.toml tmp
 		--detach-keys 'ctrl-^,ctrl-^' \
 		--env HOME=/usr/src/app/tmp \
 		--env PYTHONDONTWRITEBYTECODE=1 \
-		--env PYTHONOPTIMIZE=$(shell [ "$(DEBUG)" = "0" ] && echo "1" || echo "0") \
+		--env STAGING=$(STAGING) \
 		--rm \
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/usr/src/app/ \
@@ -51,7 +49,7 @@ tmp/check-done: .dockerignore .gitignore Dockerfile main.py pyproject.toml tmp
 		--rm \
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/usr/src/app/ \
-		$$(docker image build --quiet .) /bin/sh -c 'toml-sort --all --in-place pyproject.toml && ssort main.py && ruff format --cache-dir tmp/ruff main.py && ruff --cache-dir tmp/ruff --fix --ignore D,S101 --select ALL --unsafe-fixes main.py && mypy --cache-dir tmp/mypy --ignore-missing-imports --install-types --non-interactive --strict main.py && if [ -d "templates/" ]; then djlint templates/ --lint --profile=jinja --quiet --reformat; fi && ([ $(DEBUG) -eq 0 ] && (coverage run --data-file=tmp/.coverage main.py && coverage html --data-file=tmp/.coverage --directory tmp/ --ignore-errors) || exit 0)'
+		$$(docker image build --quiet .) /bin/sh -c 'toml-sort --all --in-place pyproject.toml && ssort main.py && ruff format --cache-dir tmp/ruff main.py && ruff --cache-dir tmp/ruff --fix --ignore D,S101 --select ALL --unsafe-fixes main.py && mypy --cache-dir tmp/mypy --ignore-missing-imports --install-types --non-interactive --strict main.py && if [ -d "templates/" ]; then djlint templates/ --lint --profile=jinja --quiet --reformat; fi && ([ -z $(STAGING) ] && exit 0 || (unset STAGING && coverage run --data-file=tmp/.coverage main.py && coverage html --data-file=tmp/.coverage --directory tmp/ --ignore-errors))'
 	if ls -a | grep -v -E -x '.|..|.dockerignore|.env|.gitignore|Dockerfile|Makefile|main.py|prm|pyproject.toml|python|static|templates|tmp' | grep -q .; then false; fi
 	test $$(basename $$(pwd)) = "python"
 	touch $@
