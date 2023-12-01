@@ -27,6 +27,19 @@ pyproject.toml:
 tmp:
 	mkdir $@
 
+tmp/check-done: .dockerignore .gitignore Dockerfile main.py pyproject.toml tmp
+	docker container run \
+		$$(test -t 0 && printf '%s' '--interactive --tty') \
+		--env HOME=/usr/src/app/tmp \
+		--env PYTHONDONTWRITEBYTECODE=1 \
+		--rm \
+		--user $$(id -u):$$(id -g) \
+		--volume $$(pwd):/usr/src/app/ \
+		$$(docker image build --quiet .) /bin/sh -c 'toml-sort --all --in-place pyproject.toml && ssort main.py && ruff format --cache-dir tmp/ruff main.py && ruff --cache-dir tmp/ruff --fix --ignore D,S101 --select ALL --unsafe-fixes main.py && mypy --cache-dir tmp/mypy --ignore-missing-imports --install-types --non-interactive --strict main.py && if [ -d "templates/" ]; then djlint templates/ --lint --profile=jinja --quiet --reformat; fi && ([ -z $(STAGING) ] && exit 0 || (unset STAGING && coverage run --data-file=tmp/.coverage main.py && coverage html --data-file=tmp/.coverage --directory tmp/ --ignore-errors))'
+	if ls -a | grep -v -E -x '.|..|.dockerignore|.env|.gitignore|Dockerfile|Makefile|main.py|prm|pyproject.toml|python|static|templates|tmp' | grep -q .; then false; fi
+	test $$(basename $$(pwd)) = "python"
+	touch $@
+
 tmp/done: .dockerignore .gitignore Dockerfile main.py pyproject.toml tmp
 	docker container run \
 		$$(command -v nvidia-container-toolkit > /dev/null && printf '%s' '--gpus all') \
@@ -39,17 +52,4 @@ tmp/done: .dockerignore .gitignore Dockerfile main.py pyproject.toml tmp
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/usr/src/app/ \
 		$$(docker image build --quiet .) $(cmd)
-	touch $@
-
-tmp/check-done: .dockerignore .gitignore Dockerfile main.py pyproject.toml tmp
-	docker container run \
-		$$(test -t 0 && printf '%s' '--interactive --tty') \
-		--env HOME=/usr/src/app/tmp \
-		--env PYTHONDONTWRITEBYTECODE=1 \
-		--rm \
-		--user $$(id -u):$$(id -g) \
-		--volume $$(pwd):/usr/src/app/ \
-		$$(docker image build --quiet .) /bin/sh -c 'toml-sort --all --in-place pyproject.toml && ssort main.py && ruff format --cache-dir tmp/ruff main.py && ruff --cache-dir tmp/ruff --fix --ignore D,S101 --select ALL --unsafe-fixes main.py && mypy --cache-dir tmp/mypy --ignore-missing-imports --install-types --non-interactive --strict main.py && if [ -d "templates/" ]; then djlint templates/ --lint --profile=jinja --quiet --reformat; fi && ([ -z $(STAGING) ] && exit 0 || (unset STAGING && coverage run --data-file=tmp/.coverage main.py && coverage html --data-file=tmp/.coverage --directory tmp/ --ignore-errors))'
-	if ls -a | grep -v -E -x '.|..|.dockerignore|.env|.gitignore|Dockerfile|Makefile|main.py|prm|pyproject.toml|python|static|templates|tmp' | grep -q .; then false; fi
-	test $$(basename $$(pwd)) = "python"
 	touch $@
