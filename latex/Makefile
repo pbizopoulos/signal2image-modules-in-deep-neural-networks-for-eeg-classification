@@ -5,7 +5,7 @@ cmd = /bin/sh -c 'latexmk -outdir=tmp/ -pdf ms.tex && touch tmp/ms.bbl && cp tmp
 all: tmp tmp/done
 
 check: .dockerignore .gitignore Dockerfile tmp/done tmp/check-bib-done tmp/check-tex-done
-	if ls -a | grep -v -E -x '.|..|.dockerignore|.gitignore|Dockerfile|Makefile|ms.bib|ms.tex|prm|python|tmp' | grep -q .; then false; fi
+	if ls -ap | grep -v -E -x './|../|.dockerignore|.gitignore|Dockerfile|Makefile|ms.bib|ms.tex|prm/|python/|tmp/' | grep -q .; then false; fi
 	test $$(basename $$(pwd)) = "latex"
 
 clean:
