@@ -2,11 +2,9 @@
 
 cmd = /bin/sh -c 'latexmk -outdir=tmp/ -pdf ms.tex && touch tmp/ms.bbl && cp tmp/ms.bbl . && tar cf tmp/tex.tar ms.bbl ms.bib ms.tex $$(grep "^INPUT ./" tmp/ms.fls | uniq | cut -b 9-) && rm ms.bbl'
 
-all: tmp tmp/done
+all: tmp tmp/all-done
 
-check: .dockerignore .gitignore Dockerfile tmp/done tmp/check-bib-done tmp/check-tex-done
-	if ls -ap | grep -v -E -x './|../|.dockerignore|.gitignore|Dockerfile|Makefile|ms.bib|ms.tex|prm/|python/|tmp/' | grep -q .; then false; fi
-	test $$(basename $$(pwd)) = "latex"
+check: tmp tmp/check-done
 
 clean:
 	rm -rf tmp/
@@ -29,7 +27,7 @@ ms.tex:
 tmp:
 	mkdir $@
 
-tmp/done: .dockerignore .gitignore Dockerfile ms.bib ms.tex tmp
+tmp/all-done: .dockerignore .gitignore Dockerfile ms.bib ms.tex
 	docker container run \
 		$$(test -t 0 && printf '%s' '--interactive --tty') \
 		--detach-keys 'ctrl-^,ctrl-^' \
@@ -39,6 +37,10 @@ tmp/done: .dockerignore .gitignore Dockerfile ms.bib ms.tex tmp
 		--workdir /usr/src/app \
 		$$(docker image build --quiet .) $(cmd)
 	touch $@
+
+tmp/check-done: .dockerignore .gitignore Dockerfile tmp/all-done tmp/check-bib-done tmp/check-tex-done
+	if ls -ap | grep -v -E -x './|../|.dockerignore|.gitignore|Dockerfile|Makefile|ms.bib|ms.tex|prm/|python/|tmp/' | grep -q .; then false; fi
+	test $$(basename $$(pwd)) = "latex"
 
 tmp/check-bib-done: ms.bib
 	docker container run \
