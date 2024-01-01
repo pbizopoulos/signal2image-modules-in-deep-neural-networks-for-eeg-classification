@@ -2,7 +2,7 @@
 dependencies = [
   "matplotlib==3.8.2",
   "onnx-tf==1.10.0",
-  "pandas==2.1.3",
+  "pandas==2.1.4",
   "scipy==1.11.4",
   "tensorflow-probability==0.19.0",
   "tensorflowjs==4.4.0"
@@ -12,10 +12,10 @@ version = "0.0.0"
 
 [project.optional-dependencies]
 dev = [
-  "coverage==7.3.2",
-  "djlint==1.34.0",
-  "mypy==1.7.1",
-  "ruff==0.1.6",
-  "ssort==0.11.6",
+  "coverage==7.4.0",
+  "djlint==1.34.1",
+  "mypy==1.8.0",
+  "ruff==0.1.9",
+  "ssort==0.12.0",
   "toml-sort==0.23.1"
 ]
