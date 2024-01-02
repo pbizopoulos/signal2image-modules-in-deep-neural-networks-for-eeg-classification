@@ -2,7 +2,7 @@
 
 cmd = node index.js
 
-all: tmp/done
+all: tmp/all-done
 
 check: .dockerignore .gitignore Dockerfile package.json tmp
 	$(MAKE) $$(test -s style.css && printf 'tmp/check-css-done') $$(test -s index.html && printf 'tmp/check-html-done') tmp/check-js-done
@@ -24,8 +24,23 @@ Dockerfile:
 index.js:
 	printf 'const dns = require("dns"); const fs = require("fs"); const https = require("https"); const os = require("os"); const serveHandler = require("serve-handler"); const server = https.createServer({ cert: fs.readFileSync("tmp/fullchain.pem"), key: fs.readFileSync("tmp/privkey.pem"), }, (request, response) => { return serveHandler(request, response); }); if (process.env.STAGING) { server.listen(443, "0.0.0.0", () => { dns.lookup(os.hostname(), (err, address) => { console.log(`Container IP address: https://$${address}`); }); process.on("SIGINT", () => { process.exit(0); }); }); }' > $@
 
+package.json:
+	printf '{"stylelint":{"extends":"stylelint-config-standard","plugins":["stylelint-order"],"rules":{"order/properties-alphabetical-order":true}},"dependencies":{"serve":"latest"},"devDependencies":{"@biomejs/biome":"latest","css-validator":"latest","html-validate":"latest","js-beautify":"latest","sort-package-json":"latest","stylelint":"latest","stylelint-config-standard":"latest","stylelint-order":"latest"}}' > $@
+
 tmp:
 	mkdir $@
+
+tmp/all-done: index.js tmp tmp/fullchain.pem
+	docker container run \
+		$$(test -t 0 && printf '%s' '--interactive --tty') \
+		--detach-keys 'ctrl-^,ctrl-^' \
+		--env STAGING=$(STAGING) \
+		--rm \
+		--user $$(id -u):$$(id -g) \
+		--volume $$(pwd):/usr/src/app/ \
+		--workdir /usr/src/app \
+		$$(docker image build --quiet .) $(cmd)
+	touch $@
 
 tmp/check-css-done: style.css
 	docker container run \
@@ -60,18 +75,6 @@ tmp/check-js-done: index.js
 		biome check --apply-unsafe index.js package.json \$$script_js \$$style_css"
 	touch $@
 
-tmp/done: index.js tmp tmp/fullchain.pem
-	docker container run \
-		$$(test -t 0 && printf '%s' '--interactive --tty') \
-		--detach-keys 'ctrl-^,ctrl-^' \
-		--env STAGING=$(STAGING) \
-		--rm \
-		--user $$(id -u):$$(id -g) \
-		--volume $$(pwd):/usr/src/app/ \
-		--workdir /usr/src/app \
-		$$(docker image build --quiet .) $(cmd)
-	touch $@
-
 tmp/fullchain.pem: .dockerignore .gitignore Dockerfile package.json
 	docker container run \
 		--rm \
@@ -79,6 +82,3 @@ tmp/fullchain.pem: .dockerignore .gitignore Dockerfile package.json
 		--volume $$(pwd):/usr/src/app/ \
 		--workdir /usr/src/app \
 		$$(docker image build --quiet .) openssl req -subj "/C=.." -nodes -x509 -keyout tmp/privkey.pem -out $@
-
-package.json:
-	printf '{"stylelint":{"extends":"stylelint-config-standard","plugins":["stylelint-order"],"rules":{"order/properties-alphabetical-order":true}},"dependencies":{"serve":"latest"},"devDependencies":{"@biomejs/biome":"latest","css-validator":"latest","html-validate":"latest","js-beautify":"latest","sort-package-json":"latest","stylelint":"latest","stylelint-config-standard":"latest","stylelint-order":"latest"}}' > $@
