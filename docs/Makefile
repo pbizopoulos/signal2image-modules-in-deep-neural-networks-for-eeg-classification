@@ -70,7 +70,6 @@ tmp/check-js-done: index.js
 		$$(docker image build --quiet .) /bin/sh -c "\
 		script_js=$$([ -e script.js ] && echo script.js) && \
 		style_css=$$([ -e style.css ] && echo style.css) && \
-		biome check --apply package.json && \
 		sort-package-json package.json && \
 		biome check --apply-unsafe index.js package.json \$$script_js \$$style_css"
 	touch $@
