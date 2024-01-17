@@ -41,6 +41,7 @@ tmp/all-done: .dockerignore .gitignore Dockerfile ms.bib ms.tex
 tmp/check-done: .dockerignore .gitignore Dockerfile tmp/all-done tmp/check-bib-done tmp/check-tex-done
 	if ls -ap | grep -v -E -x './|../|.dockerignore|.gitignore|Dockerfile|Makefile|ms.bib|ms.tex|prm/|python/|tmp/' | grep -q .; then false; fi
 	test $$(basename $$(pwd)) = "latex"
+	touch $@
 
 tmp/check-bib-done: ms.bib
 	docker container run \
