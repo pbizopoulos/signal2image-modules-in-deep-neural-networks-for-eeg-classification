@@ -16,7 +16,7 @@ clean:
 	printf 'tmp/\n' > $@
 
 Dockerfile:
-	printf 'FROM texlive/texlive\nRUN apt-get update && apt-get install -y python3-pip\nRUN python3 -m pip install --break-system-packages rebiber\n' > $@
+	printf 'FROM texlive/texlive\nWORKDIR /usr/src/app\nRUN apt-get update && apt-get install -y python3-pip\nRUN python3 -m pip install --break-system-packages rebiber\n' > $@
 
 ms.bib:
 	touch $@
@@ -34,7 +34,6 @@ tmp/all-done: .dockerignore .gitignore Dockerfile ms.bib ms.tex
 		--rm \
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/usr/src/app/ \
-		--workdir /usr/src/app \
 		$$(docker image build --quiet .) $(cmd)
 	touch $@
 
@@ -48,7 +47,6 @@ tmp/check-bib-done: ms.bib
 		--rm \
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/usr/src/app/ \
-		--workdir /usr/src/app \
 		$$(docker image build --quiet .) /bin/sh -c '\
 		checkcites tmp/ms.aux && \
 		rebiber --input_bib ms.bib --remove url'
@@ -59,7 +57,6 @@ tmp/check-tex-done: ms.tex
 		--rm \
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/usr/src/app/ \
-		--workdir /usr/src/app \
 		$$(docker image build --quiet .) /bin/sh -c '\
 		chktex ms.tex && \
 		lacheck ms.tex'
