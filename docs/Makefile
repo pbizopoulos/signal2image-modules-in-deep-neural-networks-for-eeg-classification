@@ -16,7 +16,7 @@ clean:
 	printf '.env\ntmp/\n' > $@
 
 Dockerfile:
-	printf 'FROM node\nWORKDIR /usr/src/app\nRUN apt-get update && apt-get install -y jq\nCOPY package.json /usr/src/\nRUN npm install --omit=dev --prefix /usr/src\nRUN npm install --global $$(jq --raw-output ".devDependencies | to_entries[] | \\"\(.key)@\(.value)\\"" /usr/src/package.json)\n' > $@
+	printf 'FROM node\nRUN apt-get update && apt-get install -y jq\nWORKDIR /usr/src/app\nCOPY package.json /usr/src/\nRUN npm install --omit=dev --prefix /usr/src\nRUN npm install --global $$(jq --raw-output ".devDependencies | to_entries[] | \\"\(.key)@\(.value)\\"" /usr/src/package.json)\n' > $@
 
 index.js:
 	printf 'const dns = require("dns"); const fs = require("fs"); const https = require("https"); const os = require("os"); const serveHandler = require("serve-handler"); const server = https.createServer({ cert: fs.readFileSync("tmp/fullchain.pem"), key: fs.readFileSync("tmp/privkey.pem"), }, (request, response) => { return serveHandler(request, response); }); if (process.env.STAGING) { server.listen(443, "0.0.0.0", () => { dns.lookup(os.hostname(), (err, address) => { console.log(`Container IP address: https://$${address}`); }); process.on("SIGINT", () => { process.exit(0); }); }); }' > $@
@@ -35,7 +35,6 @@ tmp/all-done: index.js tmp tmp/fullchain.pem
 		--rm \
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/usr/src/app/ \
-		--workdir /usr/src/app \
 		$$(docker image build --quiet .) $(cmd)
 	touch $@
 
@@ -43,7 +42,6 @@ tmp/check-css-done: style.css
 	docker container run \
 		--rm \
 		--volume $$(pwd):/usr/src/app/ \
-		--workdir /usr/src/app \
 		$$(docker image build --quiet .) /bin/sh -c '\
 		stylelint --fix style.css && \
 		css-validator --profile css3svg style.css'
@@ -59,7 +57,6 @@ tmp/check-html-done: index.html
 	docker container run \
 		--rm \
 		--volume $$(pwd):/usr/src/app/ \
-		--workdir /usr/src/app \
 		$$(docker image build --quiet .) /bin/sh -c '\
 		js-beautify --end-with-newline --indent-inner-html --no-preserve-newlines --type html --replace index.html && \
 		html-validate index.html'
@@ -69,7 +66,6 @@ tmp/check-js-done: index.js
 	docker container run \
 		--rm \
 		--volume $$(pwd):/usr/src/app/ \
-		--workdir /usr/src/app \
 		$$(docker image build --quiet .) /bin/sh -c "\
 		script_js=$$([ -e script.js ] && echo script.js) && \
 		style_css=$$([ -e style.css ] && echo style.css) && \
@@ -82,5 +78,4 @@ tmp/fullchain.pem: .dockerignore .gitignore Dockerfile package.json
 		--rm \
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/usr/src/app/ \
-		--workdir /usr/src/app \
 		$$(docker image build --quiet .) openssl req -subj "/C=.." -nodes -x509 -keyout tmp/privkey.pem -out $@
