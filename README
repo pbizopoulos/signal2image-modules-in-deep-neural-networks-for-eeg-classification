@@ -4,7 +4,7 @@ https://ieeexplore.ieee.org/abstract/document/8856620/
 https://pbizopoulos.github.io/signal2image-modules-in-deep-neural-networks-for-eeg-classification/
 
 # Requirements
-POSIX Utilities
+POSIX Shell & Utilities
 Git
 Docker
 NVIDIA Container Toolkit (Optional)
