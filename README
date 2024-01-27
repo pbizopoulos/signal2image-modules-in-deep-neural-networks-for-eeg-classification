@@ -10,8 +10,8 @@ Docker
 NVIDIA Container Toolkit (Optional)
 
 # Download
-git clone https://github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification
-cd signal2image-modules-in-deep-neural-networks-for-eeg-classification/
+git clone https://github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification $HOME/github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification
+cd $HOME/github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/
 
 # Development
 cd docs/ && make clean check all && cd ..
