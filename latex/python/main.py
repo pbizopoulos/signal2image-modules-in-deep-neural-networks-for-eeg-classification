@@ -485,7 +485,7 @@ class SignalAsImage(nn.Module):
         self.model_base = replace_last_layer(classes_num, model_base, model_file_name)
 
     def forward(self: SignalAsImage, signal: torch.Tensor) -> torch.Tensor:
-        signal = signal - self.signals_all_min  # type: ignore[assignment]
+        signal = signal - self.signals_all_min
         signal = (
             signal.shape[-1] * signal / (self.signals_all_max - self.signals_all_min)
         )
@@ -587,10 +587,10 @@ class UCIEpilepsy(Dataset[tuple[torch.Tensor, torch.Tensor]]):
         self: UCIEpilepsy,
         index: int,
     ) -> tuple[torch.Tensor, torch.Tensor]:
-        return (self.data[index], self.target[index])  # type: ignore[index]
+        return (self.data[index], self.target[index])
 
     def __len__(self: UCIEpilepsy) -> int:
-        return self.target.shape[0]  # type: ignore[attr-defined,no-any-return]
+        return self.target.shape[0]
 
 
 class VGG(nn.Module):
