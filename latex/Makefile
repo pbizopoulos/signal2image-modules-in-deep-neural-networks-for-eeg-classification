@@ -16,7 +16,7 @@ clean:
 	printf 'tmp/\n' > $@
 
 Dockerfile:
-	printf 'FROM texlive/texlive\nWORKDIR /usr/src/app\nRUN apt-get update && apt-get install -y python3-pip\nRUN python3 -m pip install --break-system-packages rebiber\n' > $@
+	printf 'FROM texlive/texlive\nWORKDIR /usr/src/app\nRUN apt-get update && apt-get install -y python3-pip\nRUN python3 -m pip install --break-system-packages rebiber@https://github.com/yuchenlin/rebiber/tarball/main\n' > $@
 
 ms.bib:
 	touch $@
