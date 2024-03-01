@@ -49,7 +49,7 @@ tmp/check-done: .dockerignore .gitignore Dockerfile main.py pyproject.toml
 		--rm \
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/usr/src/app/ \
-		$$(docker image build --quiet .) /bin/sh -c 'toml-sort --all --in-place pyproject.toml && ssort main.py && ruff format --cache-dir tmp/ruff main.py && ruff --cache-dir tmp/ruff --fix --ignore D --select ALL --unsafe-fixes main.py && mypy --cache-dir tmp/mypy --ignore-missing-imports --install-types --non-interactive --strict main.py && if [ -d "templates/" ]; then djlint templates/ --lint --profile=jinja --quiet --reformat; fi && ([ -z $(STAGING) ] && exit 0 || (unset STAGING && coverage run --data-file=tmp/.coverage main.py && coverage html --data-file=tmp/.coverage --directory tmp/ --ignore-errors))'
+		$$(docker image build --quiet .) /bin/sh -c 'toml-sort --all --in-place pyproject.toml && ssort main.py && ruff format --cache-dir tmp/ruff main.py && ruff check --cache-dir tmp/ruff --fix --ignore D --select ALL --unsafe-fixes main.py && mypy --cache-dir tmp/mypy --ignore-missing-imports --install-types --non-interactive --strict main.py && if [ -d "templates/" ]; then djlint templates/ --lint --profile=jinja --quiet --reformat; fi && ([ -z $(STAGING) ] && exit 0 || (unset STAGING && coverage run --data-file=tmp/.coverage main.py && coverage html --data-file=tmp/.coverage --directory tmp/ --ignore-errors))'
 	if ls -ap | grep -v -E -x './|../|.dockerignore|.env|.gitignore|Dockerfile|Makefile|main.py|prm/|pyproject.toml|python/|static/|templates/|tmp/' | grep -q .; then false; fi
 	test $$(basename $$(pwd)) = "python"
 	touch $@

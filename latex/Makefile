@@ -47,9 +47,7 @@ tmp/check-bib-done: ms.bib
 		--rm \
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/usr/src/app/ \
-		$$(docker image build --quiet .) /bin/sh -c '\
-		checkcites tmp/ms.aux && \
-		rebiber --input_bib ms.bib --remove url'
+		$$(docker image build --quiet .) /bin/sh -c 'checkcites tmp/ms.aux && rebiber --input_bib ms.bib --remove url'
 	touch $@
 
 tmp/check-tex-done: ms.tex
@@ -57,7 +55,5 @@ tmp/check-tex-done: ms.tex
 		--rm \
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/usr/src/app/ \
-		$$(docker image build --quiet .) /bin/sh -c '\
-		chktex ms.tex && \
-		lacheck ms.tex'
+		$$(docker image build --quiet .) /bin/sh -c 'chktex ms.tex && lacheck ms.tex'
 	touch $@
