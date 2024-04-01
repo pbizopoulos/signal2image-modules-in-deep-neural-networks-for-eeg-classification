@@ -1,9 +1,7 @@
 {
 	"stylelint": {
 		"extends": "stylelint-config-standard",
-		"plugins": [
-			"stylelint-order"
-		],
+		"plugins": ["stylelint-order"],
 		"rules": {
 			"order/properties-alphabetical-order": true
 		}
@@ -12,12 +10,12 @@
 		"serve": "14.2.1"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "1.5.3",
+		"@biomejs/biome": "1.6.3",
 		"css-validator": "0.11.0",
-		"html-validate": "8.11.1",
+		"html-validate": "8.18.1",
 		"js-beautify": "1.15.1",
-		"sort-package-json": "2.8.0",
-		"stylelint": "16.2.1",
+		"sort-package-json": "2.10.0",
+		"stylelint": "16.3.1",
 		"stylelint-config-standard": "36.0.0",
 		"stylelint-order": "6.0.4"
 	}

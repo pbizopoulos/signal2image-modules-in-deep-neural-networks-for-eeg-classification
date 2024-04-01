@@ -1,7 +1,7 @@
-const dns = require("dns");
-const fs = require("fs");
-const https = require("https");
-const os = require("os");
+const dns = require("node:dns");
+const fs = require("node:fs");
+const https = require("node:https");
+const os = require("node:os");
 const serveHandler = require("serve-handler");
 const server = https.createServer(
 	{
