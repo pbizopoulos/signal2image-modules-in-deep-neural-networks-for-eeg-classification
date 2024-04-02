@@ -2,19 +2,15 @@ from __future__ import annotations
 
 from os import getenv
 from pathlib import Path
-from shutil import move, rmtree
 from typing import TypeVar
 
 import numpy as np
-import onnx
 import pandas as pd
 import requests
 import torch
 from matplotlib import pyplot as plt
-from onnx_tf.backend import prepare
 from PIL import Image
 from scipy.signal import spectrogram
-from tensorflowjs.converters import tf_saved_model_conversion_v2
 from torch import nn
 from torch.nn import functional
 from torch.optim import Adam
@@ -698,33 +694,6 @@ def resnet50(classes_num: int) -> nn.Module:
     return ResNet(Bottleneck, classes_num, expansion=4, layers=[3, 4, 6, 3])
 
 
-def save_tfjs_from_torch(
-    example_input: torch.Tensor,
-    model: nn.Module,
-    model_file_name: str,
-) -> None:
-    model_file_path = Path("tmp") / model_file_name
-    if model_file_path.exists():
-        rmtree(model_file_path)
-    model_file_path.mkdir()
-    torch.onnx.export(
-        model.cpu(),
-        example_input,
-        model_file_path / "model.onnx",
-        export_params=True,
-    )
-    model_onnx = onnx.load(model_file_path / "model.onnx")
-    model_tf = prepare(model_onnx)
-    model_tf.export_graph(model_file_path / "model")
-    tf_saved_model_conversion_v2.convert_tf_saved_model(
-        (model_file_path / "model").as_posix(),
-        model_file_path,
-        skip_op_check=True,
-    )
-    rmtree(model_file_path / "model")
-    (model_file_path / "model.onnx").unlink()
-
-
 def vgg11(classes_num: int) -> nn.Module:
     cfg = [64, "M", 128, "M", 256, 256, "M", 512, 512, "M", 512, 512, "M"]
     return VGG(classes_num, make_layers(cfg))
@@ -953,15 +922,13 @@ def main() -> None:  # noqa: C901, PLR0912, PLR0915
                 model_base_name_index,
             ] = accuracy_test
             if model_file_name == "resnet34-1D":
-                save_tfjs_from_torch(
-                    dataset_train[0][0].unsqueeze(0),
-                    model,
-                    model_file_name,
+                example_input = (dataset_train[0][0].unsqueeze(0),)
+                torch.onnx.export(
+                    model.cpu(),
+                    example_input,
+                    "tmp/model.onnx",
+                    export_params=True,
                 )
-                if getenv("STAGING"):
-                    model_file_path = Path("prm") / model_file_name
-                    rmtree(model_file_path)
-                    move(Path("tmp") / model_file_name, Path("prm") / model_file_name)
             if (not getenv("STAGING")) and model_file_name != "alexnet-cnn-one-layer":
                 Path(f"tmp/{model_file_name}.pt").unlink()
     styler = pd.DataFrame(

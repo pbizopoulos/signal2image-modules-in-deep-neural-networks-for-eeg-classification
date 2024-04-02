@@ -7,8 +7,9 @@
         <title>EEG epilepsy classification tool</title>
         <link href="data:," rel="icon">
         <link href="style.css" rel="stylesheet">
-        <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
         <script defer src="https://d3js.org/d3.v7.min.js"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
         <script defer src="script.js"></script>
     </head>
 
@@ -22,10 +23,6 @@
                 <div>Choose an EEG file (.txt,.csv) and classify the presence of epilepsy using a DNN.</div>
                 <div>
                     <input accept=".txt,.csv" id="signal-input-file" type="file">
-                </div>
-                <div id="model-download-div">
-                    <label for="model-download-progress">Model download progress:</label>
-                    <progress id="model-download-progress" name="model-download-progress" value="0"></progress>
                 </div>
                 <div id="output-div"></div>
             </div>

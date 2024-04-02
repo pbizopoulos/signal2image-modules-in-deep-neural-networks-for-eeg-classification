@@ -1,13 +1,13 @@
+async function main() {
+	document.write(`data of result tensor 'c': ${dataC}`);
+}
+
 const canvasHeight = 256;
 const canvasWidth = 256;
 const classNameArray = ["Open", "Closed", "Healthy", "Tumor", "Epilepsy"];
 const inputDiv = document.getElementById("input-div");
 const inputFileName =
-	"https://raw.githubusercontent.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/main/latex/python/prm/eeg-classification-example-data.txt";
-const modelDownloadDiv = document.getElementById("model-download-div");
-const modelDownloadProgress = document.getElementById(
-	"model-download-progress",
-);
+	"https://raw.githubusercontent.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/main/docs/prm/eeg-classification-example-data.txt";
 const outputDiv = document.getElementById("output-div");
 const signalFileReader = new FileReader();
 const signalInputFile = document.getElementById("signal-input-file");
@@ -15,7 +15,7 @@ let csvDataset;
 let csvDatasetMax;
 let csvDatasetMin;
 let line;
-let model;
+let session;
 signalFileReader.onload = signalFileReaderOnLoad;
 signalInputFile.onchange = signalInputFileOnChange;
 
@@ -40,18 +40,7 @@ function drawSignal(text) {
 }
 
 async function loadModel(predictFunction) {
-	const loadModelFunction = tf.loadGraphModel;
-	model = await loadModelFunction(
-		"https://raw.githubusercontent.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/main/latex/python/prm/resnet34-1D/model.json",
-		{
-			onProgress: (fraction) => {
-				modelDownloadProgress.value = fraction;
-				if (fraction === 1) {
-					modelDownloadDiv.style.display = "none";
-				}
-			},
-		},
-	);
+	session = await ort.InferenceSession.create("./prm/model.onnx");
 	predictFunction();
 }
 
@@ -59,17 +48,21 @@ async function predictView() {
 	if (csvDataset === undefined) {
 		return;
 	}
-	if (model === undefined) {
+	if (session === undefined) {
 		return;
 	}
 	let csvDatasetTmp = csvDataset.expandDims(0).expandDims(2);
-	csvDatasetTmp = tf.image.resizeBilinear(csvDatasetTmp, [
-		1,
-		model.inputs[0].shape[2],
-	]);
-	csvDatasetTmp = csvDatasetTmp.reshape([1, 1, model.inputs[0].shape[2]]);
-	const modelOutput = await model.executeAsync(csvDatasetTmp);
-	const classProbabilityArray = modelOutput.softmax().mul(100).arraySync()[0];
+	csvDatasetTmp = tf.image.resizeBilinear(csvDatasetTmp, [1, 178]);
+	csvDatasetTmp = csvDatasetTmp.reshape([1, 1, 178]);
+	const tensorA = new ort.Tensor(
+		"float32",
+		csvDatasetTmp.dataSync(),
+		[1, 1, 178],
+	);
+	const feeds = { "input.1": tensorA };
+	const results = await session.run(feeds);
+	const modelOutput = results["29"].cpuData;
+	const classProbabilityArray = tf.softmax(modelOutput).mul(100).arraySync();
 	outputDiv.textContent = "";
 	for (let i = 0; i < classProbabilityArray.length; i++) {
 		const elementDiv = document.createElement("div");
