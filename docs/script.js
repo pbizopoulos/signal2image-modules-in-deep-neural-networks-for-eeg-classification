@@ -4,6 +4,7 @@ const classNameArray = ["Open", "Closed", "Healthy", "Tumor", "Epilepsy"];
 const inputDiv = document.getElementById("input-div");
 const inputFileName =
 	"https://raw.githubusercontent.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/main/docs/prm/eeg-classification-example-data.txt";
+const loading = document.getElementById("loading");
 const outputDiv = document.getElementById("output-div");
 const signalFileReader = new FileReader();
 const signalInputFile = document.getElementById("signal-input-file");
@@ -15,6 +16,7 @@ let session;
 signalFileReader.onload = signalFileReaderOnLoad;
 signalInputFile.onchange = signalInputFileOnChange;
 
+loading.showModal();
 function drawSignal(text) {
 	const array = text.match(/\d+(?:\.\d+)?/g).map(Number);
 	csvDataset = tf.tensor(array);
@@ -37,6 +39,7 @@ function drawSignal(text) {
 
 async function loadModel(predictFunction) {
 	session = await ort.InferenceSession.create("./prm/model.onnx");
+	loading.close();
 	predictFunction();
 }
 
