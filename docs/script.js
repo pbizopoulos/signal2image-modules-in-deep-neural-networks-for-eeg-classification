@@ -4,7 +4,7 @@ const classNameArray = ["Open", "Closed", "Healthy", "Tumor", "Epilepsy"];
 const inputDiv = document.getElementById("input-div");
 const inputFileName =
 	"https://raw.githubusercontent.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/main/docs/prm/eeg-classification-example-data.txt";
-const loading = document.getElementById("loading");
+const loadingDialog = document.getElementById("loading-dialog");
 const outputDiv = document.getElementById("output-div");
 const signalFileReader = new FileReader();
 const signalInputFile = document.getElementById("signal-input-file");
@@ -37,9 +37,9 @@ function drawSignal(text) {
 }
 
 async function loadModel(predictFunction) {
-	loading.showModal();
+	loadingDialog.showModal();
 	session = await ort.InferenceSession.create("./prm/model.onnx");
-	loading.close();
+	loadingDialog.close();
 	predictFunction();
 }
 
