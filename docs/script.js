@@ -16,7 +16,6 @@ let session;
 signalFileReader.onload = signalFileReaderOnLoad;
 signalInputFile.onchange = signalInputFileOnChange;
 
-loading.showModal();
 function drawSignal(text) {
 	const array = text.match(/\d+(?:\.\d+)?/g).map(Number);
 	csvDataset = tf.tensor(array);
@@ -38,6 +37,7 @@ function drawSignal(text) {
 }
 
 async function loadModel(predictFunction) {
+	loading.showModal();
 	session = await ort.InferenceSession.create("./prm/model.onnx");
 	loading.close();
 	predictFunction();
