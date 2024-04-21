@@ -10,16 +10,16 @@
 # NVIDIA Container Toolkit (Optional)
 
 # Download
-git clone git@github.com:pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification $HOME/github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification
+git clone git@github.com:pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification ~/github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification
 
 # Development
-cd $HOME/github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/
+cd ~/github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/
 cd docs/ && make clean check all && cd ..
 cd latex/python/ && make clean check all && cd ../..
 cd latex/ && make clean check all && cd ..
 
 # Staging
-cd $HOME/github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/
+cd ~/github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/
 cd latex/python/ && make STAGING=1 && cd ../..
 cd latex/ && make && cd ..
 cd docs/ && make STAGING=1
