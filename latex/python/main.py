@@ -579,10 +579,7 @@ class UCIEpilepsy(Dataset[tuple[torch.Tensor, torch.Tensor]]):
             )
         self.data.unsqueeze_(1)
 
-    def __getitem__(
-        self: UCIEpilepsy,
-        index: int,
-    ) -> tuple[torch.Tensor, torch.Tensor]:
+    def __getitem__(self: UCIEpilepsy, index: int) -> tuple[torch.Tensor, torch.Tensor]:
         return (self.data[index], self.target[index])
 
     def __len__(self: UCIEpilepsy) -> int:
@@ -755,7 +752,7 @@ def vgg19(classes_num: int) -> nn.Module:
     return VGG(classes_num, make_layers(cfg))
 
 
-def main() -> None:  # noqa: C901, PLR0912, PLR0915
+def main() -> None:  # noqa: C901,PLR0912,PLR0915
     if getenv("STAGING"):
         samples_num = 11500
         epochs_num = 100
@@ -917,10 +914,9 @@ def main() -> None:  # noqa: C901, PLR0912, PLR0915
                     loss = cross_entropy_loss(output, target)
                     loss_test_sum += loss.item()
             accuracy_test = 100 * predictions_correct_num / predictions_num
-            accuracy_test_array[
-                model_module_name_index,
-                model_base_name_index,
-            ] = accuracy_test
+            accuracy_test_array[model_module_name_index, model_base_name_index] = (
+                accuracy_test
+            )
             if model_file_name == "resnet34-1D":
                 example_input = (dataset_train[0][0].unsqueeze(0),)
                 torch.onnx.export(
@@ -929,7 +925,7 @@ def main() -> None:  # noqa: C901, PLR0912, PLR0915
                     "tmp/model.onnx",
                     export_params=True,
                 )
-            if (not getenv("STAGING")) and model_file_name != "alexnet-cnn-one-layer":
+            if not getenv("STAGING") and model_file_name != "alexnet-cnn-one-layer":
                 Path(f"tmp/{model_file_name}.pt").unlink()
     styler = pd.DataFrame(
         accuracy_test_array,
