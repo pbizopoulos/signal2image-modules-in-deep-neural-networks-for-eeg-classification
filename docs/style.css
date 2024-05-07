@@ -1,4 +1,13 @@
 .block {
+  border-style: solid;
   height: 256px;
   width: 256px;
+}
+
+.container {
+	display: flex;
+}
+
+.column {
+	width: 50%;
 }

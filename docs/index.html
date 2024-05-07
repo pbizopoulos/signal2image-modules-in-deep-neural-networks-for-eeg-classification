@@ -18,16 +18,18 @@
         <nav>
             <a href="https://github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification">Source code</a> | <a href="https://pbizopoulos.github.io">Home page</a> / <b>EEG epilepsy classification tool</b>
         </nav>
-        <div>
-            <div id="input-control-div">
+        <div class="container">
+            <div class="column">
                 <div>Not intended for clinical use.</div>
                 <div>Choose an EEG file (.txt,.csv) and classify the presence of epilepsy using a DNN.</div>
                 <div>
                     <input accept=".txt,.csv" id="signal-input-file" type="file">
                 </div>
+            </div>
+            <div class="column">
+                <div class="block" id="input-div"></div>
                 <div id="output-div"></div>
             </div>
-            <div class="block" id="input-div"></div>
         </div>
     </body>
 
