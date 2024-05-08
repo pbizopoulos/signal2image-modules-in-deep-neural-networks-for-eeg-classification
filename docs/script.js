@@ -10,9 +10,6 @@ const loadingDialog = document.getElementById("loading-dialog");
 const outputDiv = document.getElementById("output-div");
 const signalFileReader = new FileReader();
 const signalInputFile = document.getElementById("signal-input-file");
-informationButton.addEventListener("click", () => {
-	informationDialog.showModal();
-});
 
 let csvDataset;
 let csvDatasetMax;
@@ -21,6 +18,9 @@ let line;
 let session;
 signalFileReader.onload = signalFileReaderOnLoad;
 signalInputFile.onchange = signalInputFileOnChange;
+informationButton.addEventListener("click", () => {
+	informationDialog.showModal();
+});
 
 function drawSignal(text) {
 	const array = text.match(/\d+(?:\.\d+)?/g).map(Number);
