@@ -24,16 +24,20 @@
                 <div>
                     <input accept=".txt,.csv" id="signal-input-file" type="file">
                 </div>
+                <div class="block" id="input-div"></div>
             </div>
             <div class="column">
-                <div class="block" id="input-div"></div>
                 <div id="output-div"></div>
             </div>
         </div>
         <dialog id="information-dialog" onmousedown="event.target==this && this.close()">
             <div>Not intended for clinical use.</div>
-            <div>Choose an EEG file (.txt,.csv) and classify the presence of epilepsy using a DNN.</div>
-            <div>You can also edit the signal by clicking and dragging.</div>
+            <div>Usage:</div>
+            <ol>
+                <li>Upload an EEG file (.txt,.csv) from the left.</li>
+                <li>You can also edit the signal by clicking and dragging.</li>
+                <li>The results are shown on the right.</li>
+            </ol>
             <div>Click outside this dialog to go back.</div>
         </dialog>
     </body>
