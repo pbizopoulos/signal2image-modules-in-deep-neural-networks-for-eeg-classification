@@ -11,3 +11,11 @@
 .column {
 	width: 50%;
 }
+
+.element-right {
+       margin-left: auto;
+}
+
+nav {
+       display: flex;
+}

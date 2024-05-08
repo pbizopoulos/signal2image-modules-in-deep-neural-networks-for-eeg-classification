@@ -1,6 +1,8 @@
 const canvasHeight = 256;
 const canvasWidth = 256;
 const classNameArray = ["Open", "Closed", "Healthy", "Tumor", "Epilepsy"];
+const informationButton = document.getElementById("information-button");
+const informationDialog = document.getElementById("information-dialog");
 const inputDiv = document.getElementById("input-div");
 const inputFileName =
 	"https://raw.githubusercontent.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/main/docs/prm/eeg-classification-example-data.txt";
@@ -8,6 +10,10 @@ const loadingDialog = document.getElementById("loading-dialog");
 const outputDiv = document.getElementById("output-div");
 const signalFileReader = new FileReader();
 const signalInputFile = document.getElementById("signal-input-file");
+informationButton.addEventListener("click", () => {
+	informationDialog.showModal();
+});
+
 let csvDataset;
 let csvDatasetMax;
 let csvDatasetMin;
