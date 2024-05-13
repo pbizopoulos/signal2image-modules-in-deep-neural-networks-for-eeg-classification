@@ -1,15 +1,15 @@
 from __future__ import annotations
 
-from os import getenv
+import os
 from pathlib import Path
 from typing import TypeVar
 
 import numpy as np
 import pandas as pd
+import PIL
 import requests
 import torch
 from matplotlib import pyplot as plt
-from PIL import Image
 from scipy.signal import spectrogram
 from torch import nn
 from torch.nn import functional
@@ -753,7 +753,7 @@ def vgg19(classes_num: int) -> nn.Module:
 
 
 def main() -> None:  # noqa: C901,PLR0912,PLR0915
-    if getenv("STAGING"):
+    if os.getenv("STAGING"):
         samples_num = 11500
         epochs_num = 100
     else:
@@ -925,7 +925,7 @@ def main() -> None:  # noqa: C901,PLR0912,PLR0915
                     "tmp/model.onnx",
                     export_params=True,
                 )
-            if not getenv("STAGING") and model_file_name != "alexnet-cnn-one-layer":
+            if not os.getenv("STAGING") and model_file_name != "alexnet-cnn-one-layer":
                 Path(f"tmp/{model_file_name}.pt").unlink()
     styler = pd.DataFrame(
         accuracy_test_array,
@@ -976,7 +976,7 @@ def main() -> None:  # noqa: C901,PLR0912,PLR0915
             mode="magnitude",
         )
         data = np.array(
-            Image.fromarray(spectrogram_array[0]).resize(
+            PIL.Image.fromarray(spectrogram_array[0]).resize(
                 (signals_all.shape[-1], signals_all.shape[-1]),
                 resample=1,
             ),
@@ -992,7 +992,7 @@ def main() -> None:  # noqa: C901,PLR0912,PLR0915
         model(signal)
         data = hook.outputs[0][0, 0].cpu().detach().numpy()  # type: ignore[index]
         data = np.array(
-            Image.fromarray(data).resize(
+            PIL.Image.fromarray(data).resize(
                 (signals_all.shape[-1], signals_all.shape[-1]),
                 resample=1,
             ),
