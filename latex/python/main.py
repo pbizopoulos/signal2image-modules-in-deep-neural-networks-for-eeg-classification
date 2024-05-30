@@ -758,7 +758,7 @@ def _vgg19(num_classes: int) -> nn.Module:
 
 
 def _main() -> None:  # noqa: C901,PLR0912,PLR0915
-    if os.getenv("STAGING"):
+    if os.getenv("STAGE"):
         num_samples = 11500
         num_epochs = 100
     else:
@@ -930,7 +930,7 @@ def _main() -> None:  # noqa: C901,PLR0912,PLR0915
                     "tmp/model.onnx",
                     export_params=True,
                 )
-            if not os.getenv("STAGING") and model_file_name != "alexnet-cnn-one-layer":
+            if not os.getenv("STAGE") and model_file_name != "alexnet-cnn-one-layer":
                 Path(f"tmp/{model_file_name}.pt").unlink()
     styler = pd.DataFrame(
         accuracy_test_array,

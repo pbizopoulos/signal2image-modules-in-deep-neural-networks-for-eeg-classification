@@ -19,7 +19,7 @@ Dockerfile:
 	printf 'FROM node\nRUN apt-get update && apt-get install -y jq\nWORKDIR /usr/src/app\nCOPY package.json /usr/src/\nRUN npm install --omit=dev --prefix /usr/src\nRUN npm install --global $$(jq --raw-output ".devDependencies | to_entries[] | \\"\(.key)@\(.value)\\"" /usr/src/package.json)\n' > $@
 
 index.js:
-	printf 'const dns = require("node:dns"); const fs = require("node:fs"); const https = require("node:https"); const os = require("node:os"); const serveHandler = require("serve-handler"); const server = https.createServer({ cert: fs.readFileSync("tmp/fullchain.pem"), key: fs.readFileSync("tmp/privkey.pem"), }, (request, response) => { return serveHandler(request, response); }); if (process.env.STAGING) { server.listen(443, "0.0.0.0", () => { dns.lookup(os.hostname(), (err, address) => { console.log(`Container IP address: https://$${address}`); }); process.on("SIGINT", () => { process.exit(0); }); }); }' > $@
+	printf 'const dns = require("node:dns"); const fs = require("node:fs"); const https = require("node:https"); const os = require("node:os"); const serveHandler = require("serve-handler"); const server = https.createServer({ cert: fs.readFileSync("tmp/fullchain.pem"), key: fs.readFileSync("tmp/privkey.pem"), }, (request, response) => { return serveHandler(request, response); }); if (process.env.STAGE) { server.listen(443, "0.0.0.0", () => { dns.lookup(os.hostname(), (err, address) => { console.log(`Container IP address: https://$${address}`); }); process.on("SIGINT", () => { process.exit(0); }); }); }' > $@
 
 package.json:
 	printf '{"stylelint":{"extends":"stylelint-config-standard","plugins":["stylelint-order"],"rules":{"order/properties-alphabetical-order":true}},"dependencies":{"serve":"latest"},"devDependencies":{"@biomejs/biome":"latest","css-validator":"latest","html-validate":"latest","js-beautify":"latest","sort-package-json":"latest","stylelint":"latest","stylelint-config-standard":"latest","stylelint-order":"latest"}}' > $@
@@ -31,7 +31,7 @@ tmp/all-done: index.js tmp tmp/fullchain.pem
 	docker container run \
 		$$(test -t 0 && printf '%s' '--interactive --tty') \
 		--detach-keys 'ctrl-^,ctrl-^' \
-		--env STAGING=$(STAGING) \
+		--env STAGE=$(STAGE) \
 		--rm \
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/usr/src/app/ \

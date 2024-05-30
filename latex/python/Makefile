@@ -34,7 +34,7 @@ tmp/all-done: .dockerignore .gitignore Dockerfile main.py pyproject.toml
 		--detach-keys 'ctrl-^,ctrl-^' \
 		--env HOME=/usr/src/app/tmp \
 		--env PYTHONDONTWRITEBYTECODE=1 \
-		--env STAGING=$(STAGING) \
+		--env STAGE=$(STAGE) \
 		--rm \
 		--user $$(id -u):$$(id -g) \
 		--volume $$(pwd):/usr/src/app/ \
@@ -56,7 +56,7 @@ tmp/check-done: .dockerignore .gitignore Dockerfile main.py pyproject.toml
 		ruff check --cache-dir tmp/ruff --fix --select ALL --unsafe-fixes main.py && \
 		mypy --cache-dir tmp/mypy --ignore-missing-imports --install-types --non-interactive --strict main.py && \
 		if [ -d "templates/" ]; then djlint templates/ --lint --profile=jinja --quiet --reformat; fi && \
-		([ -z $(STAGING) ] && exit 0 || (unset STAGING && coverage run --data-file=tmp/.coverage main.py && coverage html --data-file=tmp/.coverage --directory tmp/ --ignore-errors && pydoc -w main && mv main.html tmp/))'
+		([ -z $(STAGE) ] && exit 0 || (unset STAGE && coverage run --data-file=tmp/.coverage main.py && coverage html --data-file=tmp/.coverage --directory tmp/ --ignore-errors && pydoc -w main && mv main.html tmp/))'
 	if ls -ap | grep -v -E -x './|../|.dockerignore|.env|.gitignore|Dockerfile|Makefile|main.py|prm/|pyproject.toml|python/|static/|templates/|tmp/' | grep -q .; then false; fi
 	test $$(basename $$(pwd)) = "python"
 	touch $@
