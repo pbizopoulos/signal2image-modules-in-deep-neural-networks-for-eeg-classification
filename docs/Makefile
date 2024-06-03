@@ -22,7 +22,7 @@ index.js:
 	printf 'const dns = require("node:dns"); const fs = require("node:fs"); const https = require("node:https"); const os = require("node:os"); const serveHandler = require("serve-handler"); const server = https.createServer({ cert: fs.readFileSync("tmp/fullchain.pem"), key: fs.readFileSync("tmp/privkey.pem"), }, (request, response) => { return serveHandler(request, response); }); if (process.env.STAGE) { server.listen(443, "0.0.0.0", () => { dns.lookup(os.hostname(), (err, address) => { console.log(`Container IP address: https://$${address}`); }); process.on("SIGINT", () => { process.exit(0); }); }); }' > $@
 
 package.json:
-	printf '{"stylelint":{"extends":"stylelint-config-standard","plugins":["stylelint-order"],"rules":{"order/properties-alphabetical-order":true}},"dependencies":{"serve":"latest"},"devDependencies":{"@biomejs/biome":"latest","css-validator":"latest","html-validate":"latest","js-beautify":"latest","sort-package-json":"latest","stylelint":"latest","stylelint-config-standard":"latest","stylelint-order":"latest"}}' > $@
+	printf '{"stylelint":{"extends":"stylelint-config-standard","plugins":["stylelint-order"],"rules":{"order/properties-alphabetical-order":true}},"dependencies":{"serve":"latest"},"devDependencies":{"@biomejs/biome":"latest","css-validator":"latest","html-validate":"latest","js-beautify":"latest","linkinator":"latest","sort-package-json":"latest","stylelint":"latest","stylelint-config-standard":"latest","stylelint-order":"latest"}}' > $@
 
 tmp:
 	mkdir $@
@@ -59,6 +59,7 @@ tmp/check-html-done: index.html
 		--volume $$(pwd):/usr/src/app/ \
 		$$(docker image build --quiet .) /bin/sh -c '\
 		js-beautify --end-with-newline --indent-inner-html --no-preserve-newlines --type html --replace index.html && \
+		linkinator index.html && \
 		html-validate index.html'
 	touch $@
 
