@@ -1,13 +1,11 @@
 on: [push, pull_request]
 
 jobs:
-  make:
+  develop:
     runs-on: ubuntu-20.04
     steps:
-      - name: Set up Git repository
-        uses: actions/checkout@v4
-      - name: Check code and build
-        run: |
+      - uses: actions/checkout@v4
+      - run: |
           cd docs/ && make clean check all && cd ..
           cd latex/python/ && make clean check all && cd ../..
           cd latex/ && make clean check all && cd ..
