@@ -22,7 +22,7 @@ main.py:
 	touch $@
 
 pyproject.toml:
-	printf '[project]\nname = "UNKNOWN"\nversion = "0.0.0"\n\n[project.optional-dependencies]\ndev = ["coverage","djlint","mypy","ruff","ssort","toml-sort"]' > $@
+	printf '[project]\nname = "UNKNOWN"\nversion = "0.0.0"\n\n[project.optional-dependencies]\ndev = ["coverage","djlint","mypy","ruff","check-python-script@https://api.github.com/repos/pbizopoulos/check-python-script/tarball#subdirectory=python","toml-sort"]' > $@
 
 tmp:
 	mkdir $@
@@ -51,7 +51,7 @@ tmp/check-done: .dockerignore .gitignore Dockerfile main.py pyproject.toml
 		--volume $$(pwd):/usr/src/app/ \
 		$$(docker image build --quiet .) /bin/sh -c '\
 		toml-sort --all --in-place pyproject.toml && \
-		ssort main.py && \
+		check-python-script main.py && \
 		ruff format --cache-dir tmp/ruff main.py && \
 		ruff check --cache-dir tmp/ruff --fix --select ALL --unsafe-fixes main.py && \
 		mypy --cache-dir tmp/mypy --ignore-missing-imports --install-types --non-interactive --strict main.py && \
