@@ -22,7 +22,7 @@ main.py:
 	touch $@
 
 pyproject.toml:
-	printf '[project]\nname = "UNKNOWN"\nversion = "0.0.0"\n\n[project.optional-dependencies]\ndev = ["coverage","djlint","mypy","ruff","check-python-script@https://api.github.com/repos/pbizopoulos/check-python-script/tarball#subdirectory=python","toml-sort"]' > $@
+	printf '[project]\nname = "UNKNOWN"\nversion = "0.0.0"\n\n[project.optional-dependencies]\ndev = ["coverage","djlint","mypy","ruff","check-python-script@https://api.github.com/repos/pbizopoulos/check-python-script/tarball/main#subdirectory=python","toml-sort"]' > $@
 
 tmp:
 	mkdir $@
