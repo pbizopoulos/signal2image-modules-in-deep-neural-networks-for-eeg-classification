@@ -11,7 +11,7 @@ version = "0.0.0"
 
 [project.optional-dependencies]
 dev = [
-  "check-python-script@https://api.github.com/repos/pbizopoulos/check-python-script/tarball/d29b3b1#subdirectory=python",
+  "check-python-script@https://api.github.com/repos/pbizopoulos/check-python-script/tarball/a1c91a2#subdirectory=python",
   "coverage==7.5.3",
   "djlint==1.34.1",
   "mypy==1.10.0",
