@@ -1,41 +1,35 @@
 version: 2
 updates:
-  - package-ecosystem: 'docker'
-    directory: '/docs/'
+  - package-ecosystem: "docker"
+    directories:
+      - "/docs"
+      - "/latex/python"
     schedule:
-      interval: 'monthly'
+      interval: "monthly"
     groups:
       group:
         patterns:
           - "*"
-  - package-ecosystem: 'docker'
-    directory: '/latex/python/'
+  - package-ecosystem: "github-actions"
+    directory: "/"
     schedule:
-      interval: 'monthly'
+      interval: "monthly"
     groups:
       group:
         patterns:
           - "*"
-  - package-ecosystem: 'github-actions'
-    directory: '/'
+  - package-ecosystem: "npm"
+    directory: "/docs"
     schedule:
-      interval: 'monthly'
+      interval: "monthly"
     groups:
       group:
         patterns:
           - "*"
-  - package-ecosystem: 'npm'
-    directory: '/docs/'
+  - package-ecosystem: "pip"
+    directory: "/latex/python"
     schedule:
-      interval: 'monthly'
-    groups:
-      group:
-        patterns:
-          - "*"
-  - package-ecosystem: 'pip'
-    directory: '/latex/python/'
-    schedule:
-      interval: 'monthly'
+      interval: "monthly"
     groups:
       group:
         patterns:
