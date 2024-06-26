@@ -1,4 +1,4 @@
-FROM node:22.2.0
+FROM node:22.3.0
 RUN apt-get update && apt-get install -y jq
 WORKDIR /usr/src/app
 COPY package.json /usr/src/
