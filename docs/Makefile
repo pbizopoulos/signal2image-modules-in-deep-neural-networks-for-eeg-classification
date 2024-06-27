@@ -49,7 +49,7 @@ tmp/check-css-done: style.css
 
 tmp/check-done: .dockerignore .gitignore Dockerfile package.json tmp
 	$(MAKE) $$(test -s style.css && printf 'tmp/check-css-done') $$(test -s index.html && printf 'tmp/check-html-done') tmp/check-js-done
-	if ls -ap | grep -v -E -x './|../|.dockerignore|.env|.gitignore|CNAME|Dockerfile|Makefile|docs/|index.html|index.js|package.json|prm/|python/|script.js|style.css|tmp/' | grep -q .; then false; fi
+	if ls -ap | grep -v -E -x './|../|.dockerignore|.env|.gitignore|CNAME|Dockerfile|Makefile|docs/|index.html|index.js|package.json|prm/|pyscript/|python/|script.js|style.css|tmp/' | grep -q .; then false; fi
 	test $$(basename $$(pwd)) = "docs"
 	touch $@
 
