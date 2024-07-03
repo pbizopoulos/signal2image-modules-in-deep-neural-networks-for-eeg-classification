@@ -864,7 +864,7 @@ def _main() -> None:  # noqa: C901,PLR0912,PLR0915
             mode="magnitude",
         )
         data = np.array(
-            PIL.Image.fromarray(spectrogram_array[0]).resize(
+            PIL.Image.fromarray(spectrogram_array[0]).resize(  # type: ignore[no-untyped-call]
                 (signals_all.shape[-1], signals_all.shape[-1]),
                 resample=1,
             ),
@@ -880,7 +880,7 @@ def _main() -> None:  # noqa: C901,PLR0912,PLR0915
         model(signal)
         data = hook.outputs[0][0, 0].cpu().detach().numpy()  # type: ignore[index]
         data = np.array(
-            PIL.Image.fromarray(data).resize(
+            PIL.Image.fromarray(data).resize(  # type: ignore[no-untyped-call]
                 (signals_all.shape[-1], signals_all.shape[-1]),
                 resample=1,
             ),
