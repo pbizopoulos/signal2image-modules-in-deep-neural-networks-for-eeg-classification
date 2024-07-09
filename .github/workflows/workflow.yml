@@ -5,6 +5,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v27
       - run: |
           cd docs/ && make clean check all && cd ..
           cd latex/python/ && make clean check all && cd ../..

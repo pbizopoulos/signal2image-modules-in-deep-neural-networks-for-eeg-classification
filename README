@@ -6,8 +6,7 @@
 # Requirements
 # POSIX Shell & Utilities
 # Git
-# Docker
-# NVIDIA Container Toolkit (Optional)
+# Nix
 
 # Download
 git clone git@github.com:pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification ~/github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification

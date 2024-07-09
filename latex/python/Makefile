@@ -1,7 +1,5 @@
 .POSIX:
 
-cmd = python3 main.py
-
 all: tmp tmp/all-done
 
 check: tmp tmp/check-done
@@ -9,54 +7,37 @@ check: tmp tmp/check-done
 clean:
 	rm -rf tmp/
 
-.dockerignore:
-	printf '*\n!pyproject.toml\n' > $@
-
 .gitignore:
 	printf '.env\ntmp/\n' > $@
 
-Dockerfile:
-	printf 'FROM python\nWORKDIR /usr/src/app\nCOPY pyproject.toml .\nRUN python3 -m pip install --upgrade pip && python3 -m pip install .[dev]\n' > $@
+flake.nix:
+	nix flake init
 
 main.py:
 	touch $@
 
-pyproject.toml:
-	printf '[project]\nname = "UNKNOWN"\nversion = "0.0.0"\n\n[project.optional-dependencies]\ndev = ["coverage","djlint","mypy","ruff","check-python-script@https://api.github.com/repos/pbizopoulos/check-python-script/tarball/main#subdirectory=python","toml-sort"]' > $@
-
 tmp:
 	mkdir $@
 
-tmp/all-done: .dockerignore .gitignore Dockerfile main.py pyproject.toml
-	docker container run \
-		$$(command -v nvidia-container-toolkit > /dev/null && printf '%s' '--gpus all') \
-		$$(test -t 0 && printf '%s' '--interactive --tty') \
-		--detach-keys 'ctrl-^,ctrl-^' \
-		--env HOME=/usr/src/app/tmp \
-		--env PYTHONDONTWRITEBYTECODE=1 \
-		--env STAGE=$(STAGE) \
-		--rm \
-		--user $$(id -u):$$(id -g) \
-		--volume $$(pwd):/usr/src/app/ \
-		$$(docker image build --quiet .) $(cmd)
+tmp/all-done: .gitignore flake.nix main.py
+	nix develop --command sh -c "\
+		set -e && \
+		PYTHONDONTWRITEBYTECODE=1 python3 main.py && \
+		exit"
 	touch $@
 
-tmp/check-done: .dockerignore .gitignore Dockerfile main.py pyproject.toml
-	docker container run \
-		$$(test -t 0 && printf '%s' '--interactive --tty') \
-		--env HOME=/usr/src/app/tmp \
-		--env PYTHONDONTWRITEBYTECODE=1 \
-		--rm \
-		--user $$(id -u):$$(id -g) \
-		--volume $$(pwd):/usr/src/app/ \
-		$$(docker image build --quiet .) /bin/sh -c '\
-		toml-sort --all --in-place pyproject.toml && \
+tmp/check-done: .gitignore flake.nix main.py
+	nix develop .#check --command sh -c "\
+		set -e && \
+		export PYTHONDONTWRITEBYTECODE=1 && \
+		nixfmt flake.nix && \
+		nix flake check && \
 		check-python-script main.py && \
 		ruff format --cache-dir tmp/ruff main.py && \
-		ruff check --cache-dir tmp/ruff --fix --select ALL --unsafe-fixes main.py && \
-		mypy --cache-dir tmp/mypy --ignore-missing-imports --install-types --non-interactive --strict main.py && \
-		if [ -d "templates/" ]; then djlint templates/ --lint --profile=jinja --quiet --reformat; fi && \
-		([ -z $(STAGE) ] && exit 0 || (unset STAGE && coverage run --data-file=tmp/.coverage main.py && coverage html --data-file=tmp/.coverage --directory tmp/ --ignore-errors && pydoc -w main && mv main.html tmp/))'
-	if ls -ap | grep -v -E -x './|../|.dockerignore|.env|.gitignore|Dockerfile|Makefile|main.py|prm/|pyproject.toml|python/|static/|templates/|tmp/' | grep -q .; then false; fi
-	test $$(basename $$(pwd)) = "python"
+		ruff check --cache-dir tmp/ruff --exit-non-zero-on-fix --fix --select ALL --unsafe-fixes main.py && \
+		mypy --cache-dir tmp/mypy --ignore-missing-imports --strict main.py && \
+		if [ -d 'templates/' ]; then djlint templates/ --lint --profile=jinja --quiet --reformat; fi && \
+		[ -z $$STAGE ] && exit 0 || (unset STAGE && pydoc -w main && mv main.html tmp/) && \
+		if ls -ap | grep -v -E -x './|../|.env|.gitignore|Makefile|flake.lock|flake.nix|main.py|prm/|python/|result|static/|templates/|tmp/' | grep -q .; then exit 1; fi && \
+		test $$(basename $$(pwd)) = 'python'"
 	touch $@
