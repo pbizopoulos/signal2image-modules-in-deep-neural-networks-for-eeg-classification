@@ -37,6 +37,7 @@ tmp/check-done: .gitignore flake.nix ms.bib ms.tex
             set -e && \
 	    nixfmt flake.nix && \
 	    nix flake check && \
+            latexmk -outdir=tmp/ -pdf ms.tex && \
             checkcites tmp/ms.aux && \
             chktex ms.tex && \
             lacheck ms.tex && \
