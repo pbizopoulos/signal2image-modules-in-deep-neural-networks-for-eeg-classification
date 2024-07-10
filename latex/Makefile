@@ -5,10 +5,10 @@ all: tmp tmp/all-done
 check: tmp tmp/check-done
 
 clean:
-	rm -rf tmp/
+	rm -rf result tmp/
 
 .gitignore:
-	printf '.env\ntmp/\n' > $@
+	printf '.env\nresult\ntmp/\n' > $@
 
 flake.nix:
 	nix flake init
