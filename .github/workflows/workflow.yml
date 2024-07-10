@@ -10,5 +10,8 @@ jobs:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
       - run: |
           cd docs/ && make clean check all && cd ..
+          sed -i 's/torch-bin/torchWithoutCuda/' latex/python/flake.nix
+          sed -i 's/torchvision-bin/torchvision/' latex/python/flake.nix
+          sed -i 's/config.allowUnfree = true;//' latex/python/flake.nix
           cd latex/python/ && make clean check all && cd ../..
           cd latex/ && make clean check all && cd ..
