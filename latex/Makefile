@@ -23,24 +23,9 @@ tmp:
 	mkdir $@
 
 tmp/all-done: .gitignore flake.nix ms.bib ms.tex
-	nix develop --command sh -c '\
-            set -e && \
-            latexmk -outdir=tmp/ -pdf ms.tex && \
-            touch tmp/ms.bbl && \
-            cp tmp/ms.bbl . && \
-            tar cf tmp/tex.tar ms.bbl ms.bib ms.tex $(grep "^INPUT ./" tmp/ms.fls | uniq | cut -b 9-) && \
-            rm ms.bbl'
+	nix develop .#all
 	touch $@
 
 tmp/check-done: .gitignore flake.nix ms.bib ms.tex
-	nix develop .#check --command sh -c "\
-            set -e && \
-	    nixfmt flake.nix && \
-	    nix flake check && \
-            latexmk -outdir=tmp/ -pdf ms.tex && \
-            checkcites tmp/ms.aux && \
-            chktex ms.tex && \
-            lacheck ms.tex && \
-            ls -ap | grep -v -E -x './|../|.gitignore|Makefile|flake.lock|flake.nix|ms.bib|ms.tex|prm/|python/|tmp/' | grep -q . && exit 1 || true && \
-            test $$(basename $$(pwd)) = 'latex'"
+	nix develop .#check
 	touch $@
