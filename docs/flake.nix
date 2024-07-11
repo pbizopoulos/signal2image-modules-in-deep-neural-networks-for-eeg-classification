@@ -43,6 +43,7 @@
             [ -e script.js ] && biome check --unsafe --write script.js || true
             ls -ap | grep -v -E -x './|../|.env|.gitignore|CNAME|Makefile|index.html|index.js|flake.lock|flake.nix|prm/|pyscript/|python/|script.js|style.css|tmp/' | grep -q . && exit 1 || true
             test $(basename $(pwd)) = 'docs'
+            exit    
           '';
         };
         devShells.default = pkgs.mkShell { buildInputs = packagesAll; };
