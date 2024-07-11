@@ -37,7 +37,7 @@ tmp/check-done: .gitignore flake.nix main.py
 		ruff check --cache-dir tmp/ruff --exit-non-zero-on-fix --fix --select ALL --unsafe-fixes main.py && \
 		mypy --cache-dir tmp/mypy --ignore-missing-imports --strict main.py && \
 		if [ -d 'templates/' ]; then djlint templates/ --lint --profile=jinja --quiet --reformat; fi && \
-		[ -z $$STAGE ] && exit 0 || (unset STAGE && pydoc -w main && mv main.html tmp/) && \
-		if ls -ap | grep -v -E -x './|../|.env|.gitignore|Makefile|flake.lock|flake.nix|main.py|prm/|python/|result|static/|templates/|tmp/' | grep -q .; then exit 1; fi && \
+		[ -z $$STAGE ] || (unset STAGE && pydoc -w main && mv main.html tmp/) && \
+		ls -ap | grep -v -E -x './|../|.env|.gitignore|Makefile|flake.lock|flake.nix|main.py|prm/|pyproject.toml|python/|result|static/|templates/|tmp/' | grep -q . && exit 1 || true && \
 		test $$(basename $$(pwd)) = 'python'"
 	touch $@

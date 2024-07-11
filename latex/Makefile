@@ -41,6 +41,6 @@ tmp/check-done: .gitignore flake.nix ms.bib ms.tex
             checkcites tmp/ms.aux && \
             chktex ms.tex && \
             lacheck ms.tex && \
-            if ls -ap | grep -v -E -x './|../|.gitignore|Makefile|flake.lock|flake.nix|ms.bib|ms.tex|prm/|python/|tmp/' | grep -q .; then exit 1; fi && \
+            ls -ap | grep -v -E -x './|../|.gitignore|Makefile|flake.lock|flake.nix|ms.bib|ms.tex|prm/|python/|tmp/' | grep -q . && exit 1 || true && \
             test $$(basename $$(pwd)) = 'latex'"
 	touch $@
