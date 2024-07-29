@@ -44,7 +44,7 @@
           buildInputs = packagesAll;
           shellHook = ''
             set -e
-            PYTHONDONTWRITEBYTECODE=1 python3 main.py || exit
+            python3 main.py || exit
             exit
           '';
         };
@@ -52,7 +52,6 @@
           buildInputs = packagesAll ++ packagesCheck;
           shellHook = ''
             set -e
-            export PYTHONDONTWRITEBYTECODE=1
             nix flake check
             nix fmt
             check-python-script main.py
