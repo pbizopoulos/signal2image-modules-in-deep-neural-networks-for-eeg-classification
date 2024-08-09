@@ -19,10 +19,10 @@ index.html:
 tmp:
 	mkdir $@
 
-tmp/all-done: .gitignore flake.nix index.html
-	nix develop .#all
+tmp/all-done: .gitignore flake.lock flake.nix index.html
+	nix develop --ignore-environment .#all
 	touch $@
 
-tmp/check-done: .gitignore flake.nix index.html
-	nix develop .#check
+tmp/check-done: .gitignore flake.lock flake.nix index.html
+	nix develop --ignore-environment .#check
 	touch $@

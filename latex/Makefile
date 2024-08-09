@@ -22,10 +22,10 @@ ms.tex:
 tmp:
 	mkdir $@
 
-tmp/all-done: .gitignore flake.nix ms.bib ms.tex
-	nix develop .#all
+tmp/all-done: .gitignore flake.lock flake.nix ms.bib ms.tex
+	nix develop --ignore-environment .#all
 	touch $@
 
-tmp/check-done: .gitignore flake.nix ms.bib ms.tex
-	nix develop .#check
+tmp/check-done: .gitignore flake.lock flake.nix ms.bib ms.tex
+	nix develop --ignore-environment .#check
 	touch $@

@@ -31,13 +31,6 @@
           pkgs.python3Packages.torchvision-bin
           pkgs.python3Packages.types-requests
         ];
-        packagesCheck = [
-          check-python-script.packages.${system}.default
-          pkgs.djlint
-          pkgs.mypy
-          pkgs.nixfmt-rfc-style
-          pkgs.ruff
-        ];
       in
       {
         devShells.all = pkgs.mkShell {
@@ -49,7 +42,14 @@
           '';
         };
         devShells.check = pkgs.mkShell {
-          buildInputs = packagesAll ++ packagesCheck;
+          buildInputs = packagesAll ++ [
+            check-python-script.packages.${system}.default
+            pkgs.djlint
+            pkgs.git
+            pkgs.mypy
+            pkgs.nixfmt-rfc-style
+            pkgs.ruff
+          ];
           shellHook = ''
             set -e
             nix flake check

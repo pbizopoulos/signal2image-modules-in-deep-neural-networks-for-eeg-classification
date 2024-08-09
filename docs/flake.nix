@@ -18,12 +18,6 @@
           pkgs.http-server
           pkgs.openssl
         ];
-        packagesCheck = [
-          pkgs.biome
-          pkgs.nixfmt-rfc-style
-          pkgs.nodePackages.js-beautify
-          pkgs.nodejs
-        ];
       in
       {
         devShells.all = pkgs.mkShell {
@@ -34,7 +28,13 @@
           '';
         };
         devShells.check = pkgs.mkShell {
-          buildInputs = packagesAll ++ packagesCheck;
+          buildInputs = packagesAll ++ [
+            pkgs.biome
+            pkgs.git
+            pkgs.nixfmt-rfc-style
+            pkgs.nodePackages.js-beautify
+            pkgs.nodejs
+          ];
           shellHook = ''
             set -e
             nix flake check

@@ -30,7 +30,10 @@
           '';
         };
         devShells.check = pkgs.mkShell {
-          buildInputs = packages ++ [ pkgs.nixfmt-rfc-style ];
+          buildInputs = packages ++ [
+            pkgs.git
+            pkgs.nixfmt-rfc-style
+          ];
           shellHook = ''
             set -e
             nix flake check

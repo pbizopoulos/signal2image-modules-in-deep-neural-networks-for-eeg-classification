@@ -19,10 +19,10 @@ main.py:
 tmp:
 	mkdir $@
 
-tmp/all-done: .gitignore flake.nix main.py
-	nix develop .#all
+tmp/all-done: .gitignore flake.lock flake.nix main.py
+	nix develop --ignore-environment .#all
 	touch $@
 
-tmp/check-done: .gitignore flake.nix main.py
-	nix develop .#check
+tmp/check-done: .gitignore flake.lock flake.nix main.py
+	nix develop --ignore-environment .#check
 	touch $@
