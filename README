@@ -1,7 +1,6 @@
 # Signal2Image Modules in Deep Neural Networks for EEG Classification
 # https://arxiv.org/abs/1904.13216
 # https://ieeexplore.ieee.org/abstract/document/8856620/
-# https://pbizopoulos.github.io/signal2image-modules-in-deep-neural-networks-for-eeg-classification/
 
 # Requirements
 # POSIX Shell & Utilities
@@ -22,4 +21,7 @@ cd ~/github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg
 cd latex/python/ && make STAGE=1 && cd ../..
 cd latex/ && make && cd ..
 cd docs/ && make STAGE=1
+
+# Run
+# https://pbizopoulos.github.io/signal2image-modules-in-deep-neural-networks-for-eeg-classification/
 
