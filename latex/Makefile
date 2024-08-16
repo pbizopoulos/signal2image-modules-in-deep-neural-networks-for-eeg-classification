@@ -23,9 +23,9 @@ tmp:
 	mkdir $@
 
 tmp/all-done: .gitignore flake.lock flake.nix ms.bib ms.tex
-	nix develop --ignore-environment .#all
+	nix develop --ignore-environment --keep STAGE .#all
 	touch $@
 
 tmp/check-done: .gitignore flake.lock flake.nix ms.bib ms.tex
-	nix develop --ignore-environment .#check
+	nix develop --ignore-environment --keep STAGE .#check
 	touch $@
