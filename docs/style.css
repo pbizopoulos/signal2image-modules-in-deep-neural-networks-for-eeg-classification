@@ -4,18 +4,10 @@
   width: 256px;
 }
 
-.container {
-	display: flex;
-}
-
 .column {
 	width: 50%;
 }
 
-.element-right {
-       margin-left: auto;
-}
-
-nav {
-       display: flex;
+.container {
+	display: flex;
 }
