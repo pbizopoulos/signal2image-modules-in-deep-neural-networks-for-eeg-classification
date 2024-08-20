@@ -34,6 +34,7 @@
       in
       {
         devShells.all = pkgs.mkShell {
+          PYTHONDONTWRITEBYTECODE = true;
           buildInputs = packagesAll;
           shellHook = ''
             set -e
