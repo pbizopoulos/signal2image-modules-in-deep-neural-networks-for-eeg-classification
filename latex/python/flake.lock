@@ -749,11 +749,11 @@
       },
       "locked": {
         "dir": "onnxscript",
-        "lastModified": 1723125922,
-        "narHash": "sha256-5/ctBneyrod9Jcwxc5+nO47xPzfqCZgtn1f4dDQzAvs=",
+        "lastModified": 1723197965,
+        "narHash": "sha256-M7lvwM29xBHKecs/1zZh9PC8qO03I9Dkl4OrCWKLi44=",
         "owner": "pbizopoulos",
         "repo": "nixpkgs",
-        "rev": "013564f03003be877964add4ea7943ab038d3b3d",
+        "rev": "3d4106453ebc71b81a69e06cd6873e20f63fc033",
         "type": "github"
       },
       "original": {
