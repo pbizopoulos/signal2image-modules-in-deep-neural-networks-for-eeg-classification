@@ -65,7 +65,7 @@
             mypy --cache-dir tmp/mypy --ignore-missing-imports --strict main.py
             if [ -d 'templates/' ]; then djlint templates/ --lint --profile=jinja --quiet --reformat; fi
             [ -z $STAGE ] || (unset STAGE && pydoc -w main && mv main.html tmp/)
-            ls -ap | grep -v -E -x './|../|.env|.gitignore|Makefile|flake.lock|flake.nix|main.py|prm/|pyproject.toml|python/|result|static/|templates/|tmp/' | grep -q . && exit 1 || true
+            ls -ap | grep -v -E -x './|../|.env|.gitignore|Makefile|flake.lock|flake.nix|main.py|prm/|pyproject.toml|python/|result|static/|templates/|tmp/' | grep -q . && exit 1
             test $(basename $(pwd)) = 'python'
             exit
           '';
