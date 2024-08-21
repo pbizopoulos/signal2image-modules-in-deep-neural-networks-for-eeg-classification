@@ -21,21 +21,21 @@
         { system, ... }:
         let
           pkgs = import nixpkgs { inherit system; };
-          packagesAll = [
+          dependencies = [
             pkgs.http-server
             pkgs.openssl
           ];
         in
         {
           devShells.all = pkgs.mkShell {
-            buildInputs = packagesAll;
+            buildInputs = dependencies;
             shellHook = ''
               [ ! -z $STAGE ] && openssl req -subj '/C=..' -nodes -x509 -keyout tmp/privkey.pem -out tmp/fullchain.pem && http-server --tls --cert tmp/fullchain.pem --key tmp/privkey.pem || true
               exit
             '';
           };
           devShells.check = pkgs.mkShell {
-            buildInputs = packagesAll ++ [
+            buildInputs = dependencies ++ [
               pkgs.biome
               pkgs.git
               pkgs.nixfmt-rfc-style
@@ -53,7 +53,7 @@
               exit
             '';
           };
-          devShells.default = pkgs.mkShell { buildInputs = packagesAll; };
+          devShells.default = pkgs.mkShell { buildInputs = dependencies; };
           formatter = pkgs.nixfmt-rfc-style;
         };
     };
