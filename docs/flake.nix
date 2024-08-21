@@ -45,7 +45,7 @@
             nix fmt
             js-beautify --end-with-newline --indent-inner-html --no-preserve-newlines --type html --replace index.html
             [ -e script.js ] && biome check --unsafe --write script.js || true
-            ls -ap | grep -v -E -x './|../|.env|.gitignore|CNAME|Makefile|index.html|flake.lock|flake.nix|prm/|pyscript/|python/|script.js|style.css|tmp/' | grep -q . && exit 1 || true
+            ls -ap | grep -v -E -x './|../|.env|.gitignore|CNAME|Makefile|index.html|flake.lock|flake.nix|prm/|pyscript/|python/|script.js|style.css|tmp/' | grep -q . && exit 1
             test $(basename $(pwd)) = 'docs'
             exit
           '';

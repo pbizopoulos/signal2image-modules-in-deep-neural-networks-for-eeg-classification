@@ -46,7 +46,7 @@
             checkcites tmp/ms.aux
             chktex ms.tex
             lacheck ms.tex
-            ls -ap | grep -v -E -x './|../|.gitignore|Makefile|flake.lock|flake.nix|ms.bib|ms.tex|prm/|python/|tmp/' | grep -q . && exit 1 || true
+            ls -ap | grep -v -E -x './|../|.gitignore|Makefile|flake.lock|flake.nix|ms.bib|ms.tex|prm/|python/|tmp/' | grep -q . && exit 1
             test $(basename $(pwd)) = 'latex'
             exit
           '';
