@@ -10,6 +10,9 @@ clean:
 .gitignore:
 	printf '.env\nresult\ntmp/\n' > $@
 
+flake.lock:
+	nix flake update
+
 flake.nix:
 	nix flake init
 
