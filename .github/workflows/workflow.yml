@@ -1,5 +1,4 @@
 on: [push, pull_request]
-
 jobs:
   develop:
     runs-on: ubuntu-20.04

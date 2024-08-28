@@ -3,7 +3,6 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
   };
-
   outputs = {
     self,
     nixpkgs,
@@ -37,12 +36,14 @@
               pkgs.biome
               pkgs.git
               pkgs.nodePackages.js-beautify
+              pkgs.nodePackages.prettier
               pkgs.nodejs
             ];
           shellHook = ''
             set -e
             nix flake check
             nix fmt
+            prettier --write .
             js-beautify --end-with-newline --indent-inner-html --no-preserve-newlines --type html --replace index.html
             [ -e script.js ] && biome check --unsafe --write script.js || true
             ls -ap | grep -v -E -x './|../|.env|.gitignore|CNAME|Makefile|index.html|flake.lock|flake.nix|prm/|pyscript/|python/|script.js|style.css|tmp/' | grep -q . && exit 1

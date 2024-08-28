@@ -5,7 +5,6 @@
     check-python-script.url = "github:pbizopoulos/check-python-script?dir=python";
     onnxscript.url = "github:pbizopoulos/nixpkgs?dir=onnxscript";
   };
-
   outputs = {
     self,
     nixpkgs,
@@ -27,13 +26,13 @@
         };
         dependencies = [
           onnxscript.packages.${system}.default
-          pkgs.python3Packages.matplotlib
-          pkgs.python3Packages.onnx
-          pkgs.python3Packages.pandas
-          pkgs.python3Packages.scipy
-          pkgs.python3Packages.torch-bin
-          pkgs.python3Packages.torchvision-bin
-          pkgs.python3Packages.types-requests
+          pkgs.python311Packages.matplotlib
+          pkgs.python311Packages.onnx
+          pkgs.python311Packages.pandas
+          pkgs.python311Packages.scipy
+          pkgs.python311Packages.torch-bin
+          pkgs.python311Packages.torchvision-bin
+          pkgs.python311Packages.types-requests
         ];
       in {
         devShells.all = pkgs.mkShell {

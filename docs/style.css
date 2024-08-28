@@ -5,9 +5,9 @@
 }
 
 .column {
-	width: 50%;
+  width: 50%;
 }
 
 .container {
-	display: flex;
+  display: flex;
 }
