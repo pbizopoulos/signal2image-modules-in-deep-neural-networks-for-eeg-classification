@@ -3,16 +3,18 @@
     "check-python-script": {
       "inputs": {
         "check-python-script": "check-python-script_2",
-        "flake-parts": "flake-parts_10",
-        "nixpkgs": "nixpkgs_22"
+        "flake-parts": "flake-parts_11",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
       },
       "locked": {
         "dir": "python",
-        "lastModified": 1724839506,
-        "narHash": "sha256-dHHNPttLag0dz7QLeUyMznDLfLoYDJccfSa1Io/fA1I=",
+        "lastModified": 1724842859,
+        "narHash": "sha256-mmsxlPyM97qi9etrjD84xyThjXapV5pmLeJg8Y5zgEQ=",
         "owner": "pbizopoulos",
         "repo": "check-python-script",
-        "rev": "447b13ec44acd39bfa6827519672931529e560bf",
+        "rev": "ae38eeef71737a05f4c59fcf3ed467937a80b649",
         "type": "github"
       },
       "original": {
@@ -25,6 +27,28 @@
     "check-python-script_10": {
       "inputs": {
         "check-python-script": "check-python-script_11",
+        "flake-parts": "flake-parts_2",
+        "nixpkgs": "nixpkgs_14"
+      },
+      "locked": {
+        "dir": "python",
+        "lastModified": 1724178356,
+        "narHash": "sha256-bsFoOtiKc9hGZOiS2cIiMFXlW/i68mVVRD0Mdc+mGKo=",
+        "owner": "pbizopoulos",
+        "repo": "check-python-script",
+        "rev": "ab31d0488de1b010361a2179964247394567e316",
+        "type": "github"
+      },
+      "original": {
+        "dir": "python",
+        "owner": "pbizopoulos",
+        "repo": "check-python-script",
+        "type": "github"
+      }
+    },
+    "check-python-script_11": {
+      "inputs": {
+        "check-python-script": "check-python-script_12",
         "flake-parts": "flake-parts",
         "nixpkgs": "nixpkgs_13"
       },
@@ -44,9 +68,9 @@
         "type": "github"
       }
     },
-    "check-python-script_11": {
+    "check-python-script_12": {
       "inputs": {
-        "check-python-script": "check-python-script_12",
+        "check-python-script": "check-python-script_13",
         "flake-utils": "flake-utils_12",
         "nixpkgs": "nixpkgs_12"
       },
@@ -66,9 +90,9 @@
         "type": "github"
       }
     },
-    "check-python-script_12": {
+    "check-python-script_13": {
       "inputs": {
-        "check-python-script": "check-python-script_13",
+        "check-python-script": "check-python-script_14",
         "flake-utils": "flake-utils_11",
         "nixpkgs": "nixpkgs_11"
       },
@@ -88,9 +112,9 @@
         "type": "github"
       }
     },
-    "check-python-script_13": {
+    "check-python-script_14": {
       "inputs": {
-        "check-python-script": "check-python-script_14",
+        "check-python-script": "check-python-script_15",
         "flake-utils": "flake-utils_10",
         "nixpkgs": "nixpkgs_10"
       },
@@ -110,9 +134,9 @@
         "type": "github"
       }
     },
-    "check-python-script_14": {
+    "check-python-script_15": {
       "inputs": {
-        "check-python-script": "check-python-script_15",
+        "check-python-script": "check-python-script_16",
         "flake-utils": "flake-utils_9",
         "nixpkgs": "nixpkgs_9"
       },
@@ -132,9 +156,9 @@
         "type": "github"
       }
     },
-    "check-python-script_15": {
+    "check-python-script_16": {
       "inputs": {
-        "check-python-script": "check-python-script_16",
+        "check-python-script": "check-python-script_17",
         "flake-utils": "flake-utils_8",
         "nixpkgs": "nixpkgs_8"
       },
@@ -154,9 +178,9 @@
         "type": "github"
       }
     },
-    "check-python-script_16": {
+    "check-python-script_17": {
       "inputs": {
-        "check-python-script": "check-python-script_17",
+        "check-python-script": "check-python-script_18",
         "flake-utils": "flake-utils_7",
         "nixpkgs": "nixpkgs_7"
       },
@@ -176,9 +200,9 @@
         "type": "github"
       }
     },
-    "check-python-script_17": {
+    "check-python-script_18": {
       "inputs": {
-        "check-python-script": "check-python-script_18",
+        "check-python-script": "check-python-script_19",
         "flake-utils": "flake-utils_6",
         "nixpkgs": "nixpkgs_6"
       },
@@ -198,9 +222,9 @@
         "type": "github"
       }
     },
-    "check-python-script_18": {
+    "check-python-script_19": {
       "inputs": {
-        "check-python-script": "check-python-script_19",
+        "check-python-script": "check-python-script_20",
         "flake-utils": "flake-utils_5",
         "nixpkgs": "nixpkgs_5"
       },
@@ -220,9 +244,31 @@
         "type": "github"
       }
     },
-    "check-python-script_19": {
+    "check-python-script_2": {
       "inputs": {
-        "check-python-script": "check-python-script_20",
+        "check-python-script": "check-python-script_3",
+        "flake-parts": "flake-parts_10",
+        "nixpkgs": "nixpkgs_22"
+      },
+      "locked": {
+        "dir": "python",
+        "lastModified": 1724839506,
+        "narHash": "sha256-dHHNPttLag0dz7QLeUyMznDLfLoYDJccfSa1Io/fA1I=",
+        "owner": "pbizopoulos",
+        "repo": "check-python-script",
+        "rev": "447b13ec44acd39bfa6827519672931529e560bf",
+        "type": "github"
+      },
+      "original": {
+        "dir": "python",
+        "owner": "pbizopoulos",
+        "repo": "check-python-script",
+        "type": "github"
+      }
+    },
+    "check-python-script_20": {
+      "inputs": {
+        "check-python-script": "check-python-script_21",
         "flake-utils": "flake-utils_4",
         "nixpkgs": "nixpkgs_4"
       },
@@ -242,31 +288,9 @@
         "type": "github"
       }
     },
-    "check-python-script_2": {
+    "check-python-script_21": {
       "inputs": {
-        "check-python-script": "check-python-script_3",
-        "flake-parts": "flake-parts_9",
-        "nixpkgs": "nixpkgs_21"
-      },
-      "locked": {
-        "dir": "python",
-        "lastModified": 1724837220,
-        "narHash": "sha256-G5JQg08wIypjweyEEFOnMxh2ZXSzfgqpne8RrJF0ygU=",
-        "owner": "pbizopoulos",
-        "repo": "check-python-script",
-        "rev": "c0427f29c5cfde23a7152f413d61b58098e38fb3",
-        "type": "github"
-      },
-      "original": {
-        "dir": "python",
-        "owner": "pbizopoulos",
-        "repo": "check-python-script",
-        "type": "github"
-      }
-    },
-    "check-python-script_20": {
-      "inputs": {
-        "check-python-script": "check-python-script_21",
+        "check-python-script": "check-python-script_22",
         "flake-utils": "flake-utils_3",
         "nixpkgs": "nixpkgs_3"
       },
@@ -287,9 +311,9 @@
         "type": "github"
       }
     },
-    "check-python-script_21": {
+    "check-python-script_22": {
       "inputs": {
-        "check-python-script": "check-python-script_22",
+        "check-python-script": "check-python-script_23",
         "flake-utils": "flake-utils_2",
         "nixpkgs": "nixpkgs_2"
       },
@@ -310,7 +334,7 @@
         "type": "github"
       }
     },
-    "check-python-script_22": {
+    "check-python-script_23": {
       "inputs": {
         "flake-utils": "flake-utils",
         "nixpkgs": "nixpkgs"
@@ -335,6 +359,28 @@
     "check-python-script_3": {
       "inputs": {
         "check-python-script": "check-python-script_4",
+        "flake-parts": "flake-parts_9",
+        "nixpkgs": "nixpkgs_21"
+      },
+      "locked": {
+        "dir": "python",
+        "lastModified": 1724837220,
+        "narHash": "sha256-G5JQg08wIypjweyEEFOnMxh2ZXSzfgqpne8RrJF0ygU=",
+        "owner": "pbizopoulos",
+        "repo": "check-python-script",
+        "rev": "c0427f29c5cfde23a7152f413d61b58098e38fb3",
+        "type": "github"
+      },
+      "original": {
+        "dir": "python",
+        "owner": "pbizopoulos",
+        "repo": "check-python-script",
+        "type": "github"
+      }
+    },
+    "check-python-script_4": {
+      "inputs": {
+        "check-python-script": "check-python-script_5",
         "flake-parts": "flake-parts_8",
         "nixpkgs": "nixpkgs_20"
       },
@@ -354,9 +400,9 @@
         "type": "github"
       }
     },
-    "check-python-script_4": {
+    "check-python-script_5": {
       "inputs": {
-        "check-python-script": "check-python-script_5",
+        "check-python-script": "check-python-script_6",
         "flake-parts": "flake-parts_7",
         "nixpkgs": "nixpkgs_19"
       },
@@ -376,9 +422,9 @@
         "type": "github"
       }
     },
-    "check-python-script_5": {
+    "check-python-script_6": {
       "inputs": {
-        "check-python-script": "check-python-script_6",
+        "check-python-script": "check-python-script_7",
         "flake-parts": "flake-parts_6",
         "nixpkgs": "nixpkgs_18"
       },
@@ -398,9 +444,9 @@
         "type": "github"
       }
     },
-    "check-python-script_6": {
+    "check-python-script_7": {
       "inputs": {
-        "check-python-script": "check-python-script_7",
+        "check-python-script": "check-python-script_8",
         "flake-parts": "flake-parts_5",
         "nixpkgs": "nixpkgs_17"
       },
@@ -420,9 +466,9 @@
         "type": "github"
       }
     },
-    "check-python-script_7": {
+    "check-python-script_8": {
       "inputs": {
-        "check-python-script": "check-python-script_8",
+        "check-python-script": "check-python-script_9",
         "flake-parts": "flake-parts_4",
         "nixpkgs": "nixpkgs_16"
       },
@@ -442,9 +488,9 @@
         "type": "github"
       }
     },
-    "check-python-script_8": {
+    "check-python-script_9": {
       "inputs": {
-        "check-python-script": "check-python-script_9",
+        "check-python-script": "check-python-script_10",
         "flake-parts": "flake-parts_3",
         "nixpkgs": "nixpkgs_15"
       },
@@ -455,28 +501,6 @@
         "owner": "pbizopoulos",
         "repo": "check-python-script",
         "rev": "0f9f236e3df624075e87d1be18c5a6ffc41af5d5",
-        "type": "github"
-      },
-      "original": {
-        "dir": "python",
-        "owner": "pbizopoulos",
-        "repo": "check-python-script",
-        "type": "github"
-      }
-    },
-    "check-python-script_9": {
-      "inputs": {
-        "check-python-script": "check-python-script_10",
-        "flake-parts": "flake-parts_2",
-        "nixpkgs": "nixpkgs_14"
-      },
-      "locked": {
-        "dir": "python",
-        "lastModified": 1724178356,
-        "narHash": "sha256-bsFoOtiKc9hGZOiS2cIiMFXlW/i68mVVRD0Mdc+mGKo=",
-        "owner": "pbizopoulos",
-        "repo": "check-python-script",
-        "rev": "ab31d0488de1b010361a2179964247394567e316",
         "type": "github"
       },
       "original": {
@@ -543,6 +567,24 @@
     "flake-parts_12": {
       "inputs": {
         "nixpkgs-lib": "nixpkgs-lib_12"
+      },
+      "locked": {
+        "lastModified": 1722555600,
+        "narHash": "sha256-XOQkdLafnb/p9ij77byFQjDf5m5QYl9b2REiVClC+x4=",
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "rev": "8471fe90ad337a8074e957b69ca4d0089218391d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "type": "github"
+      }
+    },
+    "flake-parts_13": {
+      "inputs": {
+        "nixpkgs-lib": "nixpkgs-lib_13"
       },
       "locked": {
         "lastModified": 1722555600,
@@ -982,6 +1024,18 @@
         "url": "https://github.com/NixOS/nixpkgs/archive/a5d394176e64ab29c852d03346c1fc9b0b7d33eb.tar.gz"
       }
     },
+    "nixpkgs-lib_13": {
+      "locked": {
+        "lastModified": 1722555339,
+        "narHash": "sha256-uFf2QeW7eAHlYXuDktm9c25OxOyCoUOQmh5SZ9amE5Q=",
+        "type": "tarball",
+        "url": "https://github.com/NixOS/nixpkgs/archive/a5d394176e64ab29c852d03346c1fc9b0b7d33eb.tar.gz"
+      },
+      "original": {
+        "type": "tarball",
+        "url": "https://github.com/NixOS/nixpkgs/archive/a5d394176e64ab29c852d03346c1fc9b0b7d33eb.tar.gz"
+      }
+    },
     "nixpkgs-lib_2": {
       "locked": {
         "lastModified": 1722555339,
@@ -1304,11 +1358,11 @@
     },
     "nixpkgs_23": {
       "locked": {
-        "lastModified": 1724531977,
-        "narHash": "sha256-XROVLf9ti4rrNCFLr+DmXRZtPjCQTW4cYy59owTEmxk=",
+        "lastModified": 1724727824,
+        "narHash": "sha256-0XH9MJk54imJm+RHOLTUJ7e+ponLW00tw5ke4MTVa1Y=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "2527da1ef492c495d5391f3bcf9c1dd9f4514e32",
+        "rev": "36bae45077667aff5720e5b3f1a5458f51cf0776",
         "type": "github"
       },
       "original": {
@@ -1320,16 +1374,16 @@
     },
     "nixpkgs_24": {
       "locked": {
-        "lastModified": 1724479785,
-        "narHash": "sha256-pP3Azj5d6M5nmG68Fu4JqZmdGt4S4vqI5f8te+E/FTw=",
+        "lastModified": 1724727824,
+        "narHash": "sha256-0XH9MJk54imJm+RHOLTUJ7e+ponLW00tw5ke4MTVa1Y=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "d0e1602ddde669d5beb01aec49d71a51937ed7be",
+        "rev": "36bae45077667aff5720e5b3f1a5458f51cf0776",
         "type": "github"
       },
       "original": {
         "owner": "NixOS",
-        "ref": "nixos-unstable",
+        "ref": "nixos-24.05",
         "repo": "nixpkgs",
         "type": "github"
       }
@@ -1448,16 +1502,16 @@
     },
     "onnxscript": {
       "inputs": {
-        "flake-parts": "flake-parts_12",
+        "flake-parts": "flake-parts_13",
         "nixpkgs": "nixpkgs_24"
       },
       "locked": {
         "dir": "onnxscript",
-        "lastModified": 1724833510,
-        "narHash": "sha256-7KbjtFy7gGM8PoMxbT9FYmfchq2cx/adaKua+kafaqg=",
+        "lastModified": 1724879652,
+        "narHash": "sha256-ciXinF9tDPaW6pPvNBrJnrNPwR+HEBq0591c+T/mMT8=",
         "owner": "pbizopoulos",
         "repo": "nixpkgs",
-        "rev": "afa8df7c1738c46be33538116207a57759ec8b2e",
+        "rev": "de3e5e61b4c93eb9bf1c37bce48e2775d117f97f",
         "type": "github"
       },
       "original": {
@@ -1470,7 +1524,7 @@
     "root": {
       "inputs": {
         "check-python-script": "check-python-script",
-        "flake-parts": "flake-parts_11",
+        "flake-parts": "flake-parts_12",
         "nixpkgs": "nixpkgs_23",
         "onnxscript": "onnxscript"
       }
