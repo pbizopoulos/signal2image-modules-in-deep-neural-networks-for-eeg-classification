@@ -1,12 +1,15 @@
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
     check-python-script = {
       url = "github:pbizopoulos/check-python-script?dir=python";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    onnxscript.url = "github:pbizopoulos/nixpkgs?dir=onnxscript";
+    onnxscript = {
+      url = "github:pbizopoulos/nixpkgs?dir=onnxscript";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
   outputs = {
     self,

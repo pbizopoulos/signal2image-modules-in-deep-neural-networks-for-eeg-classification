@@ -15,7 +15,7 @@ from matplotlib import pyplot as plt
 from scipy.signal import spectrogram
 from torch import nn
 from torch.nn import functional
-from torch.optim import Adam
+from torch.optim import Adam  # type: ignore[attr-defined]
 from torch.utils.data import DataLoader, Dataset
 from torchvision import models
 
@@ -373,7 +373,7 @@ class _ResNet(nn.Module):
                 nn.init.constant_(module.weight, 1)
                 nn.init.constant_(module.bias, 0)
 
-    def _make_layer(  # noqa: PLR0913
+    def _make_layer(
         self: _ResNet,
         block: type[M],
         blocks: int,
@@ -409,7 +409,7 @@ class _ResNet(nn.Module):
 
 
 class _SignalAsImage(nn.Module):
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self: _SignalAsImage,
         num_classes: int,
         model_base: nn.Module,
@@ -784,9 +784,9 @@ def _main() -> None:  # noqa: C901,PLR0912,PLR0915
                 accuracy_validation = 100 * num_predictions_correct / num_predictions
                 if accuracy_validation > accuracy_validation_best:
                     accuracy_validation_best = accuracy_validation
-                    model_file_path = Path(f"tmp/{model_file_name}.pt")
+                    model_file_path = f"tmp/{model_file_name}.pt"
                     torch.save(model.state_dict(), model_file_path)
-            model.load_state_dict(torch.load(model_file_path))
+            model.load_state_dict(torch.load(model_file_path, weights_only=True))
             loss_test_sum = 0
             num_predictions_correct = 0
             num_predictions = 0
@@ -864,29 +864,31 @@ def _main() -> None:  # noqa: C901,PLR0912,PLR0915
             mode="magnitude",
         )
         data = np.array(
-            PIL.Image.fromarray(spectrogram_array[0]).resize(  # type: ignore[no-untyped-call]
+            PIL.Image.fromarray(spectrogram_array[0]).resize(
                 (signals_all.shape[-1], signals_all.shape[-1]),
                 resample=1,
             ),
         )
         plt.figure()
-        plt.imsave(Path(f"tmp/spectrogram-{class_name}.png"), data, cmap="gray")
+        plt.imsave(f"tmp/spectrogram-{class_name}.png", data, cmap="gray")
         plt.close()
         model = _CNNOneLayer(num_classes, models.alexnet(), "alexnet-cnn-one-layer")
-        model.load_state_dict(torch.load(Path("tmp/alexnet-cnn-one-layer.pt")))
+        model.load_state_dict(
+            torch.load("tmp/alexnet-cnn-one-layer.pt", weights_only=True),
+        )
         signal = signals_all[signal_index].unsqueeze(0)
         hook = _Hook()
         model.conv.register_forward_hook(hook)  # type: ignore[arg-type]
         model(signal)
         data = hook.outputs[0][0, 0].cpu().detach().numpy()  # type: ignore[index]
         data = np.array(
-            PIL.Image.fromarray(data).resize(  # type: ignore[no-untyped-call]
+            PIL.Image.fromarray(data).resize(
                 (signals_all.shape[-1], signals_all.shape[-1]),
                 resample=1,
             ),
         )
         plt.figure()
-        plt.imsave(Path(f"tmp/cnn-{class_name}.png"), data, cmap="gray")
+        plt.imsave(f"tmp/cnn-{class_name}.png", data, cmap="gray")
         plt.close()
 
 
