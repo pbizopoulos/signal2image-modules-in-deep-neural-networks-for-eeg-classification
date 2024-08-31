@@ -9,11 +9,11 @@
       },
       "locked": {
         "dir": "python",
-        "lastModified": 1725093539,
-        "narHash": "sha256-oSdXDzj443cWdZCoETYBcHmGeVnNEJJ7FRGsagI696M=",
+        "lastModified": 1725093607,
+        "narHash": "sha256-N9skWtStqLepVMWiNRd9JEY1Mb7SMqSf22d121wcKjI=",
         "owner": "pbizopoulos",
         "repo": "check-python-script",
-        "rev": "b99699f4e060203ca1daee40b3c5d52ba59417e9",
+        "rev": "414876b7238392b48120280dd8c35f6c13d38d68",
         "type": "github"
       },
       "original": {
@@ -138,11 +138,11 @@
       },
       "locked": {
         "dir": "onnxscript",
-        "lastModified": 1725034916,
-        "narHash": "sha256-Dv3EVSpSIIUVLGvhqUmlUMAs6jR6+ealORiL+a7qu2c=",
+        "lastModified": 1725096181,
+        "narHash": "sha256-Mfy4j9ErU0OEf50RQaq41kf8dYq6y3rVPXvoRYgfU8Y=",
         "owner": "pbizopoulos",
         "repo": "nixpkgs",
-        "rev": "b4b634a86dc9b1577401612dc5fe528bd8d192fd",
+        "rev": "46900aa22916961dc5f5bd023309087d3ec5bfe8",
         "type": "github"
       },
       "original": {
