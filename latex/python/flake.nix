@@ -58,7 +58,7 @@
               pkgs.djlint
               pkgs.git
               pkgs.mypy
-              pkgs.python3Packages.coverage
+              pkgs.python311Packages.coverage
               pkgs.ruff
             ];
           shellHook = ''
