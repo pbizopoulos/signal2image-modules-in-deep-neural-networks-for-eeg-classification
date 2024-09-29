@@ -9,11 +9,11 @@
       },
       "locked": {
         "dir": "python",
-        "lastModified": 1727625976,
-        "narHash": "sha256-oF/C0tpPcoKParmn9kurx0xZEHTGgPtESJZ/FA74iF4=",
+        "lastModified": 1727627105,
+        "narHash": "sha256-K21FLoh51S3AoS5L5eKm36ewxo/kTLMuNvaPkA0qO0U=",
         "owner": "pbizopoulos",
         "repo": "check-python-script",
-        "rev": "8fd3144af6a54e8fc30d197ef5f017009e911cba",
+        "rev": "4cc5680afecf70466eca871d5a642d90535aa0b7",
         "type": "github"
       },
       "original": {
