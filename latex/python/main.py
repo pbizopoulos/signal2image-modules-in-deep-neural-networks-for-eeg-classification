@@ -288,6 +288,9 @@ class _DenseNet(nn.Module):
 
 
 class _Hook:
+    def __init__(self: _Hook) -> None:
+        self.outputs: list[nn.Module] = []
+
     def __call__(
         self: _Hook,
         _: nn.Module,
@@ -295,9 +298,6 @@ class _Hook:
         module_out: nn.Module,
     ) -> None:
         self.outputs.append(module_out)
-
-    def __init__(self: _Hook) -> None:
-        self.outputs: list[nn.Module] = []
 
 
 class _LeNet2D(nn.Module):
@@ -497,12 +497,6 @@ class _Transition(nn.Sequential):
 
 
 class _UCIEpilepsy(Dataset[tuple[torch.Tensor, torch.Tensor]]):
-    def __getitem__(
-        self: _UCIEpilepsy,
-        index: int,
-    ) -> tuple[torch.Tensor, torch.Tensor]:
-        return (self.data[index], self.target[index])
-
     def __init__(
         self: _UCIEpilepsy,
         num_samples: int,
@@ -548,6 +542,12 @@ class _UCIEpilepsy(Dataset[tuple[torch.Tensor, torch.Tensor]]):
                 torch.tensor(classes_all[last_validation_index:].to_numpy()) - 1
             )
         self.data.unsqueeze_(1)
+
+    def __getitem__(
+        self: _UCIEpilepsy,
+        index: int,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        return (self.data[index], self.target[index])
 
     def __len__(self: _UCIEpilepsy) -> int:
         return self.target.shape[0]
