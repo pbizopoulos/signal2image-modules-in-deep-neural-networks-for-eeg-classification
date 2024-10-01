@@ -23,9 +23,9 @@ tmp:
 	mkdir $@
 
 tmp/all-done: .gitignore flake.lock flake.nix main.py
-	nix develop --ignore-environment --keep STAGE .#all
+	nix develop --ignore-environment --impure --keep STAGE .#all
 	touch $@
 
 tmp/check-done: .gitignore flake.lock flake.nix main.py
-	nix develop --ignore-environment --keep STAGE .#check
+	nix develop --ignore-environment --impure --keep STAGE .#check
 	touch $@
