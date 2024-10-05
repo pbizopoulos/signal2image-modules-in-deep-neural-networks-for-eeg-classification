@@ -24,11 +24,11 @@ cd latex/ && make && cd ..
 cd docs/ && make STAGE=1
 xdg-open https://localhost:8080
 
-# Run Requirements
+# Use Requirements
 # Any PDF viewer
 # Any Web Browser
 
-# Run
+# Use
 xdg-open ~/github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/latex/tmp/ms.pdf
 xdg-open https://pbizopoulos.github.io/signal2image-modules-in-deep-neural-networks-for-eeg-classification/
 
