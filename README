@@ -13,6 +13,7 @@ cd ~/github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg
 cd docs/ && make clean check all && cd ..
 cd latex/python/ && make clean check all && cd ../..
 cd latex/ && make clean check all && cd ..
+make clean check all
 
 # Stage Requirements
 # Develop Requirements

@@ -14,3 +14,4 @@ jobs:
           sed -i 's/config.allowUnfree = true;//' latex/python/flake.nix
           cd latex/python/ && make clean check all && cd ../..
           cd latex/ && make clean check all && cd ..
+          make clean check all
