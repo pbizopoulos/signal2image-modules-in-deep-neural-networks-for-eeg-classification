@@ -10,10 +10,6 @@
       url = "github:nix-community/nixGL";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    onnxscript = {
-      url = "github:pbizopoulos/nixpkgs?dir=onnxscript";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
   outputs = {
     self,
@@ -21,7 +17,6 @@
     flake-parts,
     check-python-script,
     nixgl,
-    onnxscript,
   } @ inputs:
     flake-parts.lib.mkFlake {inherit inputs;} {
       systems = [
@@ -37,7 +32,7 @@
           overlays = [nixgl.overlay];
         };
         dependencies = [
-          onnxscript.packages.${system}.default
+          onnxscript
           pkgs.nixgl.auto.nixGLDefault
           pkgs.python311Packages.matplotlib
           pkgs.python311Packages.onnx
@@ -47,6 +42,18 @@
           pkgs.python311Packages.torchvision-bin
           pkgs.python311Packages.types-requests
         ];
+        onnxscript = pkgs.python311Packages.buildPythonPackage rec {
+          pname = "onnxscript";
+          version = "0.1.0.dev20240728";
+          format = "wheel";
+          src = pkgs.python311Packages.fetchPypi rec {
+            inherit pname version format;
+            sha256 = "Y8Cx4BQiWPf8QGAgnZMCQiWRQK5pqG/rHpwEHklEL78=";
+            dist = python;
+            python = "py3";
+          };
+          propagatedBuildInputs = [pkgs.python311Packages.ml-dtypes pkgs.python311Packages.packaging pkgs.python311Packages.onnx];
+        };
       in {
         devShells.all = pkgs.mkShell {
           PYTHONDONTWRITEBYTECODE = true;

@@ -9,11 +9,11 @@
       },
       "locked": {
         "dir": "python",
-        "lastModified": 1728144716,
-        "narHash": "sha256-yPNwNgp9sIEda2lPpEkqFCMpELYrNLM5X5pZNeOm4uc=",
+        "lastModified": 1728227376,
+        "narHash": "sha256-/yECTYghT6WeiLBZEk3yqOVRRBCa8yUnhXpM3Md96mI=",
         "owner": "pbizopoulos",
         "repo": "check-python-script",
-        "rev": "3ae649088fb217fe491e012498e5375448ab1c38",
+        "rev": "74e5d91a707866790e17bfbbf95bd31ea2942be8",
         "type": "github"
       },
       "original": {
@@ -44,24 +44,6 @@
     "flake-parts_2": {
       "inputs": {
         "nixpkgs-lib": "nixpkgs-lib_2"
-      },
-      "locked": {
-        "lastModified": 1727826117,
-        "narHash": "sha256-K5ZLCyfO/Zj9mPFldf3iwS6oZStJcU4tSpiXTMYaaL0=",
-        "owner": "hercules-ci",
-        "repo": "flake-parts",
-        "rev": "3d04084d54bedc3d6b8b736c70ef449225c361b1",
-        "type": "github"
-      },
-      "original": {
-        "owner": "hercules-ci",
-        "repo": "flake-parts",
-        "type": "github"
-      }
-    },
-    "flake-parts_3": {
-      "inputs": {
-        "nixpkgs-lib": "nixpkgs-lib_3"
       },
       "locked": {
         "lastModified": 1727826117,
@@ -153,48 +135,12 @@
         "url": "https://github.com/NixOS/nixpkgs/archive/fb192fec7cc7a4c26d51779e9bab07ce6fa5597a.tar.gz"
       }
     },
-    "nixpkgs-lib_3": {
-      "locked": {
-        "lastModified": 1727825735,
-        "narHash": "sha256-0xHYkMkeLVQAMa7gvkddbPqpxph+hDzdu1XdGPJR+Os=",
-        "type": "tarball",
-        "url": "https://github.com/NixOS/nixpkgs/archive/fb192fec7cc7a4c26d51779e9bab07ce6fa5597a.tar.gz"
-      },
-      "original": {
-        "type": "tarball",
-        "url": "https://github.com/NixOS/nixpkgs/archive/fb192fec7cc7a4c26d51779e9bab07ce6fa5597a.tar.gz"
-      }
-    },
-    "onnxscript": {
-      "inputs": {
-        "flake-parts": "flake-parts_3",
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "dir": "onnxscript",
-        "lastModified": 1728144727,
-        "narHash": "sha256-AtS2Zb4sTAcALs8pnQps8uaK6IQdG1NPy24AbHDvL78=",
-        "owner": "pbizopoulos",
-        "repo": "nixpkgs",
-        "rev": "ee374d3066cd867566df316bf10baab11e52279f",
-        "type": "github"
-      },
-      "original": {
-        "dir": "onnxscript",
-        "owner": "pbizopoulos",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
     "root": {
       "inputs": {
         "check-python-script": "check-python-script",
         "flake-parts": "flake-parts_2",
         "nixgl": "nixgl",
-        "nixpkgs": "nixpkgs",
-        "onnxscript": "onnxscript"
+        "nixpkgs": "nixpkgs"
       }
     }
   },
