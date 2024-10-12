@@ -55,41 +55,43 @@
           propagatedBuildInputs = [pkgs.python311Packages.ml-dtypes pkgs.python311Packages.packaging pkgs.python311Packages.onnx];
         };
       in {
-        devShells.all = pkgs.mkShell {
-          PYTHONDONTWRITEBYTECODE = true;
-          buildInputs = dependencies;
-          shellHook = ''
-            set -e
-            nixGL python3 main.py || exit
-            exit
-          '';
+        devShells = {
+          all = pkgs.mkShell {
+            PYTHONDONTWRITEBYTECODE = true;
+            buildInputs = dependencies;
+            shellHook = ''
+              set -e
+              nixGL python3 main.py || exit
+              exit
+            '';
+          };
+          check = pkgs.mkShell {
+            buildInputs =
+              dependencies
+              ++ [
+                check-python-script.packages.${system}.default
+                pkgs.git
+                pkgs.py-spy
+                pkgs.python311Packages.coverage
+                pkgs.python311Packages.mypy
+                pkgs.ruff
+              ];
+            shellHook = ''
+              set -e
+              nix flake check --impure
+              nix fmt
+              check-python-script main.py
+              ruff format --cache-dir tmp/ruff main.py
+              ruff check --cache-dir tmp/ruff --exit-non-zero-on-fix --fix --select ALL --unsafe-fixes main.py
+              mypy --cache-dir tmp/mypy --ignore-missing-imports --strict main.py
+              [ -z $STAGE ] || (unset STAGE && coverage run --data-file=tmp/.coverage main.py && coverage html --data-file=tmp/.coverage --directory tmp/ --ignore-errors && py-spy record --format speedscope --output tmp/speedscope -- python main.py)
+              ls -ap | grep -v -E -x './|../|.env|.gitignore|Makefile|flake.lock|flake.nix|main.py|prm/|pyproject.toml|python/|result|static/|templates/|tmp/' | grep -q . && exit 1
+              test $(basename $(pwd)) = 'python'
+              exit
+            '';
+          };
+          default = pkgs.mkShell {buildInputs = dependencies;};
         };
-        devShells.check = pkgs.mkShell {
-          buildInputs =
-            dependencies
-            ++ [
-              check-python-script.packages.${system}.default
-              pkgs.git
-              pkgs.py-spy
-              pkgs.python311Packages.coverage
-              pkgs.python311Packages.mypy
-              pkgs.ruff
-            ];
-          shellHook = ''
-            set -e
-            nix flake check --impure
-            nix fmt
-            check-python-script main.py
-            ruff format --cache-dir tmp/ruff main.py
-            ruff check --cache-dir tmp/ruff --exit-non-zero-on-fix --fix --select ALL --unsafe-fixes main.py
-            mypy --cache-dir tmp/mypy --ignore-missing-imports --strict main.py
-            [ -z $STAGE ] || (unset STAGE && coverage run --data-file=tmp/.coverage main.py && coverage html --data-file=tmp/.coverage --directory tmp/ --ignore-errors && py-spy record --format speedscope --output tmp/speedscope -- python main.py)
-            ls -ap | grep -v -E -x './|../|.env|.gitignore|Makefile|flake.lock|flake.nix|main.py|prm/|pyproject.toml|python/|result|static/|templates/|tmp/' | grep -q . && exit 1
-            test $(basename $(pwd)) = 'python'
-            exit
-          '';
-        };
-        devShells.default = pkgs.mkShell {buildInputs = dependencies;};
         formatter = pkgs.alejandra;
       };
     };

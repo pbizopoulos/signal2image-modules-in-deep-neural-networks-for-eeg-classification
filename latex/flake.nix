@@ -19,38 +19,40 @@
         pkgs = import nixpkgs {inherit system;};
         packages = with pkgs; [texlive.combined.scheme-full];
       in {
-        devShells.all = pkgs.mkShell {
-          buildInputs = packages;
-          shellHook = ''
-            set -e
-            latexmk -outdir=tmp/ -pdf ms.tex
-            touch tmp/ms.bbl
-            cp tmp/ms.bbl .
-            tar cf tmp/tex.tar ms.bbl ms.bib ms.tex $(grep "^INPUT ./" tmp/ms.fls | uniq | cut -b 9-)
-            rm ms.bbl
-            exit
-          '';
+        devShells = {
+          all = pkgs.mkShell {
+            buildInputs = packages;
+            shellHook = ''
+              set -e
+              latexmk -outdir=tmp/ -pdf ms.tex
+              touch tmp/ms.bbl
+              cp tmp/ms.bbl .
+              tar cf tmp/tex.tar ms.bbl ms.bib ms.tex $(grep "^INPUT ./" tmp/ms.fls | uniq | cut -b 9-)
+              rm ms.bbl
+              exit
+            '';
+          };
+          check = pkgs.mkShell {
+            buildInputs =
+              packages
+              ++ [
+                pkgs.git
+              ];
+            shellHook = ''
+              set -e
+              nix flake check
+              nix fmt
+              latexmk -outdir=tmp/ -pdf ms.tex
+              checkcites tmp/ms.aux
+              chktex ms.tex
+              lacheck ms.tex
+              ls -ap | grep -v -E -x './|../|.gitignore|Makefile|flake.lock|flake.nix|ms.bib|ms.tex|prm/|python/|tmp/' | grep -q . && exit 1
+              test $(basename $(pwd)) = 'latex'
+              exit
+            '';
+          };
+          default = pkgs.mkShell {buildInputs = packages;};
         };
-        devShells.check = pkgs.mkShell {
-          buildInputs =
-            packages
-            ++ [
-              pkgs.git
-            ];
-          shellHook = ''
-            set -e
-            nix flake check
-            nix fmt
-            latexmk -outdir=tmp/ -pdf ms.tex
-            checkcites tmp/ms.aux
-            chktex ms.tex
-            lacheck ms.tex
-            ls -ap | grep -v -E -x './|../|.gitignore|Makefile|flake.lock|flake.nix|ms.bib|ms.tex|prm/|python/|tmp/' | grep -q . && exit 1
-            test $(basename $(pwd)) = 'latex'
-            exit
-          '';
-        };
-        devShells.default = pkgs.mkShell {buildInputs = packages;};
         formatter = pkgs.alejandra;
       };
     };
