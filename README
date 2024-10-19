@@ -9,20 +9,19 @@ xdg-open https://ieeexplore.ieee.org/abstract/document/8856620/
 git clone git@github.com:pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification ~/github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification
 
 # Develop
-cd ~/github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/
-cd docs/ && make clean check all && cd ..
-cd latex/python/ && make clean check all && cd ../..
-cd latex/ && make clean check all && cd ..
-make clean check all
+make clean check all -C ~/github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/docs/
+make clean check all -C ~/github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/latex/python/
+make clean check all -C ~/github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/latex/
+make clean check all -C ~/github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/
 
 # Stage Requirements
 # Develop Requirements
 
 # Stage
-cd ~/github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/
-cd latex/python/ && make STAGE=1 && cd ../..
-cd latex/ && make && cd ..
-cd docs/ && make STAGE=1
+make STAGE=1 -C ~/github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/latex/python/
+make STAGE=1 -C ~/github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/latex/
+make STAGE=1 -C ~/github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/docs/
+make STAGE=1 -C ~/github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/
 xdg-open https://localhost:8080
 
 # Use Requirements

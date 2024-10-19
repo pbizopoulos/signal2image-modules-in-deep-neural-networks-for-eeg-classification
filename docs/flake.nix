@@ -26,8 +26,14 @@
           all = pkgs.mkShell {
             buildInputs = dependencies;
             shellHook = ''
-              [ ! -z $STAGE ] && openssl req -subj '/C=..' -nodes -x509 -keyout tmp/privkey.pem -out tmp/fullchain.pem && http-server --tls --cert tmp/fullchain.pem --key tmp/privkey.pem || true
-              exit
+              set -e
+              if [ -n "$STAGE" ]; then
+                openssl req -keyout tmp/privkey.pem -nodes -out tmp/fullchain.pem -subj '/C=..' -x509
+                http-server --cert tmp/fullchain.pem --key tmp/privkey.pem --tls
+                exit 1
+              else
+                exit 0
+              fi
             '';
           };
           check = pkgs.mkShell {

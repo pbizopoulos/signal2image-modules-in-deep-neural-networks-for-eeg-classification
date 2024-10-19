@@ -1,5 +1,3 @@
-.POSIX:
-
 all: tmp tmp/all-done
 
 check: tmp tmp/check-done
