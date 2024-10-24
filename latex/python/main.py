@@ -640,7 +640,122 @@ def _densenet201(num_classes: int) -> nn.Module:
     )
 
 
-def _main() -> None:  # noqa: C901,PLR0912,PLR0915
+def _make_layers(cfg: list) -> nn.Module:  # type: ignore[type-arg]
+    layers: list[nn.Module] = []
+    in_channels = 1
+    for cfg_element in cfg:
+        if cfg_element == "M":
+            layers += [nn.MaxPool1d(kernel_size=2, stride=2)]
+        else:
+            conv1d = nn.Conv1d(in_channels, cfg_element, kernel_size=3, padding=1)
+            layers += [conv1d, nn.ReLU()]
+            in_channels = cfg_element
+    return nn.Sequential(*layers)
+
+
+def _replace_last_layer(
+    num_classes: int,
+    model_base: nn.Module,
+    model_file_name: str,
+) -> nn.Module:
+    if model_file_name.startswith(("alexnet", "vgg")):
+        model_base.classifier[-1] = nn.Linear(
+            model_base.classifier[-1].in_features,
+            num_classes,
+        )
+    elif model_file_name.startswith("resnet"):
+        model_base.fc = nn.Linear(model_base.fc.in_features, num_classes)
+    elif model_file_name.startswith("densenet"):
+        model_base.classifier = nn.Linear(
+            model_base.classifier.in_features,
+            num_classes,
+        )
+    return model_base
+
+
+def _resnet101(num_classes: int) -> nn.Module:
+    return _ResNet(_Bottleneck, num_classes, expansion=4, layers=[3, 4, 23, 3])
+
+
+def _resnet152(num_classes: int) -> nn.Module:
+    return _ResNet(_Bottleneck, num_classes, expansion=4, layers=[3, 8, 36, 3])
+
+
+def _resnet18(num_classes: int) -> nn.Module:
+    return _ResNet(_BasicBlock, num_classes, expansion=1, layers=[2, 2, 2, 2])
+
+
+def _resnet34(num_classes: int) -> nn.Module:
+    return _ResNet(_BasicBlock, num_classes, expansion=1, layers=[3, 4, 6, 3])
+
+
+def _resnet50(num_classes: int) -> nn.Module:
+    return _ResNet(_Bottleneck, num_classes, expansion=4, layers=[3, 4, 6, 3])
+
+
+def _vgg11(num_classes: int) -> nn.Module:
+    cfg = [64, "M", 128, "M", 256, 256, "M", 512, 512, "M", 512, 512, "M"]
+    return _VGG(num_classes, _make_layers(cfg))
+
+
+def _vgg13(num_classes: int) -> nn.Module:
+    cfg = [64, 64, "M", 128, 128, "M", 256, 256, "M", 512, 512, "M", 512, 512, "M"]
+    return _VGG(num_classes, _make_layers(cfg))
+
+
+def _vgg16(num_classes: int) -> nn.Module:
+    cfg = [
+        64,
+        64,
+        "M",
+        128,
+        128,
+        "M",
+        256,
+        256,
+        256,
+        "M",
+        512,
+        512,
+        512,
+        "M",
+        512,
+        512,
+        512,
+        "M",
+    ]
+    return _VGG(num_classes, _make_layers(cfg))
+
+
+def _vgg19(num_classes: int) -> nn.Module:
+    cfg = [
+        64,
+        64,
+        "M",
+        128,
+        128,
+        "M",
+        256,
+        256,
+        256,
+        256,
+        "M",
+        512,
+        512,
+        512,
+        512,
+        "M",
+        512,
+        512,
+        512,
+        512,
+        "M",
+    ]
+    return _VGG(num_classes, _make_layers(cfg))
+
+
+def main() -> None:  # noqa: C901,PLR0912,PLR0915
+    """Train EEG classification models and generate corresponding images and tables."""
     if os.getenv("STAGE"):
         num_samples = 11500
         num_epochs = 100
@@ -892,122 +1007,8 @@ def _main() -> None:  # noqa: C901,PLR0912,PLR0915
         plt.close()
 
 
-def _make_layers(cfg: list) -> nn.Module:  # type: ignore[type-arg]
-    layers: list[nn.Module] = []
-    in_channels = 1
-    for cfg_element in cfg:
-        if cfg_element == "M":
-            layers += [nn.MaxPool1d(kernel_size=2, stride=2)]
-        else:
-            conv1d = nn.Conv1d(in_channels, cfg_element, kernel_size=3, padding=1)
-            layers += [conv1d, nn.ReLU()]
-            in_channels = cfg_element
-    return nn.Sequential(*layers)
-
-
-def _replace_last_layer(
-    num_classes: int,
-    model_base: nn.Module,
-    model_file_name: str,
-) -> nn.Module:
-    if model_file_name.startswith(("alexnet", "vgg")):
-        model_base.classifier[-1] = nn.Linear(
-            model_base.classifier[-1].in_features,
-            num_classes,
-        )
-    elif model_file_name.startswith("resnet"):
-        model_base.fc = nn.Linear(model_base.fc.in_features, num_classes)
-    elif model_file_name.startswith("densenet"):
-        model_base.classifier = nn.Linear(
-            model_base.classifier.in_features,
-            num_classes,
-        )
-    return model_base
-
-
-def _resnet101(num_classes: int) -> nn.Module:
-    return _ResNet(_Bottleneck, num_classes, expansion=4, layers=[3, 4, 23, 3])
-
-
-def _resnet152(num_classes: int) -> nn.Module:
-    return _ResNet(_Bottleneck, num_classes, expansion=4, layers=[3, 8, 36, 3])
-
-
-def _resnet18(num_classes: int) -> nn.Module:
-    return _ResNet(_BasicBlock, num_classes, expansion=1, layers=[2, 2, 2, 2])
-
-
-def _resnet34(num_classes: int) -> nn.Module:
-    return _ResNet(_BasicBlock, num_classes, expansion=1, layers=[3, 4, 6, 3])
-
-
-def _resnet50(num_classes: int) -> nn.Module:
-    return _ResNet(_Bottleneck, num_classes, expansion=4, layers=[3, 4, 6, 3])
-
-
-def _vgg11(num_classes: int) -> nn.Module:
-    cfg = [64, "M", 128, "M", 256, 256, "M", 512, 512, "M", 512, 512, "M"]
-    return _VGG(num_classes, _make_layers(cfg))
-
-
-def _vgg13(num_classes: int) -> nn.Module:
-    cfg = [64, 64, "M", 128, 128, "M", 256, 256, "M", 512, 512, "M", 512, 512, "M"]
-    return _VGG(num_classes, _make_layers(cfg))
-
-
-def _vgg16(num_classes: int) -> nn.Module:
-    cfg = [
-        64,
-        64,
-        "M",
-        128,
-        128,
-        "M",
-        256,
-        256,
-        256,
-        "M",
-        512,
-        512,
-        512,
-        "M",
-        512,
-        512,
-        512,
-        "M",
-    ]
-    return _VGG(num_classes, _make_layers(cfg))
-
-
-def _vgg19(num_classes: int) -> nn.Module:
-    cfg = [
-        64,
-        64,
-        "M",
-        128,
-        128,
-        "M",
-        256,
-        256,
-        256,
-        256,
-        "M",
-        512,
-        512,
-        512,
-        512,
-        "M",
-        512,
-        512,
-        512,
-        512,
-        "M",
-    ]
-    return _VGG(num_classes, _make_layers(cfg))
-
-
 M = TypeVar("M", _BasicBlock, _Bottleneck)
 
 
 if __name__ == "__main__":
-    _main()
+    main()
