@@ -345,7 +345,7 @@ class _Lenet(nn.Module):
 class _ResNet(nn.Module):
     def __init__(
         self: _ResNet,
-        block: type[M],
+        block: type[_BlockType],
         num_classes: int,
         expansion: int,
         layers: list[int],
@@ -375,7 +375,7 @@ class _ResNet(nn.Module):
 
     def _make_layer(
         self: _ResNet,
-        block: type[M],
+        block: type[_BlockType],
         blocks: int,
         expansion: int,
         planes: int,
@@ -644,7 +644,7 @@ def _make_layers(cfg: list) -> nn.Module:  # type: ignore[type-arg]
     layers: list[nn.Module] = []
     in_channels = 1
     for cfg_element in cfg:
-        if cfg_element == "M":
+        if cfg_element == "MaxPool":
             layers += [nn.MaxPool1d(kernel_size=2, stride=2)]
         else:
             conv1d = nn.Conv1d(in_channels, cfg_element, kernel_size=3, padding=1)
@@ -694,12 +694,42 @@ def _resnet50(num_classes: int) -> nn.Module:
 
 
 def _vgg11(num_classes: int) -> nn.Module:
-    cfg = [64, "M", 128, "M", 256, 256, "M", 512, 512, "M", 512, 512, "M"]
+    cfg = [
+        64,
+        "MaxPool",
+        128,
+        "MaxPool",
+        256,
+        256,
+        "MaxPool",
+        512,
+        512,
+        "MaxPool",
+        512,
+        512,
+        "MaxPool",
+    ]
     return _VGG(num_classes, _make_layers(cfg))
 
 
 def _vgg13(num_classes: int) -> nn.Module:
-    cfg = [64, 64, "M", 128, 128, "M", 256, 256, "M", 512, 512, "M", 512, 512, "M"]
+    cfg = [
+        64,
+        64,
+        "MaxPool",
+        128,
+        128,
+        "MaxPool",
+        256,
+        256,
+        "MaxPool",
+        512,
+        512,
+        "MaxPool",
+        512,
+        512,
+        "MaxPool",
+    ]
     return _VGG(num_classes, _make_layers(cfg))
 
 
@@ -707,22 +737,22 @@ def _vgg16(num_classes: int) -> nn.Module:
     cfg = [
         64,
         64,
-        "M",
+        "MaxPool",
         128,
         128,
-        "M",
+        "MaxPool",
         256,
         256,
         256,
-        "M",
+        "MaxPool",
         512,
         512,
         512,
-        "M",
+        "MaxPool",
         512,
         512,
         512,
-        "M",
+        "MaxPool",
     ]
     return _VGG(num_classes, _make_layers(cfg))
 
@@ -731,25 +761,25 @@ def _vgg19(num_classes: int) -> nn.Module:
     cfg = [
         64,
         64,
-        "M",
+        "MaxPool",
         128,
         128,
-        "M",
+        "MaxPool",
         256,
         256,
         256,
         256,
-        "M",
+        "MaxPool",
         512,
         512,
         512,
         512,
-        "M",
+        "MaxPool",
         512,
         512,
         512,
         512,
-        "M",
+        "MaxPool",
     ]
     return _VGG(num_classes, _make_layers(cfg))
 
@@ -1007,7 +1037,7 @@ def main() -> None:  # noqa: C901,PLR0912,PLR0915
         plt.close()
 
 
-M = TypeVar("M", _BasicBlock, _Bottleneck)
+_BlockType = TypeVar("_BlockType", _BasicBlock, _Bottleneck)
 
 
 if __name__ == "__main__":
