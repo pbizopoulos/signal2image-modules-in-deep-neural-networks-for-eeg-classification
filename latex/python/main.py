@@ -133,11 +133,11 @@ class _CNNOneLayer(nn.Module):
         self: _CNNOneLayer,
         num_classes: int,
         model_base: nn.Module,
-        model_file_name: str,
+        model_name: str,
     ) -> None:
         super().__init__()
         self.conv = nn.Conv1d(1, 8, 3, padding=2)
-        self.model_base = _replace_last_layer(num_classes, model_base, model_file_name)
+        self.model_base = _replace_last_layer(num_classes, model_base, model_name)
 
     def forward(self: _CNNOneLayer, signal: torch.Tensor) -> torch.Tensor:
         out = self.conv(signal)
@@ -153,12 +153,12 @@ class _CNNTwoLayers(nn.Module):
         self: _CNNTwoLayers,
         num_classes: int,
         model_base: nn.Module,
-        model_file_name: str,
+        model_name: str,
     ) -> None:
         super().__init__()
         self.conv1 = nn.Conv1d(1, 8, 3, padding=2)
         self.conv2 = nn.Conv1d(8, 16, 3, padding=2)
-        self.model_base = _replace_last_layer(num_classes, model_base, model_file_name)
+        self.model_base = _replace_last_layer(num_classes, model_base, model_name)
 
     def forward(self: _CNNTwoLayers, signal: torch.Tensor) -> torch.Tensor:
         out = functional.relu(self.conv1(signal))
@@ -413,14 +413,14 @@ class _SignalAsImage(nn.Module):
         self: _SignalAsImage,
         num_classes: int,
         model_base: nn.Module,
-        model_file_name: str,
+        model_name: str,
         signals_all_max: int,
         signals_all_min: int,
     ) -> None:
         super().__init__()
         self.signals_all_max = signals_all_max
         self.signals_all_min = signals_all_min
-        self.model_base = _replace_last_layer(num_classes, model_base, model_file_name)
+        self.model_base = _replace_last_layer(num_classes, model_base, model_name)
 
     def forward(self: _SignalAsImage, signal: torch.Tensor) -> torch.Tensor:
         signal = signal - self.signals_all_min
@@ -447,10 +447,10 @@ class _Spectrogram(nn.Module):
         self: _Spectrogram,
         num_classes: int,
         model_base: nn.Module,
-        model_file_name: str,
+        model_name: str,
     ) -> None:
         super().__init__()
-        self.model_base = _replace_last_layer(num_classes, model_base, model_file_name)
+        self.model_base = _replace_last_layer(num_classes, model_base, model_name)
 
     def forward(self: _Spectrogram, signal: torch.Tensor) -> torch.Tensor:
         out = torch.zeros(signal.shape[0], 1, signal.shape[-1], signal.shape[-1]).to(
@@ -502,15 +502,15 @@ class _UCIEpilepsy(Dataset[tuple[torch.Tensor, torch.Tensor]]):
         num_samples: int,
         train_validation_test: str,
     ) -> None:
-        data_file_path = Path("tmp/data.csv")
-        if not data_file_path.is_file():
-            with data_file_path.open("wb") as file:
+        data_file_name_path = Path("tmp/data.csv")
+        if not data_file_name_path.is_file():
+            with data_file_name_path.open("wb") as file:
                 response = requests.get(
                     "https://web.archive.org/web/20200318000445/http://archive.ics.uci.edu/ml/machine-learning-databases/00388/data.csv",
                     timeout=60,
                 )
                 file.write(response.content)
-        dataset = pd.read_csv(data_file_path.as_posix())
+        dataset = pd.read_csv(data_file_name_path.as_posix())
         dataset = dataset[:num_samples]
         signals_all = dataset.drop(columns=["Unnamed: 0", "y"])
         classes_all = dataset["y"]
@@ -656,16 +656,16 @@ def _make_layers(cfg: list) -> nn.Module:  # type: ignore[type-arg]
 def _replace_last_layer(
     num_classes: int,
     model_base: nn.Module,
-    model_file_name: str,
+    model_name: str,
 ) -> nn.Module:
-    if model_file_name.startswith(("alexnet", "vgg")):
+    if model_name.startswith(("alexnet", "vgg")):
         model_base.classifier[-1] = nn.Linear(
             model_base.classifier[-1].in_features,
             num_classes,
         )
-    elif model_file_name.startswith("resnet"):
+    elif model_name.startswith("resnet"):
         model_base.fc = nn.Linear(model_base.fc.in_features, num_classes)
-    elif model_file_name.startswith("densenet"):
+    elif model_name.startswith("densenet"):
         model_base.classifier = nn.Linear(
             model_base.classifier.in_features,
             num_classes,
@@ -870,14 +870,14 @@ def main() -> None:  # noqa: C901,PLR0912,PLR0915
         for model_module_name_index, model_module_name in enumerate(
             ["1D", "signal-as-image", "spectrogram", "cnn-one-layer", "cnn-two-layers"],
         ):
-            model_file_name = f"{model_base_name}-{model_module_name}"
+            model_name = f"{model_base_name}-{model_module_name}"
             if model_module_name == "1D":
                 model = models_base_1d[model_base_name_index](num_classes)
             elif model_module_name == "signal-as-image":
                 model = _SignalAsImage(
                     num_classes,
                     models_base_2d[model_base_name_index](),
-                    model_file_name,
+                    model_name,
                     signals_all_max,
                     signals_all_min,
                 )
@@ -885,19 +885,19 @@ def main() -> None:  # noqa: C901,PLR0912,PLR0915
                 model = _Spectrogram(
                     num_classes,
                     models_base_2d[model_base_name_index](),
-                    model_file_name,
+                    model_name,
                 )
             elif model_module_name == "cnn-one-layer":
                 model = _CNNOneLayer(
                     num_classes,
                     models_base_2d[model_base_name_index](),
-                    model_file_name,
+                    model_name,
                 )
             elif model_module_name == "cnn-two-layers":
                 model = _CNNTwoLayers(
                     num_classes,
                     models_base_2d[model_base_name_index](),
-                    model_file_name,
+                    model_name,
                 )
             model = model.to(device)
             optimizer = Adam(model.parameters())
@@ -929,9 +929,9 @@ def main() -> None:  # noqa: C901,PLR0912,PLR0915
                 accuracy_validation = 100 * num_predictions_correct / num_predictions
                 if accuracy_validation > accuracy_validation_best:
                     accuracy_validation_best = accuracy_validation
-                    model_file_path = f"tmp/{model_file_name}.pt"
-                    torch.save(model.state_dict(), model_file_path)
-            model.load_state_dict(torch.load(model_file_path, weights_only=True))
+                    model_file_name = f"tmp/{model_name}.pt"
+                    torch.save(model.state_dict(), model_file_name)
+            model.load_state_dict(torch.load(model_file_name, weights_only=True))
             loss_test_sum = 0
             num_predictions_correct = 0
             num_predictions = 0
@@ -950,7 +950,7 @@ def main() -> None:  # noqa: C901,PLR0912,PLR0915
             accuracy_test_array[model_module_name_index, model_base_name_index] = (
                 accuracy_test
             )
-            if model_file_name == "resnet34-1D":
+            if model_name == "resnet34-1D":
                 example_input = (uci_epilepsy_train[0][0].unsqueeze(0),)
                 torch.onnx.export(
                     model.cpu(),
@@ -958,8 +958,8 @@ def main() -> None:  # noqa: C901,PLR0912,PLR0915
                     "tmp/model.onnx",
                     export_params=True,
                 )
-            if not os.getenv("STAGE") and model_file_name != "alexnet-cnn-one-layer":
-                Path(f"tmp/{model_file_name}.pt").unlink()
+            if not os.getenv("STAGE") and model_name != "alexnet-cnn-one-layer":
+                Path(f"tmp/{model_name}.pt").unlink()
     styler = pd.DataFrame(
         accuracy_test_array,
         index=[
