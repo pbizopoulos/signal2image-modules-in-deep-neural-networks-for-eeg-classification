@@ -6,39 +6,51 @@
         <meta content="width=device-width, initial-scale=1" name="viewport" />
         <title> Signal2Image Modules in Deep Neural Networks for EEG Classification </title>
         <link href="data:," rel="icon" />
-        <link href="style.css" rel="stylesheet" />
-        <script defer src="https://d3js.org/d3.v7.min.js"></script>
-        <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
-        <script defer src="script.js"></script>
+        <script type="module" crossorigin src="https://cdn.jsdelivr.net/npm/@gradio/lite/dist/lite.js"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@gradio/lite/dist/lite.css" />
     </head>
 
     <body>
-        <dialog id="loading-dialog">Loading...</dialog>
         <nav>
             <a href="https://pbizopoulos.github.io">Home</a>/<b>Signal2Image Modules in Deep Neural Networks for EEG Classification</b>/<a href="javascript:;" id="documentation-a">Documentation</a>/<a href="https://github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification">Source code</a>
         </nav>
-        <div class="container">
-            <div class="column">
-                <div>
-                    <input accept=".txt,.csv" id="signal-input-file" type="file" />
-                </div>
-                <div class="block" id="input-div"></div>
-            </div>
-            <div class="column">
-                <div id="output-div"></div>
-            </div>
-        </div>
-        <dialog id="documentation-dialog" onmousedown="event.target==this && this.close()">
-            <div>Not intended for clinical use.</div>
-            <div>Usage:</div>
-            <ol>
-                <li>Upload an EEG file (.txt,.csv) from the left.</li>
-                <li>The tool shows the classification results on the right.</li>
-                <li>Optionally edit the signal by clicking and dragging.</li>
-            </ol>
-            <div>Click outside this dialog to go back.</div>
-        </dialog>
+    <gradio-lite>
+            <gradio-requirements> opencv-python </gradio-requirements>
+            <gradio-file name="eeg-classification-example-data.txt" url="https://raw.githubusercontent.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/main/docs/prm/eeg-classification-example-data.txt" />
+            <gradio-file name="model.onnx" url="https://raw.githubusercontent.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/main/docs/prm/model.onnx" />
+		    <gradio-file name="app.py" entrypoint>
+import cv2
+import gradio as gr
+import numpy as np
+import numpy.typing as npt
+from pathlib import Path
+
+
+def _submit(file_name: str) -> npt.NDArray[np.float64]:
+    with Path(file_name).open() as file:
+        numbers = file.read().strip().split(',')
+    numbers = np.array([int(num) for num in numbers]).reshape(1, 180)
+    img_cv2 = cv2.normalize(numbers, None, 0, 1, cv2.NORM_MINMAX, dtype=cv2.CV_32F)
+    net = cv2.dnn.readNet("model.onnx")
+    blob = cv2.dnn.blobFromImage(img_cv2, 1.0, (1, 180), (0, 0, 0))
+    net.setInput(blob)
+    output = net.forward()
+    return str(output)
+
+
+gr.Interface(
+    _submit,
+    gr.File(),
+    gr.Label(),
+    flagging_mode="never",
+    analytics_enabled=False,
+    examples=[
+        ["eeg-classification-example-data.txt"],
+    ],
+).launch()
+</gradio-file>
+
+        </gradio-lite>
     </body>
 
 </html>
