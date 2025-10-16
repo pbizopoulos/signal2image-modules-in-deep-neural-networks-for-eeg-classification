@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Signal2Image Modules in Deep Neural Networks for EEG Classification."""
+
 from __future__ import annotations
 
 import os
