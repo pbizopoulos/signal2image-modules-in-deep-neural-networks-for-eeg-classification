@@ -1,0 +1,13 @@
+.block {
+  border-style: solid;
+  height: 256px;
+  width: 256px;
+}
+
+.column {
+  width: 50%;
+}
+
+.container {
+  display: flex;
+}

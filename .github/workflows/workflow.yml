@@ -1,0 +1,38 @@
+on: [push, pull_request]
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+jobs:
+  develop:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: wimpysworld/nothing-but-nix@main
+      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+      - uses: actions/checkout@main
+      - run: |
+          nix flake check
+  build-github-page:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@main
+      - name: Build static files
+        id: build
+        run: |
+          cp -r packages/html/ _site/
+      - name: Upload static files as artifact
+        id: deployment
+        uses: actions/upload-pages-artifact@main
+        with:
+          path: _site/
+  deploy-github-page:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build-github-page
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@main
