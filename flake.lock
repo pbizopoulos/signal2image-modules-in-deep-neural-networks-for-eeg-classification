@@ -3,7 +3,6 @@
     "blueprint": {
       "inputs": {
         "nixpkgs": [
-          "canonicalization",
           "nixpkgs"
         ],
         "systems": "systems"
@@ -19,26 +18,6 @@
       "original": {
         "owner": "numtide",
         "repo": "blueprint",
-        "type": "github"
-      }
-    },
-    "canonicalization": {
-      "inputs": {
-        "blueprint": "blueprint",
-        "nixpkgs": "nixpkgs",
-        "treefmt-nix": "treefmt-nix"
-      },
-      "locked": {
-        "lastModified": 1760692333,
-        "narHash": "sha256-BjxHWi1w3TeecYvmj7SxuAqJMWqVTWB7WXUTtgarcR0=",
-        "owner": "pbizopoulos",
-        "repo": "canonicalization",
-        "rev": "ad69a89dab585619adf8225437a6e42f01ccf6e4",
-        "type": "github"
-      },
-      "original": {
-        "owner": "pbizopoulos",
-        "repo": "canonicalization",
         "type": "github"
       }
     },
@@ -60,11 +39,9 @@
     },
     "root": {
       "inputs": {
-        "canonicalization": "canonicalization",
-        "nixpkgs": [
-          "canonicalization",
-          "nixpkgs"
-        ]
+        "blueprint": "blueprint",
+        "nixpkgs": "nixpkgs",
+        "treefmt-nix": "treefmt-nix"
       }
     },
     "systems": {
@@ -85,16 +62,15 @@
     "treefmt-nix": {
       "inputs": {
         "nixpkgs": [
-          "canonicalization",
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1760120816,
-        "narHash": "sha256-gq9rdocpmRZCwLS5vsHozwB6b5nrOBDNc2kkEaTXHfg=",
+        "lastModified": 1760889407,
+        "narHash": "sha256-ppIp04fmz+BaTpJs1nIOmPADg02asfQFrFbhb3SmxsE=",
         "owner": "numtide",
         "repo": "treefmt-nix",
-        "rev": "761ae7aff00907b607125b2f57338b74177697ed",
+        "rev": "3f258dead9fed51f53862366d3a6bc1b622ee7cb",
         "type": "github"
       },
       "original": {
