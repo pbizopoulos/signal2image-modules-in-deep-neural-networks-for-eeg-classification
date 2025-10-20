@@ -42,13 +42,11 @@ inputs.treefmt-nix.lib.mkWrapper pkgs {
           "--strict"
         ];
       };
-      ruff-check = {
-        options = [
-          "--select"
-          "ALL"
-          "--unsafe-fixes"
-        ];
-      };
+      ruff-check.options = [
+        "--select"
+        "ALL"
+        "--unsafe-fixes"
+      ];
       shfmt.options = [
         "--posix"
         "--simplify"
