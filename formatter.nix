@@ -37,8 +37,6 @@ inputs.treefmt-nix.lib.mkWrapper pkgs {
         command = pkgs.mypy;
         includes = [ "*.py" ];
         options = [
-          "--cache-dir"
-          "tmp/mypy"
           "--explicit-package-bases"
           "--ignore-missing-imports"
           "--strict"
@@ -46,17 +44,9 @@ inputs.treefmt-nix.lib.mkWrapper pkgs {
       };
       ruff-check = {
         options = [
-          "--cache-dir"
-          "tmp/ruff"
           "--select"
           "ALL"
           "--unsafe-fixes"
-        ];
-      };
-      ruff-format = {
-        options = [
-          "--cache-dir"
-          "tmp/ruff"
         ];
       };
       shfmt.options = [
