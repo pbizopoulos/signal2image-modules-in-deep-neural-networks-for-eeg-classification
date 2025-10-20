@@ -1,4 +1,3 @@
-# no-check
 { inputs, pkgs, ... }:
 inputs.treefmt-nix.lib.mkWrapper pkgs {
   programs = {
@@ -6,7 +5,10 @@ inputs.treefmt-nix.lib.mkWrapper pkgs {
     beautysh.enable = true;
     biome.enable = true;
     deadnix.enable = true;
-    nixfmt.enable = true;
+    nixfmt = {
+      enable = true;
+      strict = true;
+    };
     prettier.enable = true;
     ruff-check.enable = true;
     ruff-format.enable = true;
@@ -41,11 +43,6 @@ inputs.treefmt-nix.lib.mkWrapper pkgs {
           "--ignore-missing-imports"
           "--strict"
         ];
-        priority = 2;
-      };
-      nixfmt = {
-        priority = 1;
-        strict = true;
       };
       ruff-check = {
         options = [
@@ -55,20 +52,17 @@ inputs.treefmt-nix.lib.mkWrapper pkgs {
           "ALL"
           "--unsafe-fixes"
         ];
-        priority = 2;
       };
       ruff-format = {
         options = [
           "--cache-dir"
           "tmp/ruff"
         ];
-        priority = 1;
       };
       shfmt.options = [
         "--posix"
         "--simplify"
       ];
-      statix.priority = 2;
       texfmt.options = [ "--nowrap" ];
     };
     global.excludes = [

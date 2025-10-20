@@ -15,8 +15,5 @@
     inputs.blueprint {
       inherit inputs;
       nixpkgs.config.allowUnfree = true;
-    }
-    // {
-      inherit (inputs) nixpkgs blueprint;
     };
 }
