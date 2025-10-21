@@ -1,10 +1,8 @@
 {
-  inputs,
   pkgs ? import <nixpkgs> { },
 }:
 let
   pythonEnv = pkgs.python312.withPackages (_ps: [
-    inputs.self.packages.${pkgs.stdenv.system}.onnxscript
     pkgs.python312Packages.matplotlib
     pkgs.python312Packages.pandas
     pkgs.python312Packages.scipy

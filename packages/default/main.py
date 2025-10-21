@@ -21,7 +21,7 @@ from torchvision import models
 
 _PACKAGE_PATH = (
     Path.home()
-    / "github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/packages/python/"  # noqa: E501
+    / "github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/packages/default/"  # noqa: E501
 )
 if Path(__file__).resolve().as_posix().startswith("/nix/store/"):
     _PARENT_PATH = Path(__file__).resolve().parent
