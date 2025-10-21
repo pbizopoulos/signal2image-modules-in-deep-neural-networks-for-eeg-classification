@@ -19,16 +19,12 @@ from torch.optim import Adam
 from torch.utils.data import DataLoader, Dataset
 from torchvision import models
 
-_PACKAGE_PATH = (
+_OUT_PATH = (
     Path.home()
-    / "github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/packages/default/"  # noqa: E501
+    / "github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/packages/default/tmp/"  # noqa: E501
 )
-if Path(__file__).resolve().as_posix().startswith("/nix/store/"):
-    _PARENT_PATH = Path(__file__).resolve().parent
-else:
-    _PARENT_PATH = _PACKAGE_PATH
-_OUT_PATH = _PACKAGE_PATH / "tmp"
 _OUT_PATH.mkdir(exist_ok=True, parents=True)
+_PARENT_PATH = Path(__file__).resolve().parent
 
 
 class _Alexnet(nn.Module):  # type: ignore[misc]

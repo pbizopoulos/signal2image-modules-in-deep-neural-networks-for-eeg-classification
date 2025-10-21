@@ -4,6 +4,7 @@
 let
   pythonEnv = pkgs.python312.withPackages (_ps: [
     pkgs.python312Packages.matplotlib
+    pkgs.python312Packages.onnx
     pkgs.python312Packages.pandas
     pkgs.python312Packages.scipy
     pkgs.python312Packages.torch-bin
