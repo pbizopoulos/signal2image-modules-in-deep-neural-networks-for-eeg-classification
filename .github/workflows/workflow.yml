@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: wimpysworld/nothing-but-nix@main
-      - uses: nixbuild/nix-quick-install-action@main
+      - uses: nixbuild/nix-quick-install-action@master
       - uses: DeterminateSystems/magic-nix-cache-action@main
       - uses: actions/checkout@main
       - run: |
