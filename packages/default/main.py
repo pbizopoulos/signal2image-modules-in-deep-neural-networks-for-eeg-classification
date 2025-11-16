@@ -950,14 +950,6 @@ def main() -> None:  # noqa: C901,PLR0912,PLR0915
             accuracy_test_array[model_module_name_index, model_base_name_index] = (
                 accuracy_test
             )
-            if model_name == "resnet34-1D":
-                example_input = (uci_epilepsy_train[0][0].unsqueeze(0),)
-                torch.onnx.export(
-                    model.cpu(),
-                    example_input,
-                    _OUT_PATH / "model.onnx",
-                    export_params=True,
-                )
             if os.getenv("DEBUG") and model_name != "alexnet-cnn-one-layer":
                 (_OUT_PATH / f"{model_name}.pt").unlink()
     styler = pd.DataFrame(
