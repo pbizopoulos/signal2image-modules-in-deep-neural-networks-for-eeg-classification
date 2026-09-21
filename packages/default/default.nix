@@ -1,35 +1,41 @@
-{
-  pkgs ? import <nixpkgs> { },
-}:
+{ pkgs, ... }:
 let
-  pythonEnv = pkgs.python312.withPackages (_ps: [
-    pkgs.python312Packages.matplotlib
-    pkgs.python312Packages.pandas
-    pkgs.python312Packages.scipy
-    pkgs.python312Packages.torch-bin
-    pkgs.python312Packages.torchvision-bin
-  ]);
-in
-pkgs.stdenv.mkDerivation rec {
-  buildInputs = [
-    pkgs.texlive.combined.scheme-full
-    pythonEnv
+  nativeDeps = [ pkgs.texliveFull ];
+  pname = baseNameOf ./.;
+  python = pkgs.python3;
+  pythonDeps = [
+    python.pkgs.jinja2
+    python.pkgs.matplotlib
+    python.pkgs.numpy
+    python.pkgs.pandas
+    python.pkgs.pillow
+    python.pkgs.scipy
+    python.pkgs.torch
+    python.pkgs.torchvision
   ];
+  shellHook = "";
+in
+python.pkgs.buildPythonPackage {
+  inherit pname;
+  inherit shellHook;
   installPhase = ''
-    mkdir -p $out/bin
-    echo '#!/usr/bin/env bash
-      set -e
-      package_dir=$HOME/github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/packages/default
-      tmp_dir=$(mktemp -d)
-      cp -r ${src}/* "$tmp_dir"
-      cd "$tmp_dir"
-      ${pythonEnv}/bin/python ./main.py
-      ${pkgs.texlive.combined.scheme-full}/bin/latexmk -outdir=$package_dir/tmp -pdf ./ms.tex
-      ' > $out/bin/${pname}
-    chmod +x $out/bin/${pname}
+    install -Dm644 main.py "$out/${python.sitePackages}/$pname/__init__.py"
+    mkdir -p "$out/bin"
+    printf '%s\n' '#!${python.interpreter}' "from $pname import main" 'main()' > "$out/bin/$pname"
+    chmod 755 "$out/bin/$pname"
+    if [ -d prm ]; then
+      cp -R prm/ "$out/${python.sitePackages}/$pname/"
+    fi
   '';
-  meta.mainProgram = pname;
-  pname = builtins.baseNameOf src;
+  meta = {
+    description = "A Python package.";
+    mainProgram = pname;
+  };
+  nativeBuildInputs = nativeDeps;
+  passthru.python = python;
+  propagatedBuildInputs = pythonDeps;
+  pyproject = false;
   src = ./.;
+  strictDeps = true;
   version = "0.0.0";
 }

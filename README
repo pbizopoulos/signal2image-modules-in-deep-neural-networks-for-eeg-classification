@@ -4,3 +4,13 @@ xdg-open https://ieeexplore.ieee.org/abstract/document/8856620/
 
 # Usage
 xdg-open https://pbizopoulos.github.io/README.txt
+
+# Local workflow
+nix fmt
+nix flake check
+nix develop --command python packages/default/main.py
+
+The experiment writes checkpoints, figures, results.tex, and ms.pdf to ./tmp/.
+The flake check runs an offline, one-epoch AlexNet smoke experiment across all
+five module variants and verifies the generated figures, results, and PDF.
+Manuscript sources and the dataset are stored in packages/default/prm/.

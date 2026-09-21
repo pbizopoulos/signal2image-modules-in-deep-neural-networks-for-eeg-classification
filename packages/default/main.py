@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
+# Copyright (c) 2026- Paschalis Bizopoulos
 """Signal2Image Modules in Deep Neural Networks for EEG Classification."""
 
 from __future__ import annotations
 
 import os
+import shutil
+import subprocess
+import sys
 from pathlib import Path
 from typing import TypeVar
 
@@ -19,10 +23,7 @@ from torch.optim import Adam
 from torch.utils.data import DataLoader, Dataset
 from torchvision import models
 
-_OUT_PATH = (
-    Path.home()
-    / "github.com/pbizopoulos/signal2image-modules-in-deep-neural-networks-for-eeg-classification/packages/default/tmp/"  # noqa: E501
-)
+_OUT_PATH = Path.cwd() / "tmp"
 _OUT_PATH.mkdir(exist_ok=True, parents=True)
 _PARENT_PATH = Path(__file__).resolve().parent
 
@@ -786,7 +787,10 @@ def _vgg19(num_classes: int) -> nn.Module:
 
 def main() -> None:  # noqa: C901,PLR0912,PLR0915
     """Train EEG classification models and generate corresponding images and tables."""
-    if os.getenv("DEBUG"):
+    smoke = "pytest" in sys.modules
+    if smoke:
+        torch.set_num_threads(1)
+    if smoke or os.getenv("DEBUG"):
         num_samples = 10
         num_epochs = 1
     else:
@@ -865,7 +869,11 @@ def main() -> None:  # noqa: C901,PLR0912,PLR0915
         models.densenet169,
         models.densenet201,
     ]
-    accuracy_test_array = np.zeros((5, 15))
+    if smoke:
+        model_base_names = ["alexnet"]
+        models_base_1d = [_Alexnet]
+        models_base_2d = [models.alexnet]
+    accuracy_test_array = np.zeros((5, len(model_base_names)))
     for model_base_name_index, model_base_name in enumerate(model_base_names):
         for model_module_name_index, model_module_name in enumerate(
             ["1D", "signal-as-image", "spectrogram", "cnn-one-layer", "cnn-two-layers"],
@@ -950,7 +958,7 @@ def main() -> None:  # noqa: C901,PLR0912,PLR0915
             accuracy_test_array[model_module_name_index, model_base_name_index] = (
                 accuracy_test
             )
-            if os.getenv("DEBUG") and model_name != "alexnet-cnn-one-layer":
+            if (smoke or os.getenv("DEBUG")) and model_name != "alexnet-cnn-one-layer":
                 (_OUT_PATH / f"{model_name}.pt").unlink()
     styler = pd.DataFrame(
         accuracy_test_array,
@@ -1038,10 +1046,24 @@ def main() -> None:  # noqa: C901,PLR0912,PLR0915
         plt.figure()
         plt.imsave(_OUT_PATH / f"cnn-{class_name}.png", data, cmap="gray")
         plt.close()
+    _compile_manuscript()
+
+
+def _compile_manuscript() -> None:
+    """Copy and compile the manuscript after generating its artifacts."""
+    for filename in ("ms.tex", "ms.bib"):
+        shutil.copy2(_PARENT_PATH / "prm" / filename, _OUT_PATH / filename)
+    latexmk = shutil.which("latexmk")
+    if latexmk is None:
+        message = "latexmk is required to compile the manuscript"
+        raise RuntimeError(message)
+    subprocess.run(  # noqa: S603
+        [latexmk, "-pdf", "ms.tex"],
+        cwd=_OUT_PATH,
+        check=True,
+    )
 
 
 _BlockType = TypeVar("_BlockType", _BasicBlock, _Bottleneck)
-
-
 if __name__ == "__main__":
     main()

@@ -1,19 +1,18 @@
 {
   inputs = {
-    blueprint = {
-      inputs.nixpkgs.follows = "nixpkgs";
-      url = "github:numtide/blueprint";
-    };
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    treefmt-nix = {
-      inputs.nixpkgs.follows = "nixpkgs";
-      url = "github:numtide/treefmt-nix";
-    };
+    canonical.url = "github:pbizopoulos/canonical";
+    nixpkgs.follows = "canonical/nixpkgs";
   };
   outputs =
     inputs:
-    inputs.blueprint {
+    inputs.canonical.blueprint {
       inherit inputs;
-      nixpkgs.config.allowUnfree = true;
+      nixpkgs.config = {
+        allowUnfree = true;
+        cudaSupport = true;
+      };
+    }
+    // {
+      inherit (inputs.canonical) formatter;
     };
 }
