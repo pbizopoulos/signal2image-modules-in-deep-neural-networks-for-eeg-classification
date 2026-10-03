@@ -19,7 +19,7 @@ def test_smoke_run_generates_classification_results_and_a_complete_manuscript(
     monkeypatch.chdir(tmp_path)
     from packages.default import main as subject  # noqa: PLC0415
 
-    subject.main()
+    subject.main([])
     results = (tmp_path / "tmp/results.tex").read_text()
     if "alexnet" not in results or "nan" in results.lower():
         message = "classification results must contain finite AlexNet accuracies"

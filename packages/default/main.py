@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+import argparse
 import os
 import shutil
 import subprocess
@@ -785,8 +786,18 @@ def _vgg19(num_classes: int) -> nn.Module:
     return _VGG(num_classes, _make_layers(cfg))
 
 
-def main() -> None:  # noqa: C901,PLR0912,PLR0915
+def parser() -> argparse.ArgumentParser:
+    """Declare the command-line interface for this fixed workflow."""
+    return argparse.ArgumentParser(
+        description=(
+            "Signal2Image Modules in Deep Neural Networks for EEG Classification."
+        ),
+    )
+
+
+def main(argv: list[str] | None = None) -> None:  # noqa: C901,PLR0912,PLR0915
     """Train EEG classification models and generate corresponding images and tables."""
+    parser().parse_args(argv)
     smoke = "pytest" in sys.modules
     if smoke:
         torch.set_num_threads(1)

@@ -1,8 +1,5 @@
 {
-  inputs = {
-    canonical.url = "github:pbizopoulos/canonical";
-    nixpkgs.follows = "canonical/nixpkgs";
-  };
+  inputs.canonical.url = "github:pbizopoulos/canonical";
   outputs =
     inputs:
     inputs.canonical.blueprint {
