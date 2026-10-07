@@ -1,5 +1,5 @@
 {
-  inputs.perigrafo.url = "github:perigrafo/perigrafo";
+  inputs.perigrafo.url = "github:afairesi/afairesi";
   outputs =
     inputs:
     inputs.perigrafo.blueprint {

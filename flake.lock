@@ -47,14 +47,14 @@
       "locked": {
         "lastModified": 1791358568,
         "narHash": "sha256-57XRyMHJjbWMl8Mdo61nuhxX+obEnLGrnO6waGThtjQ=",
-        "owner": "perigrafo",
-        "repo": "perigrafo",
+        "owner": "afairesi",
+        "repo": "afairesi",
         "rev": "dea7504fe79297131b268d0b95227a59674f28c7",
         "type": "github"
       },
       "original": {
-        "owner": "perigrafo",
-        "repo": "perigrafo",
+        "owner": "afairesi",
+        "repo": "afairesi",
         "type": "github"
       }
     },
