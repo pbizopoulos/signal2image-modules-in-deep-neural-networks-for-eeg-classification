@@ -1,8 +1,8 @@
 {
-  inputs.perigrafo.url = "github:afairesi/afairesi";
+  inputs.afairesi.url = "github:afairesi/afairesi";
   outputs =
     inputs:
-    inputs.perigrafo.blueprint {
+    inputs.afairesi.blueprint {
       inherit inputs;
       nixpkgs.config = {
         allowUnfree = true;
@@ -10,6 +10,6 @@
       };
     }
     // {
-      formatter = inputs.perigrafo.lib.mkFormatter { inherit (inputs) self; };
+      formatter = inputs.afairesi.lib.mkFormatter { inherit (inputs) self; };
     };
 }

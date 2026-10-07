@@ -2,7 +2,7 @@
 let
   python = pkgs.python3;
 in
-(inputs.perigrafo or inputs.self).lib.mkPythonPackage {
+(inputs.afairesi or inputs.self).lib.mkPythonPackage {
   inherit pkgs;
   executable = true;
   meta.description = "A Python package.";
