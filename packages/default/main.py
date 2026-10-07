@@ -996,8 +996,8 @@ def main(argv: list[str] | None = None) -> None:  # noqa: C901,PLR0912,PLR0915
         plt.figure()
         plt.plot(signals_all[signal_index].squeeze(), linewidth=4, color="k")
         plt.axis("off")
-        plt.xlim([0, signals_all.shape[-1] - 1])
-        plt.ylim([-1000, 1000])
+        plt.xlim((0, signals_all.shape[-1] - 1))
+        plt.ylim((-1000, 1000))
         plt.savefig(_OUT_PATH / f"signal-{class_name}.png")
         plt.close()
         signals_all_min = -1000
