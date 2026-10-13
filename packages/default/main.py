@@ -24,7 +24,11 @@ from torch.optim import Adam
 from torch.utils.data import DataLoader, Dataset
 from torchvision import models
 
-_OUT_PATH = Path.cwd() / "tmp"
+RUNTIME_DIR = Path.home() / (
+    "github.com/pbizopoulos/signal2image-modules-in-deep-neural-n"
+    "etworks-for-eeg-classification/packages/default/tmp"
+)
+_OUT_PATH = RUNTIME_DIR
 _OUT_PATH.mkdir(exist_ok=True, parents=True)
 _PARENT_PATH = Path(__file__).resolve().parent
 

@@ -16,21 +16,29 @@ def test_smoke_run_generates_classification_results_and_a_complete_manuscript(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Train all five module variants and compile their results into a PDF."""
+    monkeypatch.setenv("HOME", str(tmp_path))
     monkeypatch.chdir(tmp_path)
     from packages.default import main as subject  # noqa: PLC0415
 
+    output = tmp_path / (
+        "github.com/pbizopoulos/signal2image-modules-in-deep-neural-n"
+        "etworks-for-eeg-classification/packages/default/tmp"
+    )
+    if output != subject.RUNTIME_DIR:
+        message = "Runtime output must use the canonical package directory"
+        raise AssertionError(message)
     subject.main([])
-    results = (tmp_path / "tmp/results.tex").read_text()
+    results = (output / "results.tex").read_text()
     if "alexnet" not in results or "nan" in results.lower():
         message = "classification results must contain finite AlexNet accuracies"
         raise AssertionError(message)
     for name in ("eyes-open", "eyes-closed", "healthy-area", "tumor-area", "epilepsy"):
         for prefix in ("signal", "signal-as-image", "spectrogram", "cnn"):
-            image = tmp_path / "tmp" / f"{prefix}-{name}.png"
+            image = output / f"{prefix}-{name}.png"
             if not image.read_bytes().startswith(b"\x89PNG\r\n\x1a\n"):
                 message = "each EEG class must have all four visualizations"
                 raise AssertionError(message)
-    manuscript = (tmp_path / "tmp/ms.pdf").read_bytes()
+    manuscript = (output / "ms.pdf").read_bytes()
     if not manuscript.startswith(b"%PDF-") or not manuscript.rstrip().endswith(
         b"%%EOF",
     ):
