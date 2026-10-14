@@ -5,7 +5,6 @@
 from __future__ import annotations
 
 import argparse
-import os
 import shutil
 import subprocess
 import sys
@@ -805,7 +804,7 @@ def main(argv: list[str] | None = None) -> None:  # noqa: C901,PLR0912,PLR0915
     smoke = "pytest" in sys.modules
     if smoke:
         torch.set_num_threads(1)
-    if smoke or os.getenv("DEBUG"):
+    if smoke:
         num_samples = 10
         num_epochs = 1
     else:
@@ -973,7 +972,7 @@ def main(argv: list[str] | None = None) -> None:  # noqa: C901,PLR0912,PLR0915
             accuracy_test_array[model_module_name_index, model_base_name_index] = (
                 accuracy_test
             )
-            if (smoke or os.getenv("DEBUG")) and model_name != "alexnet-cnn-one-layer":
+            if smoke and model_name != "alexnet-cnn-one-layer":
                 (_OUT_PATH / f"{model_name}.pt").unlink()
     styler = pd.DataFrame(
         accuracy_test_array,
