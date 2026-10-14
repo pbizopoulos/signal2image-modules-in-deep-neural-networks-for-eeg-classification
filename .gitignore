@@ -4,7 +4,6 @@
 !/.github/workflows/workflow.yml
 !/.gitignore
 !/LICENSE
-!/README
 !/checks/
 !/checks/default/
 !/checks/default/default.nix
