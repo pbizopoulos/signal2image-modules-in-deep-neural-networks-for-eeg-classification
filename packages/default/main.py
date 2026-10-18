@@ -9,7 +9,7 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
-from typing import TypeVar
+from typing import TypeVar, cast
 
 import numpy as np
 import pandas as pd
@@ -32,7 +32,7 @@ _OUT_PATH.mkdir(exist_ok=True, parents=True)
 _PARENT_PATH = Path(__file__).resolve().parent
 
 
-class _Alexnet(nn.Module):  # type: ignore[misc]
+class _Alexnet(nn.Module):
     def __init__(self, num_classes: int) -> None:
         super().__init__()
         self.conv1 = nn.Conv1d(1, 64, kernel_size=11, stride=4, padding=2)
@@ -72,7 +72,7 @@ class _Alexnet(nn.Module):  # type: ignore[misc]
         return output
 
 
-class _BasicBlock(nn.Module):  # type: ignore[misc]
+class _BasicBlock(nn.Module):
     def __init__(
         self: _BasicBlock,
         downsample: nn.Module | None,
@@ -103,7 +103,7 @@ class _BasicBlock(nn.Module):  # type: ignore[misc]
         return output
 
 
-class _Bottleneck(nn.Module):  # type: ignore[misc]
+class _Bottleneck(nn.Module):
     def __init__(
         self: _Bottleneck,
         downsample: nn.Module | None,
@@ -140,7 +140,7 @@ class _Bottleneck(nn.Module):  # type: ignore[misc]
         return output
 
 
-class _CNNOneLayer(nn.Module):  # type: ignore[misc]
+class _CNNOneLayer(nn.Module):
     def __init__(
         self: _CNNOneLayer,
         num_classes: int,
@@ -160,7 +160,7 @@ class _CNNOneLayer(nn.Module):  # type: ignore[misc]
         return output
 
 
-class _CNNTwoLayers(nn.Module):  # type: ignore[misc]
+class _CNNTwoLayers(nn.Module):
     def __init__(
         self: _CNNTwoLayers,
         num_classes: int,
@@ -183,7 +183,7 @@ class _CNNTwoLayers(nn.Module):  # type: ignore[misc]
         return output
 
 
-class _DenseBlock(nn.Sequential):  # type: ignore[misc]
+class _DenseBlock(nn.Sequential):
     def __init__(
         self: _DenseBlock,
         bn_size: int,
@@ -201,7 +201,7 @@ class _DenseBlock(nn.Sequential):  # type: ignore[misc]
             self.add_module(f"denselayer{index + 1}", layer)
 
 
-class _DenseLayer(nn.Sequential):  # type: ignore[misc]
+class _DenseLayer(nn.Sequential):
     def __init__(
         self: _DenseLayer,
         bn_size: int,
@@ -236,11 +236,11 @@ class _DenseLayer(nn.Sequential):  # type: ignore[misc]
         )
 
     def forward(self, signal: torch.Tensor) -> torch.Tensor:
-        new_features = super().forward(signal)
+        new_features = super().forward(signal)  # type: ignore[no-untyped-call]
         return torch.cat([signal, new_features], 1)
 
 
-class _DenseNet(nn.Module):  # type: ignore[misc]
+class _DenseNet(nn.Module):
     def __init__(
         self: _DenseNet,
         block_config: tuple[int, ...],
@@ -301,18 +301,18 @@ class _DenseNet(nn.Module):  # type: ignore[misc]
 
 class _Hook:
     def __init__(self) -> None:
-        self.outputs: list[nn.Module] = []
+        self.outputs: list[torch.Tensor] = []
 
     def __call__(
         self: _Hook,
         _: nn.Module,
-        __: nn.Module,
-        module_out: nn.Module,
+        __: tuple[torch.Tensor, ...],
+        module_out: torch.Tensor,
     ) -> None:
         self.outputs.append(module_out)
 
 
-class _LeNet2D(nn.Module):  # type: ignore[misc]
+class _LeNet2D(nn.Module):
     def __init__(self) -> None:
         super().__init__()
         self.conv1 = nn.Conv2d(3, 3, 5)
@@ -333,7 +333,7 @@ class _LeNet2D(nn.Module):  # type: ignore[misc]
         return output
 
 
-class _Lenet(nn.Module):  # type: ignore[misc]
+class _Lenet(nn.Module):
     def __init__(self, num_classes: int) -> None:
         super().__init__()
         self.conv1 = nn.Conv1d(1, 3, 5)
@@ -354,7 +354,7 @@ class _Lenet(nn.Module):  # type: ignore[misc]
         return output
 
 
-class _ResNet(nn.Module):  # type: ignore[misc]
+class _ResNet(nn.Module):
     def __init__(
         self: _ResNet,
         block: type[_BlockType],
@@ -420,7 +420,7 @@ class _ResNet(nn.Module):  # type: ignore[misc]
         return output
 
 
-class _SignalAsImage(nn.Module):  # type: ignore[misc]
+class _SignalAsImage(nn.Module):
     def __init__(
         self: _SignalAsImage,
         num_classes: int,
@@ -451,10 +451,10 @@ class _SignalAsImage(nn.Module):  # type: ignore[misc]
                 range(signal.shape[-1]),
             ] = 255
         out = torch.cat((out, out, out), 1)
-        return self.model_base(out)
+        return cast("torch.Tensor", self.model_base(out))
 
 
-class _Spectrogram(nn.Module):  # type: ignore[misc]
+class _Spectrogram(nn.Module):
     def __init__(
         self: _Spectrogram,
         num_classes: int,
@@ -483,10 +483,10 @@ class _Spectrogram(nn.Module):  # type: ignore[misc]
                 mode="bilinear",
             )
         out = torch.cat((out, out, out), 1)
-        return self.model_base(out)
+        return cast("torch.Tensor", self.model_base(out))
 
 
-class _Transition(nn.Sequential):  # type: ignore[misc]
+class _Transition(nn.Sequential):
     def __init__(
         self: _Transition,
         num_input_features: int,
@@ -508,7 +508,7 @@ class _Transition(nn.Sequential):  # type: ignore[misc]
         self.add_module("pool", nn.AvgPool1d(kernel_size=2, stride=2))
 
 
-class _UCIEpilepsy(Dataset[tuple[torch.Tensor, torch.Tensor]]):  # type: ignore[misc]
+class _UCIEpilepsy(Dataset[tuple[torch.Tensor, torch.Tensor]]):
     def __init__(
         self: _UCIEpilepsy,
         num_samples: int,
@@ -555,10 +555,10 @@ class _UCIEpilepsy(Dataset[tuple[torch.Tensor, torch.Tensor]]):  # type: ignore[
         return (self.data[index], self.target[index])
 
     def __len__(self) -> int:
-        return self.target.shape[0]  # type: ignore[no-any-return]
+        return self.target.shape[0]
 
 
-class _VGG(nn.Module):  # type: ignore[misc]
+class _VGG(nn.Module):
     def __init__(self, num_classes: int, features: nn.Module) -> None:
         super().__init__()
         self.features = features
@@ -664,15 +664,19 @@ def _replace_last_layer(
     model_name: str,
 ) -> nn.Module:
     if model_name.startswith(("alexnet", "vgg")):
-        model_base.classifier[-1] = nn.Linear(
-            model_base.classifier[-1].in_features,
+        classifier = cast("nn.Sequential", model_base.classifier)
+        classifier[-1] = nn.Linear(
+            cast("nn.Linear", classifier[-1]).in_features,
             num_classes,
         )
     elif model_name.startswith("resnet"):
-        model_base.fc = nn.Linear(model_base.fc.in_features, num_classes)
+        model_base.fc = nn.Linear(
+            cast("nn.Linear", model_base.fc).in_features,
+            num_classes,
+        )
     elif model_name.startswith("densenet"):
         model_base.classifier = nn.Linear(
-            model_base.classifier.in_features,
+            cast("nn.Linear", model_base.classifier).in_features,
             num_classes,
         )
     return model_base
