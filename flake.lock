@@ -6,11 +6,11 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1792408771,
-        "narHash": "sha256-fJEybGJdu5giVQsKeJMOFV65EAN52v489mSZEjb/Oho=",
+        "lastModified": 1792415027,
+        "narHash": "sha256-ZPgDxhEE7Zn2MU0fuL8eZz+q/DdVcjkAYJ6f7+T/y4I=",
         "owner": "afairesi",
         "repo": "afairesi",
-        "rev": "09c24aaa44f28a143c02a22d6a43bea83e72487a",
+        "rev": "147d1852095c09ce798079a4833cd19376cd6aa9",
         "type": "github"
       },
       "original": {
