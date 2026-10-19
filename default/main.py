@@ -25,7 +25,7 @@ from torchvision import models
 
 RUNTIME_DIR = Path.home() / (
     "github.com/pbizopoulos/signal2image-modules-in-deep-neural-n"
-    "etworks-for-eeg-classification/packages/default/tmp"
+    "etworks-for-eeg-classification/default/tmp"
 )
 _OUT_PATH = RUNTIME_DIR
 _OUT_PATH.mkdir(exist_ok=True, parents=True)
