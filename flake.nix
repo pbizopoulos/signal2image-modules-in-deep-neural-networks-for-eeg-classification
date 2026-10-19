@@ -2,7 +2,7 @@
   inputs.afairesi.url = "github:afairesi/afairesi";
   outputs =
     inputs:
-    inputs.afairesi.blueprint {
+    inputs.afairesi.lib.mkFlake {
       inherit inputs;
       nixpkgs.config = {
         allowUnfree = true;

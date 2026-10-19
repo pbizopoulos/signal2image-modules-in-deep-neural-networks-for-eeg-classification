@@ -2,43 +2,20 @@
   "nodes": {
     "afairesi": {
       "inputs": {
-        "blueprint": "blueprint",
         "nixpkgs": "nixpkgs",
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1792339616,
-        "narHash": "sha256-vEWc9XErRlu2ds+jDSCzEDfXPUXcFmZ7cS68XpZZaFA=",
+        "lastModified": 1792393966,
+        "narHash": "sha256-pcTIqi2h9A6zONOm0vN/Lhthdj+2VvxqGdEJmi6mTbs=",
         "owner": "afairesi",
         "repo": "afairesi",
-        "rev": "361686fa1cb9c98a360dee767df5560a15226f8b",
+        "rev": "8d083d83d7f0f33d102057bd9121e1b7c5f981f9",
         "type": "github"
       },
       "original": {
         "owner": "afairesi",
         "repo": "afairesi",
-        "type": "github"
-      }
-    },
-    "blueprint": {
-      "inputs": {
-        "nixpkgs": [
-          "afairesi",
-          "nixpkgs"
-        ],
-        "systems": "systems"
-      },
-      "locked": {
-        "lastModified": 1791920352,
-        "narHash": "sha256-Zbd0CGR2Dh9USbYglGXQ09FJXxxKkD5w5vi99nlz1yE=",
-        "owner": "numtide",
-        "repo": "blueprint",
-        "rev": "2bf123541bd5024046f32299c9f8a6cc6bdd8a9f",
-        "type": "github"
-      },
-      "original": {
-        "owner": "numtide",
-        "repo": "blueprint",
         "type": "github"
       }
     },
@@ -61,21 +38,6 @@
     "root": {
       "inputs": {
         "afairesi": "afairesi"
-      }
-    },
-    "systems": {
-      "locked": {
-        "lastModified": 1681028828,
-        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
-        "owner": "nix-systems",
-        "repo": "default",
-        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-systems",
-        "repo": "default",
-        "type": "github"
       }
     },
     "treefmt-nix": {
