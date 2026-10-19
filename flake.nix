@@ -8,8 +8,5 @@
         allowUnfree = true;
         cudaSupport = true;
       };
-    }
-    // {
-      formatter = inputs.afairesi.lib.mkFormatter { inherit (inputs) self; };
     };
 }
