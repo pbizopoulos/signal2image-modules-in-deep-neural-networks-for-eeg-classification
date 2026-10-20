@@ -4,11 +4,11 @@
 !/.github/workflows/workflow.yml
 !/.gitignore
 !/LICENSE
-!/default/
-!/default/default.nix
-!/default/main.py
-!/default/prm/
-!/default/prm/**
-!/default/test_main.py
 !/flake.lock
 !/flake.nix
+!/generate_paper/
+!/generate_paper/default.nix
+!/generate_paper/main.py
+!/generate_paper/prm/
+!/generate_paper/prm/**
+!/generate_paper/test_main.py
