@@ -1,8 +1,9 @@
 # Copyright (c) 2026- Paschalis Bizopoulos
-"""Specify the offline EEG classification and manuscript workflow."""
+"""Check the generated manuscript against its expected SHA-256 hash."""
 
 from __future__ import annotations
 
+import hashlib
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -11,36 +12,22 @@ if TYPE_CHECKING:
     import pytest
 
 
-def test_smoke_run_generates_classification_results_and_a_complete_manuscript(
+_EXPECTED_MS_PDF_SHA256 = (
+    "b778ed69483781edb92850ebef9fbe413084c0a8ac1f7cf9ffb0709a71111426"
+)
+
+
+def test_generated_manuscript_hash(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Train all five module variants and compile their results into a PDF."""
+    """Generate the manuscript and compare its bytes with the pinned baseline."""
     monkeypatch.setenv("HOME", str(tmp_path))
     monkeypatch.chdir(tmp_path)
     from generate_paper import main as subject  # noqa: PLC0415
 
-    output = tmp_path / (
-        "github.com/pbizopoulos/signal2image-modules-in-deep-neural-n"
-        "etworks-for-eeg-classification/generate_paper/tmp"
-    )
-    if output != subject.RUNTIME_DIR:
-        message = "Runtime output must use the canonical package directory"
-        raise AssertionError(message)
     subject.main([])
-    results = (output / "results.tex").read_text()
-    if "alexnet" not in results or "nan" in results.lower():
-        message = "classification results must contain finite AlexNet accuracies"
-        raise AssertionError(message)
-    for name in ("eyes-open", "eyes-closed", "healthy-area", "tumor-area", "epilepsy"):
-        for prefix in ("signal", "signal-as-image", "spectrogram", "cnn"):
-            image = output / f"{prefix}-{name}.png"
-            if not image.read_bytes().startswith(b"\x89PNG\r\n\x1a\n"):
-                message = "each EEG class must have all four visualizations"
-                raise AssertionError(message)
-    manuscript = (output / "ms.pdf").read_bytes()
-    if not manuscript.startswith(b"%PDF-") or not manuscript.rstrip().endswith(
-        b"%%EOF",
-    ):
-        message = "the manuscript must be a complete PDF"
+    actual = hashlib.sha256((subject.RUNTIME_DIR / "ms.pdf").read_bytes()).hexdigest()
+    if actual != _EXPECTED_MS_PDF_SHA256:
+        message = f"ms.pdf SHA-256: expected {_EXPECTED_MS_PDF_SHA256}, got {actual}"
         raise AssertionError(message)
