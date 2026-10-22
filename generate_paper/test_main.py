@@ -26,7 +26,7 @@ def test_generated_manuscript_hash(
     monkeypatch.chdir(tmp_path)
     from generate_paper import main as subject  # noqa: PLC0415
 
-    subject.main([])
+    subject.main()
     actual = hashlib.sha256((subject.RUNTIME_DIR / "ms.pdf").read_bytes()).hexdigest()
     if actual != _EXPECTED_MS_PDF_SHA256:
         message = f"ms.pdf SHA-256: expected {_EXPECTED_MS_PDF_SHA256}, got {actual}"
