@@ -513,7 +513,7 @@ class _UCIEpilepsy(Dataset[tuple[torch.Tensor, torch.Tensor]]):
         num_samples: int,
         train_validation_test: str,
     ) -> None:
-        data_file_name_path = _PARENT_PATH / "prm/data.csv"
+        data_file_name_path = _PARENT_PATH / "data.csv"
         dataset = pd.read_csv(data_file_name_path.as_posix())
         dataset = dataset[:num_samples]
         signals_all = dataset.drop(columns=["Unnamed: 0", "y"])
@@ -981,7 +981,7 @@ def main() -> None:  # noqa: C901,PLR0912,PLR0915
     styler.format(precision=1)
     styler.highlight_max(props="bfseries: ;")
     styler.to_latex(_OUT_PATH / "results.tex", hrules=True)
-    dataset = pd.read_csv(_PARENT_PATH / "prm/data.csv")
+    dataset = pd.read_csv(_PARENT_PATH / "data.csv")
     signals_all = dataset.drop(columns=["Unnamed: 0", "y"])
     classes_all = dataset["y"]
     signals_all = torch.tensor(signals_all.to_numpy(), dtype=torch.float)
@@ -1059,7 +1059,7 @@ def main() -> None:  # noqa: C901,PLR0912,PLR0915
 def _compile_manuscript() -> None:
     """Copy and compile the manuscript after generating its artifacts."""
     for filename in ("ms.tex", "ms.bib"):
-        shutil.copy2(_PARENT_PATH / "prm" / filename, _OUT_PATH / filename)
+        shutil.copy2(_PARENT_PATH / filename, _OUT_PATH / filename)
     latexmk = shutil.which("latexmk")
     if latexmk is None:
         message = "latexmk is required to compile the manuscript"
