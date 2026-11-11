@@ -2,7 +2,7 @@
 let
   python = pkgs.python3;
 in
-(inputs.afairesi or inputs.self).lib.mkPythonPackage {
+inputs.afairesi.lib.mkPythonPackage {
   inherit pkgs;
   executable = true;
   meta = {
