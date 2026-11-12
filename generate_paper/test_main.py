@@ -13,11 +13,11 @@ if TYPE_CHECKING:
 
 
 _EXPECTED_MS_PDF_SHA256 = (
-    "b778ed69483781edb92850ebef9fbe413084c0a8ac1f7cf9ffb0709a71111426"
+    "d16183a513fef03691f51c57c6d38c9d276490431c74b21b62a3cf51490fae43"
 )
 
 
-def test_generated_manuscript_hash(
+def test_generated_manuscript_matches_the_reviewed_baseline(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
