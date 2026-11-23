@@ -1,5 +1,5 @@
 {
-  inputs.afairesi.url = "github:afairesi/afairesi";
+  inputs.afairesi.url = "github:afairesi/flake-conventions";
   outputs =
     inputs:
     let

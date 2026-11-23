@@ -17,7 +17,7 @@ _EXPECTED_MS_PDF_SHA256 = (
 )
 
 
-def test_generated_manuscript_matches_the_reviewed_baseline(
+def test_the_generated_eeg_classification_pdf_matches_the_reviewed_manuscript(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -27,9 +27,9 @@ def test_generated_manuscript_matches_the_reviewed_baseline(
     import generate_paper  # noqa: PLC0415
 
     generate_paper.main()
-    actual = hashlib.sha256(
-        (generate_paper.RUNTIME_DIR / "ms.pdf").read_bytes(),
-    ).hexdigest()
+    repository = "signal2image-modules-in-deep-neural-networks-for-eeg-classification"
+    pdf = tmp_path / "github.com/pbizopoulos" / repository / "generate_paper/tmp/ms.pdf"
+    actual = hashlib.sha256(pdf.read_bytes()).hexdigest()
     if actual != _EXPECTED_MS_PDF_SHA256:
         message = f"ms.pdf SHA-256: expected {_EXPECTED_MS_PDF_SHA256}, got {actual}"
         raise AssertionError(message)
