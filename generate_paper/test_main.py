@@ -17,7 +17,7 @@ _EXPECTED_MS_PDF_SHA256 = (
 )
 
 
-def test_the_generated_eeg_classification_pdf_matches_the_reviewed_manuscript(
+def test_generated_manuscript_pdf_matches_the_expected_sha256(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
