@@ -26,8 +26,7 @@ RUNTIME_DIR = Path.home() / (
     "github.com/pbizopoulos/signal2image-modules-in-deep-neural-n"
     "etworks-for-eeg-classification/generate_paper/tmp"
 )
-_OUT_PATH = RUNTIME_DIR
-_OUT_PATH.mkdir(exist_ok=True, parents=True)
+RUNTIME_DIR.mkdir(exist_ok=True, parents=True)
 _PARENT_PATH = Path(__file__).resolve().parent
 
 
@@ -944,7 +943,7 @@ def main() -> None:  # noqa: C901,PLR0912,PLR0915
                 accuracy_validation = 100 * num_predictions_correct / num_predictions
                 if accuracy_validation > accuracy_validation_best:
                     accuracy_validation_best = accuracy_validation
-                    model_file_name = _OUT_PATH / f"{model_name}.pt"
+                    model_file_name = RUNTIME_DIR / f"{model_name}.pt"
                     torch.save(model.state_dict(), model_file_name)
             model.load_state_dict(torch.load(model_file_name, weights_only=True))
             loss_test_sum = 0
@@ -966,7 +965,7 @@ def main() -> None:  # noqa: C901,PLR0912,PLR0915
                 accuracy_test
             )
             if smoke and model_name != "alexnet-cnn-one-layer":
-                (_OUT_PATH / f"{model_name}.pt").unlink()
+                (RUNTIME_DIR / f"{model_name}.pt").unlink()
     styler = pd.DataFrame(
         accuracy_test_array,
         index=[
@@ -980,7 +979,7 @@ def main() -> None:  # noqa: C901,PLR0912,PLR0915
     ).style
     styler.format(precision=1)
     styler.highlight_max(props="bfseries: ;")
-    styler.to_latex(_OUT_PATH / "results.tex", hrules=True)
+    styler.to_latex(RUNTIME_DIR / "results.tex", hrules=True)
     dataset = pd.read_csv(_PARENT_PATH / "data.csv")
     signals_all = dataset.drop(columns=["Unnamed: 0", "y"])
     classes_all = dataset["y"]
@@ -994,7 +993,7 @@ def main() -> None:  # noqa: C901,PLR0912,PLR0915
         plt.axis("off")
         plt.xlim((0, signals_all.shape[-1] - 1))
         plt.ylim((-1000, 1000))
-        plt.savefig(_OUT_PATH / f"signal-{class_name}.png")
+        plt.savefig(RUNTIME_DIR / f"signal-{class_name}.png")
         plt.close()
         signals_all_min = -1000
         signals_all_max = 1000
@@ -1006,7 +1005,7 @@ def main() -> None:  # noqa: C901,PLR0912,PLR0915
             data[signals_all.shape[-1] - 1 - signal[index], index] = 255
         plt.figure()
         plt.imsave(
-            _OUT_PATH / f"signal-as-image-{class_name}.png",
+            RUNTIME_DIR / f"signal-as-image-{class_name}.png",
             data,
             cmap="gray",
         )
@@ -1027,7 +1026,7 @@ def main() -> None:  # noqa: C901,PLR0912,PLR0915
         )
         plt.figure()
         plt.imsave(
-            _OUT_PATH / f"spectrogram-{class_name}.png",
+            RUNTIME_DIR / f"spectrogram-{class_name}.png",
             data,
             cmap="gray",
         )
@@ -1035,7 +1034,7 @@ def main() -> None:  # noqa: C901,PLR0912,PLR0915
         model = _CNNOneLayer(num_classes, models.alexnet(), "alexnet-cnn-one-layer")
         model.load_state_dict(
             torch.load(
-                _OUT_PATH / "alexnet-cnn-one-layer.pt",
+                RUNTIME_DIR / "alexnet-cnn-one-layer.pt",
                 weights_only=True,
             ),
         )
@@ -1051,7 +1050,7 @@ def main() -> None:  # noqa: C901,PLR0912,PLR0915
             ),
         )
         plt.figure()
-        plt.imsave(_OUT_PATH / f"cnn-{class_name}.png", data, cmap="gray")
+        plt.imsave(RUNTIME_DIR / f"cnn-{class_name}.png", data, cmap="gray")
         plt.close()
     _compile_manuscript()
 
@@ -1059,14 +1058,14 @@ def main() -> None:  # noqa: C901,PLR0912,PLR0915
 def _compile_manuscript() -> None:
     """Copy and compile the manuscript after generating its artifacts."""
     for filename in ("ms.tex", "ms.bib"):
-        shutil.copy2(_PARENT_PATH / filename, _OUT_PATH / filename)
+        shutil.copy2(_PARENT_PATH / filename, RUNTIME_DIR / filename)
     latexmk = shutil.which("latexmk")
     if latexmk is None:
         message = "latexmk is required to compile the manuscript"
         raise RuntimeError(message)
     subprocess.run(  # noqa: S603
         [latexmk, "-pdf", "ms.tex"],
-        cwd=_OUT_PATH,
+        cwd=RUNTIME_DIR,
         check=True,
     )
 
