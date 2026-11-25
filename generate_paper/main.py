@@ -26,7 +26,6 @@ RUNTIME_DIR = Path.home() / (
     "github.com/pbizopoulos/signal2image-modules-in-deep-neural-n"
     "etworks-for-eeg-classification/generate_paper/tmp"
 )
-RUNTIME_DIR.mkdir(exist_ok=True, parents=True)
 _PARENT_PATH = Path(__file__).resolve().parent
 
 
@@ -85,7 +84,6 @@ class _BasicBlock(nn.Module):
         self.conv2 = _conv3x3(planes, planes)
         self.bn2 = nn.BatchNorm1d(planes)
         self.downsample = downsample
-        self.stride = stride
 
     def forward(self, signal: torch.Tensor) -> torch.Tensor:
         identity = signal
@@ -119,7 +117,6 @@ class _Bottleneck(nn.Module):
         self.bn3 = nn.BatchNorm1d(planes * expansion)
         self.relu = nn.ReLU()
         self.downsample = downsample
-        self.stride = stride
 
     def forward(self, signal: torch.Tensor) -> torch.Tensor:
         identity = signal
@@ -399,8 +396,7 @@ class _ResNet(nn.Module):
             )
         layers = [block(downsample, self.inplanes, planes, stride)]
         self.inplanes = planes * expansion
-        for _ in range(1, blocks):
-            layers.append(block(None, self.inplanes, planes))  # noqa: PERF401
+        layers.extend(block(None, self.inplanes, planes) for _ in range(1, blocks))
         return nn.Sequential(*layers)
 
     def forward(self, signal: torch.Tensor) -> torch.Tensor:
@@ -793,6 +789,7 @@ def _vgg19(num_classes: int) -> nn.Module:
 
 def main() -> None:  # noqa: C901,PLR0912,PLR0915
     """Train EEG classification models and generate corresponding images and tables."""
+    RUNTIME_DIR.mkdir(exist_ok=True, parents=True)
     smoke = "pytest" in sys.modules
     if smoke:
         torch.set_num_threads(1)
@@ -918,9 +915,9 @@ def main() -> None:  # noqa: C901,PLR0912,PLR0915
             accuracy_validation_best = -1.0
             for _ in range(num_epochs):
                 model.train()
-                for data, target in dataloader_train:
-                    data = data.to(device)  # noqa: PLW2901
-                    target = target.to(device)  # noqa: PLW2901
+                for batch_data, batch_target in dataloader_train:
+                    data = batch_data.to(device)
+                    target = batch_target.to(device)
                     output = model(data)
                     loss = cross_entropy_loss(output, target)
                     optimizer.zero_grad()
@@ -931,9 +928,9 @@ def main() -> None:  # noqa: C901,PLR0912,PLR0915
                 num_predictions = 0
                 model.eval()
                 with torch.no_grad():
-                    for data, target in validation_dataloader:
-                        data = data.to(device)  # noqa: PLW2901
-                        target = target.to(device)  # noqa: PLW2901
+                    for batch_data, batch_target in validation_dataloader:
+                        data = batch_data.to(device)
+                        target = batch_target.to(device)
                         output = model(data)
                         prediction = output.argmax(dim=1)
                         num_predictions_correct += sum(prediction == target).item()
@@ -951,9 +948,9 @@ def main() -> None:  # noqa: C901,PLR0912,PLR0915
             num_predictions = 0
             model.eval()
             with torch.no_grad():
-                for data, target in dataloader_test:
-                    data = data.to(device)  # noqa: PLW2901
-                    target = target.to(device)  # noqa: PLW2901
+                for batch_data, batch_target in dataloader_test:
+                    data = batch_data.to(device)
+                    target = batch_target.to(device)
                     output = model(data)
                     prediction = output.argmax(dim=1)
                     num_predictions_correct += sum(prediction == target).item()

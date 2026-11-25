@@ -4,11 +4,12 @@
 from __future__ import annotations
 
 import hashlib
+from pathlib import Path
 from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from pathlib import Path
+import generate_paper
 
+if TYPE_CHECKING:
     import pytest
 
 
@@ -22,9 +23,10 @@ def test_generated_manuscript_pdf_matches_the_expected_sha256(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Generate the manuscript and compare its bytes with the pinned baseline."""
+    output = tmp_path / generate_paper.RUNTIME_DIR.relative_to(Path.home())
+    monkeypatch.setattr(generate_paper, "RUNTIME_DIR", output)
     monkeypatch.setenv("HOME", str(tmp_path))
     monkeypatch.chdir(tmp_path)
-    import generate_paper  # noqa: PLC0415
 
     generate_paper.main()
     repository = "signal2image-modules-in-deep-neural-networks-for-eeg-classification"
