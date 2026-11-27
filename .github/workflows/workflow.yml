@@ -7,5 +7,4 @@ jobs:
       - uses: DeterminateSystems/nix-installer-action@main
       - uses: DeterminateSystems/magic-nix-cache-action@main
       - uses: actions/checkout@main
-      - run: |
-          nix flake check
+      - run: nix flake check -L

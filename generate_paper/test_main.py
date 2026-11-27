@@ -28,7 +28,7 @@ def test_generated_manuscript_pdf_matches_the_expected_sha256(
     monkeypatch.setenv("HOME", str(tmp_path))
     monkeypatch.chdir(tmp_path)
 
-    generate_paper.main()
+    generate_paper.main(smoke=True)
     repository = "signal2image-modules-in-deep-neural-networks-for-eeg-classification"
     pdf = tmp_path / "github.com/pbizopoulos" / repository / "generate_paper/tmp/ms.pdf"
     actual = hashlib.sha256(pdf.read_bytes()).hexdigest()

@@ -5,6 +5,12 @@ in
 inputs.afairesi.lib.mkPythonPackage {
   inherit pkgs;
   executable = true;
+  makeWrapperArgs = [
+    "--prefix"
+    "PATH"
+    ":"
+    (pkgs.lib.makeBinPath [ pkgs.texliveFull ])
+  ];
   meta = {
     description = "Signal2Image Modules in Deep Neural Networks for EEG Classification";
     homepage = "https://arxiv.org/abs/1904.13216";
@@ -12,7 +18,11 @@ inputs.afairesi.lib.mkPythonPackage {
       Publication: https://ieeexplore.ieee.org/abstract/document/8856620/
     '';
   };
-  nativeBuildInputs = [ pkgs.texliveFull ];
+  nativeCheckInputs = [
+    pkgs.texliveFull
+    python.pkgs.pandas-stubs
+    python.pkgs.scipy-stubs
+  ];
   propagatedBuildInputs = [
     python.pkgs.jinja2
     python.pkgs.matplotlib
